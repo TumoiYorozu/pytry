@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <style>
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+    h1 {
+      float: left;
+      font-size: 24px;
+      line-height: 24px;
+      width: calc(100% - 24px - 88px);
+      margin: 0;
+      padding: 12px;
+      color: white;
+      background: #0984e3;
+    }
+    .help-button {
+      display: inline-block;
+      margin: auto;
+      padding: 0;
+      font-size: 20px;
+      line-height: 24px;
+      width: 24px;
+      height: 24px;
+      border-radius: 12px;
+      text-align: center;
+      vertical-align: middle;
+      background: white;
+      color: black;
+      cursor: pointer;
+    }
+    .help-button .content {
+      display: none;
+    }
+    .help-button:hover .content {
+      display: block;
+      position: relative;
+      top: 8px;
+      width: 320px;
+      padding: 24px;
+      z-index: 10000;
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      text-align: left;
+      font-weight: normal;
+    }
+    .h1-button {
+      float: right;
+      font-size: 24px;
+      line-height: 24px;
+      width: 64px;
+      margin: 0;
+      padding: 12px;
+      text-align: center;
+      color: white;
+      background: #d63031;
+      cursor: pointer;
+    }
+    .h1-button:hover {
+      background: #ff7675;
+    }
+    h3 {
+      display: inline-block;
+      font-size: 20px;
+      line-height: 20px;
+      margin: 0;
+      padding: 10px 12px;
+    }
+    .paste-button {
+      border: 1px solid #ddd;
+      border-radius: 2px;
+      background: white;
+      font-size: 12px;
+      line-height: 12px;
+      padding: 2px 4px;
+      vertical-align: middle;
+      cursor: pointer;
+    }
+    .paste-button:hover {
+      background: #eee;
+    }
+    #container {
+      width: 100%;
+      height: calc(100% - 48pt);
+      padding: 2px 0;
+    }
+    #editor {
+      float: left;
+      width: calc(70% - 1px);
+      height: 100%;
+      border-right: 1px solid #ddd;
+    }
+    #pain {
+      float: right;
+      width: 30%;
+      height: 100%;
+    }
+    .box {
+      width: 100%;
+      height: 49%;
+    }
+    #input {
+      width: 100%;
+      height: calc(100% - 40px);
+      margin: 0;
+      padding: 0;
+    }
+    #output {
+      width: 100%;
+      height: calc(100% - 40px);
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+  <script src="./pyodide/pyodide.js"></script>
+  <script>
+    async function load() {
+      let pyodide = await loadPyodide({
+        indexURL: location.href + '/pyodide',
+      });
+      await pyodide.loadPackage('numpy');
+      pyodide.runPython(`
+import io, sys, traceback
+
+def __run(code, input):
+    my_in = io.StringIO(input)
+    my_out = io.StringIO()
+    oldin = sys.stdin
+    oldout = sys.stdout
+    olderr = sys.stderr
+    sys.stdin = my_in
+    sys.stdout = sys.stderr = my_out
+    try:
+        exec(code, {})
+    except:
+        traceback.print_exc()
+    sys.stdin = oldin
+    sys.stdout = oldout
+    sys.stderr = olderr
+    return my_out.getvalue()`);
+      return pyodide;
+    }
+    let pyodideReadyPromise = load();
+
+    async function run() {
+      let pyodide = await pyodideReadyPromise;
+      try {
+        pyodide.globals.set("__code_to_run", editor.getValue());
+        pyodide.globals.set("__input_to_read", inputEditor.getValue());
+        let output = pyodide.runPython('__run(__code_to_run, __input_to_read)');
+        console.log(output);
+        var note = output;
+        output = output.replaceAll('Traceback (most recent call last):\n', 'エラー発生:\n');
+        output = output.replaceAll(/(.*)File "<exec>"(.*)\n/g, "");
+        output = output.replaceAll(/(.*)File "<string>", line (\d*)(.*)\n/g, '$1プログラムの $2 行目\n');
+        output = output.replaceAll('ZeroDivisionError: division by zero', 'ZeroDivisionError: ゼロで割ろうとしました\n');
+        output = output.replaceAll(/NameError: name '(.*)' is not defined/g, "NameError: 「$1」が見つかりません\n");
+        output = output.replaceAll('SyntaxError: invalid syntax', 'SyntaxError: 文法が間違っています\n');
+        outputEditor.setValue(output);
+        output = output.replaceAll('IndentationError: unindent does not match any outer indentation level', 'IndentationError: インデントが揃っていません\n');
+        output = output.replaceAll(/TypeError: (.*)/g, 'TypeError: 種類が違う値を一緒に計算しようとしました\n');
+        output = output.replaceAll(/ValueError: (.*)/g, 'ValueError: 値が不適切です\n');
+        output = output.replaceAll('IndexError: list index out of range', 'IndexError: リストのサイズより大きい場所にアクセスしようとしました\n');
+        output = output.replaceAll(/KeyError: '(.*)'/g, 'KeyError: キー「$1」は存在しません\n');
+        
+        outputEditor.setValue(output);
+
+        var err = [...output.matchAll(/プログラムの (\d*) 行目/g)];
+        if (err != null && err.length != 0) {
+          var l = Number(err[err.length - 1][1]);
+          editor.markers = [{
+            startLineNumber: l,
+            startColumn: 1,
+            endLineNumber: l,
+            endColumn: 1000,
+            message: note,
+            severity: monaco.MarkerSeverity.Error,
+          }];
+          monaco.editor.setModelMarkers(editor.getModel(), 'message', editor.markers);
+
+          outputEditor.setValue(output + "\n=== エラー原文 ===\n" + note + "==================\n");
+        }
+        else {
+          editor.markers = [];
+          monaco.editor.setModelMarkers(editor.getModel(), 'message', editor.markers);
+        }
+      } catch (err) {
+        console.log(err);
+        outputEditor.setValue(err.toString());
+      }
+    }
+  </script>
+  <script src="./monaco-editor/min/vs/loader.js"></script>
+  <script>
+    var editor, session, inputEditor, inputSession, outputEditor, outputSession;
+
+    window.addEventListener('load', (event) => {
+      require.config({ 
+        paths: { 
+          'vs': './monaco-editor/min/vs'
+        },
+        'vs/nls' : {
+          availableLanguages : { '*' : 'ja' }
+        }
+      });
+
+      source_text = 'print("Hello, world!")';
+      input_text = '';
+      output_text = '';
+      if (localStorage.getItem('source_text') != null) {
+        source_text = decodeURIComponent(localStorage.getItem('source_text'));
+      }
+      if (localStorage.getItem('input_text') != null) {
+        input_text = decodeURIComponent(localStorage.getItem('input_text'));
+      }
+      if (localStorage.getItem('output_text') != null) {
+        output_text = decodeURIComponent(localStorage.getItem('output_text'));
+      }
+
+      require(['vs/editor/editor.main'], function() {
+        session = monaco.editor.createModel(source_text, 'python');
+        editor = monaco.editor.create(document.getElementById('editor'), {
+          minimap: { enabled: false },
+          automaticLayout: true,
+          renderControlCharacters: true,
+          fontSize: 20,
+          wordWrap: true,
+          renderIndentGuides: true,
+        });
+        editor.setModel(session);
+        session.onDidChangeContent((event) => {
+          localStorage.setItem('source_text', encodeURIComponent(editor.getValue()));
+        });
+
+        inputSession = monaco.editor.createModel(input_text, 'text');
+        inputEditor = monaco.editor.create(document.getElementById('input'), {
+          minimap: { enabled: false },
+          automaticLayout: true,
+          renderControlCharacters: true,
+          fontSize: 20,
+          wordWrap: true,
+        });
+        inputEditor.setModel(inputSession);
+        inputSession.onDidChangeContent((event) => {
+          localStorage.setItem('input_text', encodeURIComponent(inputEditor.getValue()));
+        });
+
+        outputSession = monaco.editor.createModel(output_text, 'text');
+        outputEditor = monaco.editor.create(document.getElementById('output'), {
+          minimap: { enabled: false },
+          automaticLayout: true,
+          renderControlCharacters: true,
+          fontSize: 20,
+          wordWrap: true,
+        });
+        outputEditor.setModel(outputSession);
+        outputSession.onDidChangeContent((event) => {
+          localStorage.setItem('output_text', encodeURIComponent(outputEditor.getValue()));
+        });
+      });
+    });
+  </script>
+  <title>PyTry | Python 簡単環境</title>
+</head>
+
+<body>
+  <h1>PyTry | Python 簡単環境 <span class="help-button">？<div class="content">PyTry はPython を Web 上で実装し，実行できる開発環境です．日本情報オリンピック (JOI) 一次予選レベルの内容に対応しています．<br />ソースコードは自動でブラウザ内に保存されます．実行も含め，外部とソースコードをやり取りすることは一切ありません．</div></span></h1>
+  <span class="h1-button" onclick="run()">実行</span>
+  <div id="container">
+    <div id="editor"></div>
+    <div id="pain">
+      <div class="box">
+        <h3>入力</h3>
+        <span class="paste-button" onclick="if(navigator.clipboard){
+          navigator.clipboard.readText()
+          .then(function(text){
+            inputEditor.setValue(text);
+          });
+      }">ペースト</span>
+        <div id="input"></div>
+      </div>
+      <div class="box">
+        <h3>出力</h3>
+        <div id="output"></div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
