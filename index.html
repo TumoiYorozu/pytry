@@ -211,8 +211,8 @@ def __run(code, input):
         }
       });
 
-      source_text = 'print("Hello, world!")';
-      input_text = '';
+      source_text = 'a = int(input())\nb = int(input())\nprint(a + b)\n';
+      input_text = '7\n5\n3\n';
       output_text = '';
       if (localStorage.getItem('source_text') != null) {
         source_text = decodeURIComponent(localStorage.getItem('source_text'));
