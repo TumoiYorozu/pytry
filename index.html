@@ -165,7 +165,6 @@ def __run(code, input):
         output = output.replaceAll('SyntaxError: invalid syntax', 'SyntaxError: 文法が間違っています\n');
         outputEditor.setValue(output);
         output = output.replaceAll('IndentationError: unindent does not match any outer indentation level', 'IndentationError: インデントが揃っていません\n');
-        output = output.replaceAll(/TypeError: (.*)/g, 'TypeError: 種類が違う値を一緒に計算しようとしました\n');
         output = output.replaceAll(/ValueError: (.*)/g, 'ValueError: 値が不適切です\n');
         output = output.replaceAll('IndexError: list index out of range', 'IndexError: リストのサイズより大きい場所にアクセスしようとしました\n');
         output = output.replaceAll(/KeyError: '(.*)'/g, 'KeyError: キー「$1」は存在しません\n');
