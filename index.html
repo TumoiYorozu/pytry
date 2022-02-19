@@ -159,7 +159,7 @@ def __run(code, input):
       let pyodide = await pyodideReadyPromise;
       try {
         pyodide.globals.set("__code_to_run", editor.getValue());
-        pyodide.globals.set("__input_to_read", inputEditor.getValue());
+        pyodide.globals.set("__input_to_read", inputEditor.getValue().replaceAll(/\r/g, ""));
         let output = pyodide.runPython('__run(__code_to_run, __input_to_read)');
         console.log(output);
         var note = output;
