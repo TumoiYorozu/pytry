@@ -63,11 +63,11 @@ h1 {
   text-align: center;
   color: white;
   background: #d63031;
-  cursor: pointer;
 }
 
-.h1-button:hover {
+.h1-button.pushable:hover {
   background: #ff7675;
+  cursor: pointer;
 }
 
 h3 {

@@ -24,6 +24,7 @@ def __run(code, input):
     sys.stdout = oldout
     sys.stderr = olderr
     return my_out.getvalue()`);
+  self.postMessage('ready');
   return pyodide;
 }
 let pyodideReadyPromise = load();
