@@ -3,7 +3,7 @@ async function load() {
     indexURL: location.href + '/pyodide',
   });
   await pyodide.loadPackage('numpy');
-  pyodide.runPython(`
+  await pyodide.runPython(`
 import io, sys, traceback
 
 def __run(code, input):
@@ -31,15 +31,15 @@ async function run() {
   try {
     pyodide.globals.set("__code_to_run", editor.getValue());
     pyodide.globals.set("__input_to_read", inputEditor.getValue().replaceAll(/\r/g, ""));
-    let output = pyodide.runPython('__run(__code_to_run, __input_to_read)');
+    let output = await pyodide.runPython('__run(__code_to_run, __input_to_read)');
     output = output.replaceAll(/(.*)File "<exec>"(.*)\n/g, "");
     output = output.replaceAll(/(.*)File "<string>", line (\d*)(.*)\n/g, '$1File "Main.py", line $2$3\n');
     let formatedOutput = formatOutput(output);
     outputEditor.setValue(formatedOutput);
 
-    var err = [...formatedOutput.matchAll(/プログラムの (\d*) 行目/g)];
+    let err = [...formatedOutput.matchAll(/プログラムの (\d*) 行目/g)];
     if (err != null && err.length != 0) {
-      var l = Number(err[err.length - 1][1]);
+      let l = Number(err[err.length - 1][1]);
       editor.markers = [{
         startLineNumber: l,
         startColumn: 1,
@@ -61,7 +61,7 @@ async function run() {
     }
   } catch (err) {
     console.log(err);
-    outputEditor.setValue(err.toString());
+    outputEditor.setValue("PyTry 内部でエラーが発生しました");
   }
 }
 
