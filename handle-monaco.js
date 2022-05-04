@@ -32,6 +32,7 @@ window.addEventListener('load', (event) => {
       fontSize: 20,
       wordWrap: true,
       renderIndentGuides: true,
+      folding: false,
     });
     editor.setModel(session);
     session.onDidChangeContent((event) => {
@@ -45,6 +46,7 @@ window.addEventListener('load', (event) => {
       renderControlCharacters: true,
       fontSize: 20,
       wordWrap: true,
+      folding: false,
     });
     inputEditor.setModel(inputSession);
     inputSession.onDidChangeContent((event) => {
@@ -58,6 +60,7 @@ window.addEventListener('load', (event) => {
       renderControlCharacters: true,
       fontSize: 20,
       wordWrap: true,
+      folding: false,
     });
     outputEditor.setModel(outputSession);
     outputSession.onDidChangeContent((event) => {
