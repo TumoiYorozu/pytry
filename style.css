@@ -1,0 +1,132 @@
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Noto Sans JP', sans-serif;
+}
+
+h1 {
+  float: left;
+  font-size: 24px;
+  line-height: 24px;
+  width: calc(100% - 24px - 88px);
+  height: 24px;
+  margin: 0;
+  padding: 12px;
+  color: white;
+  background: #0984e3;
+}
+
+.help-button {
+  display: inline-block;
+  margin: auto;
+  padding: 0;
+  font-size: 20px;
+  line-height: 24px;
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  text-align: center;
+  vertical-align: middle;
+  background: white;
+  color: black;
+  cursor: pointer;
+}
+
+.help-button .content {
+  display: none;
+}
+
+.help-button:hover .content {
+  display: block;
+  position: relative;
+  top: 8px;
+  width: 320px;
+  padding: 24px;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  text-align: left;
+  font-weight: normal;
+}
+
+.h1-button {
+  float: right;
+  font-size: 24px;
+  line-height: 24px;
+  width: 64px;
+  height: 24px;
+  margin: 0;
+  padding: 12px;
+  text-align: center;
+  color: white;
+  background: #d63031;
+  cursor: pointer;
+}
+
+.h1-button:hover {
+  background: #ff7675;
+}
+
+h3 {
+  display: inline-block;
+  font-size: 20px;
+  line-height: 20px;
+  margin: 0;
+  padding: 10px 12px;
+}
+
+.paste-button {
+  border: 1px solid #ddd;
+  border-radius: 2px;
+  background: white;
+  font-size: 12px;
+  line-height: 12px;
+  padding: 2px 4px;
+  vertical-align: middle;
+  cursor: pointer;
+}
+
+.paste-button:hover {
+  background: #eee;
+}
+
+#container {
+  width: 100%;
+  height: calc(100% - 48pt);
+  padding: 2px 0;
+}
+
+#editor {
+  float: left;
+  width: calc(70% - 1px);
+  height: 100%;
+  border-right: 1px solid #ddd;
+}
+
+#pain {
+  float: right;
+  width: 30%;
+  height: 100%;
+}
+
+.box {
+  width: 100%;
+  height: 49%;
+}
+
+#input {
+  width: 100%;
+  height: calc(100% - 40px);
+  margin: 0;
+  padding: 0;
+}
+
+#output {
+  width: 100%;
+  height: calc(100% - 40px);
+  margin: 0;
+  padding: 0;
+}
