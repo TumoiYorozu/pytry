@@ -20,16 +20,22 @@
         一次予選レベルの内容に対応しています．<br />ソースコードは自動でブラウザ内に保存されます．実行も含め，外部とソースコードをやり取りすることは一切ありません．</div></span></h1>
   <span id="run-button" class="h1-button" onclick="run()"></span>
   <div id="container">
-    <div id="editor"></div>
-    <div id="pain">
+    <div id="left-column">
+      <h3>ソースコード</h3>
+      <span class="copy-paste-button" onclick="if (navigator.clipboard) {
+        navigator.clipboard.writeText(editor.getValue());
+      }">コピー</span>
+      <div id="editor"></div>
+    </div>
+    <div id="right-column">
       <div class="box">
         <h3>入力</h3>
-        <span class="paste-button" onclick="if(navigator.clipboard){
+        <span class="copy-paste-button" onclick="if (navigator.clipboard) {
           navigator.clipboard.readText()
           .then(function(text){
             inputEditor.setValue(text);
           });
-      }">ペースト</span>
+        }">ペースト</span>
         <div id="input"></div>
       </div>
       <div class="box">
