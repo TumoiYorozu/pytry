@@ -33,6 +33,7 @@ window.addEventListener('load', (event) => {
       wordWrap: true,
       renderIndentGuides: true,
       folding: false,
+      'bracketPairColorization.enabled': true,
     });
     editor.setModel(session);
     session.onDidChangeContent((event) => {
