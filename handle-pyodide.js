@@ -36,7 +36,8 @@ function workerListenner(msg) {
   if (msg.data == 'ready') return;
 
   clearTimeout(timer);
-  let formatedOutput = msg.data;
+  let formatedOutput = msg.data[0];
+  let output = msg.data[1];
   outputEditor.setValue(formatedOutput);
   let err = [...formatedOutput.matchAll(/プログラムの (\d*) 行目/g)];
   if (err != null && err.length != 0) {

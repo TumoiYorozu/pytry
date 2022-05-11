@@ -38,7 +38,7 @@ async function run(source, input) {
     output = output.replaceAll(/(.*)File "<exec>"(.*)\n/g, "");
     output = output.replaceAll(/(.*)File "<string>", line (\d*)(.*)\n/g, '$1File "Main.py", line $2$3\n');
     let formatedOutput = formatOutput(output);
-    self.postMessage(formatedOutput);
+    self.postMessage([formatedOutput, output]);
   } catch (err) {
     console.log(err);
     self.postMessage('PyTry 内部でエラーが発生しました');
