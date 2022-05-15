@@ -69,3 +69,9 @@ window.addEventListener('load', (event) => {
     });
   });
 });
+
+document.addEventListener('keydown', (event) => {
+  if (event.ctrlKey && event.key === 's') {
+    event.preventDefault();
+  }
+});
