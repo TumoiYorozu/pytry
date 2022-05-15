@@ -54,6 +54,7 @@ function formatOutput(output) {
   output = output.replaceAll('IndentationError: unindent does not match any outer indentation level', 'IndentationError: インデントが揃っていません\n');
   output = output.replaceAll(/ValueError: invalid literal for int\(\) with base 10: '(.*)'/g, "ValueError: 「$1」を整数に変換できません (入力の受け取り方や入力欄が正しくないことがあります)\n");
   output = output.replaceAll(/ValueError: not enough values to unpack \(expected (.*), got (.*)\)/g, "ValueError: $2 個しかないデータを $1 個に分けようとしました (入力の受け取り方や入力欄が正しくないことがあります)\n");
+  output = output.replaceAll(/ValueError: too many values to unpack \(expected (.*)\)/g, "ValueError: $1 個より多いデータを $1 個に分けようとしました (入力の受け取り方や入力欄が正しくないことがあります)\n");
   output = output.replaceAll('IndexError: list index out of range', 'IndexError: リストのサイズ以上の添え字の要素にアクセスしようとしました\n');
   output = output.replaceAll('IndexError: string index out of range', 'IndexError: 文字列の長さ以上の添え字の文字にアクセスしようとしました\n');
   output = output.replaceAll(/KeyError: '(.*)'/g, 'KeyError: キー「$1」は存在しません\n');
