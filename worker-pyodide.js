@@ -54,12 +54,14 @@ function formatOutput(output) {
   output = output.replaceAll('IndentationError: expected an indented block', 'IndentationError: インデントを忘れています\n');
   output = output.replaceAll('IndentationError: unexpected indent', 'IndentationError: インデントがおかしな位置にあります\n');
   output = output.replaceAll('IndentationError: unindent does not match any outer indentation level', 'IndentationError: インデントが揃っていません\n');
+  output = output.replaceAll('SyntaxError: invalid non-printable character U+3000', 'SyntaxError: 全角スペースが紛れ込んでいます (半角スペース 2 個に直しましょう)\n');
   output = output.replaceAll(/ValueError: invalid literal for int\(\) with base 10: '(.*)'/g, "ValueError: 「$1」を整数に変換できません (入力の受け取り方や入力欄が正しくないことがあります)\n");
   output = output.replaceAll(/ValueError: not enough values to unpack \(expected (.*), got (.*)\)/g, "ValueError: $2 個しかないデータを $1 個に分けようとしました (入力の受け取り方や入力欄が正しくないことがあります)\n");
   output = output.replaceAll(/ValueError: too many values to unpack \(expected (.*)\)/g, "ValueError: $1 個より多いデータを $1 個に分けようとしました (入力の受け取り方や入力欄が正しくないことがあります)\n");
   output = output.replaceAll('IndexError: list index out of range', 'IndexError: リストのサイズ以上の添え字の要素にアクセスしようとしました\n');
   output = output.replaceAll('IndexError: string index out of range', 'IndexError: 文字列の長さ以上の添え字の文字にアクセスしようとしました\n');
   output = output.replaceAll(/KeyError: '(.*)'/g, 'KeyError: キー「$1」は存在しません\n');
+  output = output.replaceAll('SyntaxError: EOL while scanning string literal', 'SyntaxError: 文字列の終わりのクオーテーションが見つかりません\n');
   output = output.replaceAll('EOFError: EOF when reading a line', 'EOFError: ファイルの末尾に到達しました (入力欄が正しくないことがあります)\n');
   return output;
 }
