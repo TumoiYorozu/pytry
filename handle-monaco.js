@@ -50,6 +50,7 @@ window.addEventListener('load', (event) => {
       wordWrap: true,
       folding: false,
       lineDecorationsWidth: 30,
+      renderIndentGuides: false,
     });
     inputEditor.setModel(inputSession);
     inputSession.onDidChangeContent((event) => {
@@ -65,6 +66,7 @@ window.addEventListener('load', (event) => {
       wordWrap: true,
       folding: false,
       lineDecorationsWidth: 30,
+      renderIndentGuides: false,
     });
     outputEditor.setModel(outputSession);
     outputSession.onDidChangeContent((event) => {
