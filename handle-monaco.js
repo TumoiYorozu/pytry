@@ -101,6 +101,7 @@ function pasteToInput() {
 }
 
 function insert_int_input() {
+  editor.pushUndoStop();
   const selection = editor.getSelection();
   const id = { major: 1, minor: 1 };
   const text = 'int(input())';
@@ -110,6 +111,7 @@ function insert_int_input() {
 }
 
 function insert_map_int_input_split() {
+  editor.pushUndoStop();
   const selection = editor.getSelection();
   const id = { major: 1, minor: 1 };
   const text = 'map(int, input().split())';
@@ -119,6 +121,7 @@ function insert_map_int_input_split() {
 }
 
 function insert_input() {
+  editor.pushUndoStop();
   const selection = editor.getSelection();
   const id = { major: 1, minor: 1 };
   const text = 'input()';
@@ -128,6 +131,7 @@ function insert_input() {
 }
 
 function insert_list_map_int_input_split() {
+  editor.pushUndoStop();
   const selection = editor.getSelection();
   const id = { major: 1, minor: 1 };
   const text = 'list(map(int, input().split()))';
