@@ -35,6 +35,9 @@ window.addEventListener('load', (event) => {
       folding: false,
       'bracketPairColorization.enabled': true,
       lineDecorationsWidth: 30,
+      unicodeHighlight: {
+        nonBasicASCII: true,
+      },
     });
     editor.setModel(session);
     session.onDidChangeContent((event) => {
