@@ -5,9 +5,26 @@ function initializeWorker() {
   disableReady();
   worker.addEventListener('message', workerListenner);
 }
+
 window.addEventListener('load', (event) => {
   initializeWorker();
 });
+
+async function loadFormatter() {
+  const pyodide = await loadPyodide({
+    indexURL: location.href + '/pyodide',
+  });
+  await pyodide.loadPackage('micropip');
+  await pyodide.runPythonAsync(`
+import micropip
+await micropip.install('autopep8')
+import autopep8
+def __format(code):
+    return autopep8.fix_code(code, options={})`);
+  self.postMessage('ready');
+  return pyodide;
+}
+const foratterReadyPromise = loadFormatter();
 
 function disableReady() {
   ready = false;
@@ -22,8 +39,16 @@ function enableReady() {
 
 let timer;
 
-function run() {
+async function run() {
   if (ready) {
+    const pyodide = await foratterReadyPromise;
+    pyodide.globals.set('__code_to_format', editor.getValue());
+    const formatted = pyodide.runPython('__format(__code_to_format)');
+    if (formatted != editor.getValue()) {
+      editor.pushUndoStop();
+      editor.setValue(formatted);
+    }
+    console.log(pyodide.runPython('__format(__code_to_format)'));
     outputEditor.setValue('');
     disableReady();
     timer = setTimeout(cancelRunning, 10000);
