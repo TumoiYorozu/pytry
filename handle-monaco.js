@@ -38,6 +38,7 @@ window.addEventListener('load', (event) => {
       unicodeHighlight: {
         nonBasicASCII: true,
       },
+      renderWhitespace: 'all',
     });
     editor.setModel(session);
     session.onDidChangeContent((event) => {
