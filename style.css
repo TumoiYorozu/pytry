@@ -7,6 +7,13 @@ body {
   font-family: 'Noto Sans JP', sans-serif;
 }
 
+.unselectable {
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 h1 {
   float: left;
   font-size: 24px;
@@ -22,6 +29,7 @@ h1 {
 .help-button {
   display: inline-block;
   margin: auto;
+  margin-left: 12px;
   padding: 0;
   font-size: 20px;
   line-height: 24px;
