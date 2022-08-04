@@ -1,3 +1,7 @@
+.monaco-editor {
+  --vscode-editorUnicodeHighlight-border: #d63031 !important;
+}
+
 html,
 body {
   width: 100%;
