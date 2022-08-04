@@ -256,6 +256,11 @@ h3 {
   background-color: rgba(0, 0, 0, 0) !important;
 }
 
+#highlighter {
+  position: absolute;
+  overflow: hidden;
+}
+
 .stdin-highlight {
   position: absolute;
   background: #FFF67F;
