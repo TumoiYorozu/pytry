@@ -17,10 +17,10 @@ async function loadFormatter() {
   await pyodide.loadPackage('micropip');
   await pyodide.runPythonAsync(`
 import micropip
-await micropip.install('autopep8')
-import autopep8
+await micropip.install('black')
+from black import format_str, FileMode
 def __format(code):
-    return autopep8.fix_code(code, options={})`);
+    return format_str(code, mode=FileMode())`);
   self.postMessage('ready');
   return pyodide;
 }
