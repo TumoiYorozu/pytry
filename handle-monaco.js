@@ -71,6 +71,7 @@ window.addEventListener('load', (event) => {
       folding: false,
       lineDecorationsWidth: 30,
       renderIndentGuides: false,
+      readOnly: true,
     });
     outputEditor.setModel(outputSession);
     outputSession.onDidChangeContent((event) => {
