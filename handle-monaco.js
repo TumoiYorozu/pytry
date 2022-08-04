@@ -127,7 +127,7 @@ function updateStdinHighlighter() {
       }
       if (ok) {
         const left = window.pageXOffset + tags[i].getBoundingClientRect().left - editor_left;
-        const top = window.pageYOffset + tags[i].getBoundingClientRect().top - editor_top;
+        const top = window.pageYOffset + tags[i].getBoundingClientRect().top - editor_top + 1;
         const right = window.pageXOffset + tags[i + pattern.length - 1].getBoundingClientRect().right - editor_left;
         const bottom = window.pageYOffset + tags[i + pattern.length - 1].getBoundingClientRect().bottom - editor_top;
         highlighter.innerHTML += `<span class="stdin-highlight" style="left: ${left}px; top: ${top}px; width: ${right - left}px; height: ${bottom - top}px;"></span>`;
