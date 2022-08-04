@@ -18,9 +18,12 @@ async function loadFormatter() {
   await pyodide.runPythonAsync(`
 import micropip
 await micropip.install('black')
-from black import format_str, FileMode
+import black
 def __format(code):
-    return format_str(code, mode=FileMode())`);
+    try:
+        return black.format_str(code, mode=black.FileMode())
+    except black.parsing.InvalidInput:
+        return code`);
   self.postMessage('ready');
   return pyodide;
 }
@@ -41,15 +44,22 @@ let timer;
 
 async function run() {
   if (ready) {
-    const pyodide = await foratterReadyPromise;
-    pyodide.globals.set('__code_to_format', editor.getValue());
-    const formatted = pyodide.runPython('__format(__code_to_format)');
+    outputEditor.setValue('');
+
+    const formatted = await formatSource(editor.getValue());
     if (formatted != editor.getValue()) {
       editor.pushUndoStop();
-      editor.setValue(formatted);
+      editor.executeEdits('formatter', [{
+        range: {
+          startLineNumber: 1,
+          endLineNumber: 1000000000,
+          startColumn: 1,
+          endColumn: 1000000000,
+        },
+        text: formatted,
+      }]);
     }
-    console.log(pyodide.runPython('__format(__code_to_format)'));
-    outputEditor.setValue('');
+
     disableReady();
     timer = setTimeout(cancelRunning, 10000);
     worker.postMessage([editor.getValue(), inputEditor.getValue()]);
@@ -194,4 +204,42 @@ function searchWarnings() {
   }
   if (res == '') return '';
   return `\n提案：\n${res}(提案は間違っていることもあります)\n`;
+}
+
+async function formatSource(source) {
+  const pyodide = await foratterReadyPromise;
+  pyodide.globals.set('__code_to_format', source);
+  const formatted = pyodide.runPython('__format(__code_to_format)');
+  return formatted;
+}
+
+class PyTryOnTypeFormattingEditProvider {
+  constructor() {
+    this.autoFormatTriggerCharacters = ['\n'];
+  }
+
+  async provideOnTypeFormattingEdits(model, position, ch, options, token) {
+    const source = model.getValue();
+
+    let begin = '';
+    if (source.substr(0, 2) == '\n\n') begin = '\n\n';
+    else if (source.substr(0, 1) == '\n') begin = '\n';
+    let end = '';
+    if (source.substr(source.length - 2, 2) == '\n\n') end = '\n';
+
+    let formatted = await formatSource(source);
+    if (formatted != source) {
+      formatted = begin + formatted + end;
+    }
+
+    return [{
+      range: {
+        startLineNumber: 1,
+        endLineNumber: 1000000000,
+        startColumn: 1,
+        endColumn: 1000000000,
+      },
+      text: formatted,
+    }];
+  }
 }
