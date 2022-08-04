@@ -24,6 +24,8 @@ window.addEventListener('load', (event) => {
   }
 
   require(['vs/editor/editor.main'], function () {
+    monaco.languages.registerOnTypeFormattingEditProvider('python', new PyTryOnTypeFormattingEditProvider());
+
     session = monaco.editor.createModel(source_text, 'python');
     editor = monaco.editor.create(document.getElementById('editor'), {
       minimap: { enabled: false },
@@ -40,6 +42,7 @@ window.addEventListener('load', (event) => {
         nonBasicASCII: true,
       },
       renderWhitespace: 'all',
+      formatOnType: true,
     });
     editor.setModel(session);
     session.onDidChangeContent((event) => {
