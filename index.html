@@ -30,8 +30,22 @@
 
 <body>
   <div id="highlighter"></div>
-  <h1>PyTry | 初心者のための Python 開発環境 <span class="help-button">？<div class="content">PyTry は競技プログラミング初心者のための Python
-        開発環境です．日本語エラーメッセージ，標準入力を読み込むコードのワンクリック入力，ソースコード自動保存，オートフォーマットなどの便利機能を搭載しています！</div></span></h1>
+  <h1>PyTry | 初心者のための Python 開発環境
+    <span class="help-button fold-button">？
+      <div class="content">
+        PyTry は競技プログラミング初心者のための Python
+        開発環境です．日本語エラーメッセージ，標準入力を読み込むコードのワンクリック入力，ソースコード自動保存，オートフォーマットなどの便利機能を搭載しています！
+      </div>
+    </span>
+    <span class="config-button fold-button">⚙️
+      <div class="content">
+        オートフォーマット：<div class="toggle_button">
+          <input id="toggle_auto_format" class="toggle_input" type="checkbox" checked />
+          <label for="toggle_auto_format" class="toggle_label"></label>
+        </div>
+      </div>
+    </span>
+  </h1>
   <span id="run-button" class="h1-button unselectable" onclick="run()"></span>
   <div id="container">
     <div id="left-column">

@@ -207,6 +207,9 @@ function searchWarnings() {
 }
 
 async function formatSource(source) {
+  if (!document.getElementById('toggle_auto_format').checked) {
+    return source;
+  }
   const pyodide = await foratterReadyPromise;
   pyodide.globals.set('__code_to_format', source);
   const formatted = pyodide.runPython('__format(__code_to_format)');
