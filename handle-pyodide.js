@@ -144,16 +144,17 @@ function formatErrorMessage(original) {
   formatted = formatted.replaceAll(/AttributeError: '(.*)' object has no attribute '(.*)'/g, '属性エラー: 「$1」のオブジェクトに「.$2」は存在しません');
 
   // 文法
-  formatted = formatted.replaceAll("SyntaxError: invalid syntax. Maybe you meant '==' or ':=' instead of '='?", '文法エラー: 文法が間違っています (比較のイコールは == です)');
+  formatted = formatted.replaceAll("SyntaxError: invalid syntax. Maybe you meant '==' or ':=' instead of '='?", '文法エラー: 文法が間違っています');
   formatted = formatted.replaceAll('SyntaxError: invalid syntax. Perhaps you forgot a comma?', '文法エラー: 文法が間違っています (コンマを忘れていませんか？)');
   formatted = formatted.replaceAll('SyntaxError: invalid syntax', '文法エラー: 文法が間違っています');
   formatted = formatted.replaceAll('SyntaxError: cannot assign to operator', '文法エラー: 代入のイコールの左辺に演算子は使えません');
-  formatted = formatted.replaceAll("SyntaxError: cannot assign to expression here. Maybe you meant '==' instead of '='?", '文法エラー: ここでは代入のイコールの左辺に式は使えません (比較のイコールは == です)');
-  formatted = formatted.replaceAll("SyntaxError: cannot assign to function call here. Maybe you meant '==' instead of '='?", '文法エラー: ここでは代入のイコールの左辺に関数呼び出しは使えません (比較のイコールは == です)');
-  formatted = formatted.replaceAll("SyntaxError: cannot assign to subscript here. Maybe you meant '==' instead of '='?", '文法エラー: ここでは代入のイコールの左辺に添え字は使えません (比較のイコールは == です)');
-  formatted = formatted.replaceAll("SyntaxError: cannot assign to literal here. Maybe you meant '==' instead of '='?", '文法エラー: ここでは代入のイコールの左辺に値は使えません (比較のイコールは == です)');
+  formatted = formatted.replaceAll("SyntaxError: cannot assign to expression here. Maybe you meant '==' instead of '='?", '文法エラー: ここでは代入のイコールの左辺に式は使えません');
+  formatted = formatted.replaceAll("SyntaxError: cannot assign to function call here. Maybe you meant '==' instead of '='?", '文法エラー: ここでは代入のイコールの左辺に関数呼び出しは使えません');
+  formatted = formatted.replaceAll("SyntaxError: cannot assign to subscript here. Maybe you meant '==' instead of '='?", '文法エラー: ここでは代入のイコールの左辺に添え字は使えません');
+  formatted = formatted.replaceAll("SyntaxError: cannot assign to literal here. Maybe you meant '==' instead of '='?", '文法エラー: ここでは代入のイコールの左辺に値は使えません');
   formatted = formatted.replaceAll(/SyntaxError: expected '(.*)'/g, '文法エラー: 「$1」が必要です');
   formatted = formatted.replaceAll('SyntaxError: EOL while scanning string literal', '文法エラー: 文字列の終わりのクオーテーションが見つかりません');
+  formatted = formatted.replaceAll(/SyntaxError: unterminated string literal \(detected at line \d*\)/g, '文法エラー: 文字列の終わりのクオーテーションが見つかりません');
   formatted = formatted.replaceAll(/SyntaxError: invalid character '(.*)' \((.*)\)/g, '文法エラー: 「$1」という文字は使えません (誤って全角文字を使っていることがあります)');
   formatted = formatted.replaceAll('SyntaxError: unexpected EOF while parsing', '文法エラー: 括弧などを閉じないまま行が終わってしまいました');
   formatted = formatted.replaceAll(/SyntaxError: unmatched '(.*)'/g, '文法エラー: 「$1」の開きと閉じが対応していません');
@@ -172,6 +173,7 @@ function formatErrorMessage(original) {
   formatted = formatted.replaceAll(/TypeError: '(.*)' object cannot be interpreted as an integer/g, '型エラー: 「$1」を整数値とみなすことはできません');
   formatted = formatted.replaceAll(/TypeError: '(.*)' object is not iterable/g, '型エラー: 「$1」は繰り返し不可能です (リストのように使うことはできません)');
   formatted = formatted.replaceAll(/TypeError: argument of type '(.*)' is not iterable/g, '型エラー: 「$1」は繰り返し不可能です (in の右辺に使うことはできません)');
+  formatted = formatted.replaceAll(/TypeError: 'str' object does not support item assignment/g, '型エラー: 文字列から添え字で取り出した文字は読み取り専用で代入はできません');
   formatted = formatted.replaceAll(/TypeError: '(.*)' object does not support item assignment/g, '型エラー: 「$1」の添え字で指定した要素に代入することはできません');
   formatted = formatted.replaceAll('TypeError: string indices must be integers', '型エラー: 文字列の添え字は整数にしてください');
   formatted = formatted.replaceAll(/TypeError: list indices must be integers or slices, not (.*)/g, '型エラー: リストの添え字は「$1」ではなく整数やスライスにしてください');
@@ -194,6 +196,7 @@ function formatErrorMessage(original) {
   formatted = formatted.replaceAll('「float」', '「小数 (float)」');
   formatted = formatted.replaceAll('「str」', '「文字列 (str)」');
   formatted = formatted.replaceAll('「list」', '「リスト (list)」');
+  formatted = formatted.replaceAll('「tuple」', '「タプル (tuple)」');
   formatted = formatted.replaceAll('「NoneType」', '「値ではないもの (NoneType)」');
   formatted = formatted.replaceAll('builtin_function_or_method', '組み込み関数');
 
@@ -266,6 +269,11 @@ function searchWarnings() {
     }
     if (line.match(/(if|while)[^=]*=[^=]/g) !== null && line.match(/>=|<=|!=|=>|=<|=!/g) == null) {
       res += `${i + 1} 行目の = は == ではありませんか？\n`;
+    }
+
+    // その他
+    if (line.match(/\S\[.*\,.*\]/g) !== null) {
+      res += `${i + 1} 行目の [ ] の間のコンマ , はスライスのコロン : ではありませんか？\n`;
     }
   }
   if (res == '') return '';
