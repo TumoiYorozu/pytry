@@ -81,7 +81,7 @@ window.addEventListener('load', (event) => {
         ambiguousCharacters: false,
       },
       renderIndentGuides: false,
-      readOnly: true,
+      //readOnly: true,
     });
     outputEditor.setModel(outputSession);
     outputSession.onDidChangeContent((event) => {
