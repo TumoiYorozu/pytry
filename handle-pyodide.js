@@ -291,7 +291,7 @@ function searchWarnings() {
 
 async function loadFormatter() {
   const pyodide = await loadPyodide({
-    indexURL: location.href + '/pyodide',
+    indexURL: new URL('./pyodide', location.href).toString(),
   });
   await pyodide.loadPackage('micropip');
   await pyodide.runPythonAsync(`
