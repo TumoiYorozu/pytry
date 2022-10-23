@@ -4,12 +4,12 @@
   src: url("../fonts/UDEVGothicJPDOC-Regular.ttf") format("truetype");
 }
 
-.monaco-editor {
-  --vscode-editorUnicodeHighlight-border: #d63031 !important;
-}
+/* 各タグの設定 */
 
 html,
-body {
+body,
+header,
+main {
   width: 100%;
   height: 100%;
   margin: 0;
@@ -17,177 +17,75 @@ body {
   font-family: "Noto Sans JP", sans-serif;
 }
 
-.unselectable {
-  -moz-user-select: -moz-none;
-  -khtml-user-select: none;
-  -webkit-user-select: none;
-  user-select: none;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  margin: 0;
+  padding: 0;
+}
+
+/* ヘッダー */
+
+header {
+  height: 3rem;
+  background-color: #444;
 }
 
 h1 {
-  float: left;
-  font-size: 24px;
-  line-height: 24px;
-  width: calc(100% - 24px - 88px);
-  height: 24px;
-  margin: 0;
-  padding: 12px;
-  color: white;
-  background: #0984e3;
+  display: inline-block;
+  line-height: 2rem;
+  margin: 0.6rem 1.6rem;
 }
 
-.help-button {
-  display: inline-block;
-  margin: auto;
-  margin-left: 12px;
-  padding: 0;
-  font-size: 20px;
-  line-height: 24px;
-  width: 24px;
-  height: 24px;
-  border-radius: 12px;
-  text-align: center;
-  vertical-align: middle;
-  background: white;
-  color: black;
-  cursor: pointer;
+.logo-type {
+  height: 1.8rem;
 }
 
 .config-button {
-  display: inline-block;
-  margin: auto;
-  margin-left: 12px;
-  padding: 0;
-  font-size: 22px;
-  line-height: 24px;
-  width: 24px;
-  height: 24px;
-  text-align: center;
-  vertical-align: middle;
-  color: black;
-  cursor: pointer;
-}
-
-.fold-button .content {
-  display: none;
-}
-
-.fold-button:hover .content {
-  display: block;
   position: relative;
-  top: 0px;
-  width: 320px;
-  padding: 24px;
-  z-index: 10000;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  text-align: left;
-  font-weight: normal;
-  line-height: 150%;
+  display: inline-block;
+  font-size: 1.6rem;
+  line-height: 2.8rem;
+  cursor: pointer;
+  vertical-align: top;
 }
 
-.h1-button {
+.run-button {
   float: right;
-  font-size: 24px;
-  line-height: 24px;
-  width: 64px;
-  height: 24px;
-  margin: 0;
-  padding: 12px;
+  position: relative;
+  font-size: 1.4rem;
+  line-height: 3rem;
+  height: 3rem;
+  width: 7rem;
+  background: white;
+  cursor: pointer;
+}
+
+.run-button span {
+  display: block;
+  width: 100%;
+  height: 100%;
   text-align: center;
   color: white;
-  background: #d63031;
+  background: #d60a34;
 }
 
-.h1-button.pushable:hover {
-  background: #ff7675;
-  cursor: pointer;
+.run-button:hover span.pushable {
+  opacity: 0.7;
 }
 
-h3 {
-  display: inline-block;
-  font-size: 20px;
-  line-height: 20px;
-  margin: 0;
-  padding: 10px 12px;
+.run-button:active span.pushable {
+  opacity: 0.4;
 }
 
-.copy-paste-button {
-  border: 1px solid #ddd;
-  border-radius: 2px;
-  background: white;
-  font-size: 12px;
-  line-height: 12px;
-  padding: 2px 4px;
-  vertical-align: middle;
-  cursor: pointer;
-}
-
-.copy-paste-button:hover {
-  background: #ddd;
-}
-
-.insert-buttons {
-  white-space: nowrap;
-  overflow-x: scroll;
-  overflow-y: hidden;
-  padding: 0 1em 12px 1em;
-  scrollbar-width: none;
-  background: white;
-  z-index: 1;
-}
-
-.insert-buttons::-webkit-scrollbar {
-  display: none;
-}
-
-.insert-button {
-  position: relative;
-  border-radius: 4px;
-  background: #eee;
-  font-size: 12px;
-  line-height: 12px;
-  padding: 2px 4px;
-  margin: 1px 2px;
-  vertical-align: middle;
-  cursor: pointer;
-  animation-delay: 5s;
-  animation-direction: alternate;
-  animation-duration: 0.8s;
-  animation-iteration-count: 6;
-  animation-name: appealAnim;
-  animation-timing-function: steps(2, start);
-}
-
-@keyframes appealAnim {
-  0% {
-    background: #bbb;
-  }
-  100% {
-    background: #eee;
-  }
-}
-
-.insert-button:hover {
-  background: #ccc;
-}
-
-.insert-button pre {
-  display: inline;
-  font-family: "UDEV Gothic JPDOC", monospace;
-  background: #fff67f;
-  border: 1px solid #888;
-}
+/* メイン - 構造 */
 
 .container {
   width: 100%;
-  height: calc(100% - 48pt);
-  padding: 2px 0;
-}
-
-#source-editor {
-  width: 100%;
-  height: calc(100% - 78px);
+  height: calc(100% - 3rem);
 }
 
 .left-column {
@@ -203,24 +101,205 @@ h3 {
   height: 100%;
 }
 
-.box {
+.right-column-row {
   width: 100%;
-  height: calc(50% - 1px);
+  height: 50%;
+}
+
+#source-editor {
+  width: 100%;
+  height: calc(100% - 2.4rem - 1.8rem);
 }
 
 #input-editor {
   width: 100%;
-  height: calc(100% - 40px);
+  height: calc(100% - 2.4rem);
   margin: 0;
   padding: 0;
 }
 
 #output-editor {
   width: 100%;
-  height: calc(100% - 40px);
+  height: calc(100% - 2.4rem);
   margin: 0;
   padding: 0;
 }
+
+/* メイン - コンポーネント */
+
+.editor-title {
+  display: flex;
+  align-items: center;
+  height: 2.4rem;
+}
+
+h3 {
+  display: inline-block;
+  font-size: 1.2rem;
+  line-height: 1.2rem;
+  margin: 0.6rem 0.6rem 0.6rem 1rem;
+}
+
+.tip-button {
+  display: inline-block;
+  border-radius: 0.2rem;
+  background: #aaa;
+  color: white;
+  font-size: 0.6rem;
+  line-height: 0.6rem;
+  padding: 0.35rem 0.4rem;
+  margin: 0.55rem 0.2rem;
+  cursor: pointer;
+}
+
+.tip-button:hover {
+  opacity: 0.7;
+}
+
+.tip-button:active {
+  opacity: 0.4;
+}
+
+.insert-buttons {
+  display: flex;
+  align-items: center;
+  height: 1.3rem;
+  margin-left: 1rem;
+  margin-bottom: 0.5rem;
+  white-space: nowrap;
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  font-size: 0.8rem;
+  line-height: 1.3rem;
+}
+
+.insert-buttons::-webkit-scrollbar {
+  display: none;
+}
+
+.insert-buttons .tip-button {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+.insert-buttons .tip-button pre {
+  display: inline;
+  font-family: "UDEV Gothic JPDOC", monospace;
+  background: #fff67f;
+  color: black;
+  border: 1px solid #888;
+}
+
+/* monaco エディタ */
+
+.monaco-editor {
+  --vscode-editorUnicodeHighlight-border: #d63031 !important;
+}
+
+.monaco-editor,
+.monaco-editor-background,
+.monaco-editor .inputarea.ime-input {
+  background-color: rgba(0, 0, 0, 0) !important;
+}
+
+#highlight {
+  position: absolute;
+  overflow: hidden;
+}
+
+.stdin-highlight {
+  position: absolute;
+  background: #fff67f;
+  z-index: -2;
+}
+
+.stdin-highlight::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border-top: 1px solid #888;
+  border-bottom: 1px solid #888;
+}
+
+.stdin-highlight-left::after {
+  border-left: 1px solid #888;
+}
+
+.stdin-highlight-right::after {
+  border-right: 1px solid #888;
+}
+
+/* 汎用クラス */
+
+.unselectable {
+  -moz-user-select: -moz-none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.toggle-input {
+  display: inline-block;
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  z-index: 5;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.toggle-label {
+  width: 54px;
+  height: 32px;
+  background: #fff;
+  border: 2px solid #eee;
+  position: relative;
+  display: inline-block;
+  border-radius: 16px;
+  transition: 0.4s;
+  box-sizing: border-box;
+}
+
+.toggle-label:after {
+  content: "";
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 100%;
+  left: 2px;
+  top: 2px;
+  z-index: 2;
+  background: #eee;
+  transition: 0.4s;
+}
+
+.toggle-input:checked + .toggle_label {
+  border: 2px solid #4bd865;
+}
+
+.toggle-input:checked + .toggle_label:after {
+  left: 24px;
+  background: #4bd865;
+}
+
+.toggle-button {
+  display: inline-block;
+  position: relative;
+  width: 54px;
+  height: 32px;
+  margin: auto;
+  vertical-align: text-top;
+}
+
+/* アニメーション */
 
 @-webkit-keyframes scale {
   0% {
@@ -286,97 +365,4 @@ h3 {
   -webkit-animation-fill-mode: both;
   animation-fill-mode: both;
   display: inline-block;
-}
-
-.toggle_input {
-  display: inline-block;
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  z-index: 5;
-  opacity: 0;
-  cursor: pointer;
-}
-
-.toggle_label {
-  width: 54px;
-  height: 32px;
-  background: #fff;
-  border: 2px solid #eee;
-  position: relative;
-  display: inline-block;
-  border-radius: 16px;
-  transition: 0.4s;
-  box-sizing: border-box;
-}
-
-.toggle_label:after {
-  content: "";
-  position: absolute;
-  width: 24px;
-  height: 24px;
-  border-radius: 100%;
-  left: 2px;
-  top: 2px;
-  z-index: 2;
-  background: #eee;
-  transition: 0.4s;
-}
-
-.toggle_input:checked + .toggle_label {
-  border: 2px solid #4bd865;
-}
-
-.toggle_input:checked + .toggle_label:after {
-  left: 24px;
-  background: #4bd865;
-}
-
-.toggle_button {
-  display: inline-block;
-  position: relative;
-  width: 54px;
-  height: 32px;
-  margin: auto;
-  vertical-align: text-top;
-}
-
-.monaco-editor,
-.monaco-editor-background,
-.monaco-editor .inputarea.ime-input {
-  background-color: rgba(0, 0, 0, 0) !important;
-}
-
-#highlight {
-  position: absolute;
-  overflow: hidden;
-}
-
-.stdin-highlight {
-  position: absolute;
-  background: #fff67f;
-  z-index: -2;
-}
-
-.stdin-highlight::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
-  box-sizing: border-box;
-  border-top: 1px solid #888;
-  border-bottom: 1px solid #888;
-}
-
-.stdin-highlight-left::after {
-  border-left: 1px solid #888;
-}
-
-.stdin-highlight-right::after {
-  border-right: 1px solid #888;
 }

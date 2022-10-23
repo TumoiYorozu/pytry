@@ -29,10 +29,6 @@ export async function formatAndUpdateEditor(editor) {
 }
 
 async function format(source) {
-  if (!document.getElementById('toggle_auto_format').checked) {
-    return source;
-  }
-
   result = null;
   worker.postMessage(source);
   while (result === null) {
