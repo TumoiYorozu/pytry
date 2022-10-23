@@ -1,4 +1,8 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap");
+@font-face {
+  font-family: "UDEV Gothic JPDOC";
+  src: url("../fonts/UDEVGothicJPDOC-Regular.ttf") format("truetype");
+}
 
 .monaco-editor {
   --vscode-editorUnicodeHighlight-border: #d63031 !important;
@@ -170,7 +174,7 @@ h3 {
 
 .insert-button pre {
   display: inline;
-  font-family: "Consolas", monospace;
+  font-family: "UDEV Gothic JPDOC", monospace;
   background: #fff67f;
   border: 1px solid #888;
 }

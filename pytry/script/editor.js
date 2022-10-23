@@ -39,11 +39,12 @@ export function initialize(sourceEditorId, inputEditorId, outputEditorId) {
       minimap: { enabled: false },
       automaticLayout: true,
       renderControlCharacters: true,
-      fontSize: 20,
+      fontSize: 18,
       wordWrap: true,
       scrollBeyondLastLine: false,
       folding: false,
       lineDecorationsWidth: 30,
+      fontFamily: "'UDEV Gothic JPDOC', monospace",
       // ソースエディタ専用設定
       renderIndentGuides: true,
       unicodeHighlight: {
@@ -64,11 +65,12 @@ export function initialize(sourceEditorId, inputEditorId, outputEditorId) {
       minimap: { enabled: false },
       automaticLayout: true,
       renderControlCharacters: true,
-      fontSize: 20,
+      fontSize: 18,
       wordWrap: true,
       scrollBeyondLastLine: false,
       folding: false,
       lineDecorationsWidth: 30,
+      fontFamily: "'UDEV Gothic JPDOC', monospace",
       // インプットエディタ専用設定
       renderIndentGuides: false,
     });
@@ -83,11 +85,12 @@ export function initialize(sourceEditorId, inputEditorId, outputEditorId) {
       minimap: { enabled: false },
       automaticLayout: true,
       renderControlCharacters: true,
-      fontSize: 20,
+      fontSize: 18,
       wordWrap: true,
       scrollBeyondLastLine: false,
       folding: false,
       lineDecorationsWidth: 30,
+      fontFamily: "'UDEV Gothic JPDOC', monospace",
       // アウトプットエディタ専用設定
       renderIndentGuides: false,
       unicodeHighlight: {
@@ -185,11 +188,11 @@ function updateStdinHighlight() {
         ok &= i + j < tags.length && pattern[j] == tags[i + j].innerHTML;
       }
       if (ok) {
+        const top = window.pageYOffset + tags[i].getBoundingClientRect().top - editorTop + 1;
+        const bottom = window.pageYOffset + tags[i].getBoundingClientRect().bottom - editorTop;
         for (let j = 0; j < pattern.length; j++) {
           const left = window.pageXOffset + tags[i + j].getBoundingClientRect().left - editorLeft;
-          const top = window.pageYOffset + tags[i + j].getBoundingClientRect().top - editorTop + 1;
           const right = window.pageXOffset + tags[i + j].getBoundingClientRect().right - editorLeft;
-          const bottom = window.pageYOffset + tags[i + j].getBoundingClientRect().bottom - editorTop;
           let classes = 'stdin-highlight';
           if (j == 0) {
             classes += ' stdin-highlight-left';
