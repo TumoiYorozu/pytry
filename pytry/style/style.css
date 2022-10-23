@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap");
+
 .monaco-editor {
   --vscode-editorUnicodeHighlight-border: #d63031 !important;
 }
@@ -173,25 +175,25 @@ h3 {
   border: 1px solid #888;
 }
 
-#container {
+.container {
   width: 100%;
   height: calc(100% - 48pt);
   padding: 2px 0;
 }
 
-#editor {
+#source-editor {
   width: 100%;
   height: calc(100% - 78px);
 }
 
-#left-column {
+.left-column {
   float: left;
   width: calc(60% - 1px);
   height: 100%;
   border-right: 1px solid #ddd;
 }
 
-#right-column {
+.right-column {
   float: right;
   width: 40%;
   height: 100%;
@@ -202,14 +204,14 @@ h3 {
   height: calc(50% - 1px);
 }
 
-#input {
+#input-editor {
   width: 100%;
   height: calc(100% - 40px);
   margin: 0;
   padding: 0;
 }
 
-#output {
+#output-editor {
   width: 100%;
   height: calc(100% - 40px);
   margin: 0;
@@ -344,7 +346,7 @@ h3 {
   background-color: rgba(0, 0, 0, 0) !important;
 }
 
-#highlighter {
+#highlight {
   position: absolute;
   overflow: hidden;
 }
