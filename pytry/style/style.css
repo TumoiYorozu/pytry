@@ -115,20 +115,19 @@ h1 {
 #source-editor {
   width: 100%;
   height: calc(100% - 2.4rem - 1.8rem);
+  font-family: "UDEV Gothic JPDOC", monospace;
 }
 
 #input-editor {
   width: 100%;
   height: calc(100% - 2.4rem);
-  margin: 0;
-  padding: 0;
+  font-family: "UDEV Gothic JPDOC", monospace;
 }
 
 #output-editor {
   width: 100%;
   height: calc(100% - 2.4rem);
-  margin: 0;
-  padding: 0;
+  font-family: "UDEV Gothic JPDOC", monospace;
 }
 
 /* メイン - コンポーネント */
@@ -239,6 +238,10 @@ h3 {
 
 .stdin-highlight-right::after {
   border-right: 1px solid #888;
+}
+
+.glyphMarginError {
+  background: red;
 }
 
 /* 汎用クラス */

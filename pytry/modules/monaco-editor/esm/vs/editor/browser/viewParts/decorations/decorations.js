@@ -5,14 +5,14 @@
 import './decorations.css';
 import { DynamicViewOverlay } from '../../view/dynamicViewOverlay.js';
 import { Range } from '../../../common/core/range.js';
-import { HorizontalRange } from '../../../common/view/renderingContext.js';
+import { HorizontalRange } from '../../view/renderingContext.js';
 export class DecorationsOverlay extends DynamicViewOverlay {
     constructor(context) {
         super();
         this._context = context;
         const options = this._context.configuration.options;
-        this._lineHeight = options.get(58 /* lineHeight */);
-        this._typicalHalfwidthCharacterWidth = options.get(43 /* fontInfo */).typicalHalfwidthCharacterWidth;
+        this._lineHeight = options.get(61 /* EditorOption.lineHeight */);
+        this._typicalHalfwidthCharacterWidth = options.get(46 /* EditorOption.fontInfo */).typicalHalfwidthCharacterWidth;
         this._renderResult = null;
         this._context.addEventHandler(this);
     }
@@ -24,8 +24,8 @@ export class DecorationsOverlay extends DynamicViewOverlay {
     // --- begin event handlers
     onConfigurationChanged(e) {
         const options = this._context.configuration.options;
-        this._lineHeight = options.get(58 /* lineHeight */);
-        this._typicalHalfwidthCharacterWidth = options.get(43 /* fontInfo */).typicalHalfwidthCharacterWidth;
+        this._lineHeight = options.get(61 /* EditorOption.lineHeight */);
+        this._typicalHalfwidthCharacterWidth = options.get(46 /* EditorOption.fontInfo */).typicalHalfwidthCharacterWidth;
         return true;
     }
     onDecorationsChanged(e) {
@@ -53,7 +53,8 @@ export class DecorationsOverlay extends DynamicViewOverlay {
     prepareRender(ctx) {
         const _decorations = ctx.getDecorationsInViewport();
         // Keep only decorations with `className`
-        let decorations = [], decorationsLen = 0;
+        let decorations = [];
+        let decorationsLen = 0;
         for (let i = 0, len = _decorations.length; i < len; i++) {
             const d = _decorations[i];
             if (d.options.className) {
@@ -127,7 +128,7 @@ export class DecorationsOverlay extends DynamicViewOverlay {
             const showIfCollapsed = Boolean(d.options.showIfCollapsed);
             let range = d.range;
             if (showIfCollapsed && range.endColumn === 1 && range.endLineNumber !== range.startLineNumber) {
-                range = new Range(range.startLineNumber, range.startColumn, range.endLineNumber - 1, this._context.model.getLineMaxColumn(range.endLineNumber - 1));
+                range = new Range(range.startLineNumber, range.startColumn, range.endLineNumber - 1, this._context.viewModel.getLineMaxColumn(range.endLineNumber - 1));
             }
             if (prevClassName === className && prevShowIfCollapsed === showIfCollapsed && Range.areIntersectingOrTouching(prevRange, range)) {
                 // merge into previous decoration

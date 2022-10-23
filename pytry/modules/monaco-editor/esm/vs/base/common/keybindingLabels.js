@@ -6,9 +6,9 @@ import * as nls from '../../nls.js';
 export class ModifierLabelProvider {
     constructor(mac, windows, linux = windows) {
         this.modifierLabels = [null]; // index 0 will never me accessed.
-        this.modifierLabels[2 /* Macintosh */] = mac;
-        this.modifierLabels[1 /* Windows */] = windows;
-        this.modifierLabels[3 /* Linux */] = linux;
+        this.modifierLabels[2 /* OperatingSystem.Macintosh */] = mac;
+        this.modifierLabels[1 /* OperatingSystem.Windows */] = windows;
+        this.modifierLabels[3 /* OperatingSystem.Linux */] = linux;
     }
     toLabel(OS, parts, keyLabelProvider) {
         if (parts.length === 0) {
@@ -86,6 +86,28 @@ export const ElectronAcceleratorLabelProvider = new ModifierLabelProvider({
     shiftKey: 'Shift',
     altKey: 'Alt',
     metaKey: 'Super',
+    separator: '+',
+});
+/**
+ * A label provider that prints modifiers in a suitable format for user settings.
+ */
+export const UserSettingsLabelProvider = new ModifierLabelProvider({
+    ctrlKey: 'ctrl',
+    shiftKey: 'shift',
+    altKey: 'alt',
+    metaKey: 'cmd',
+    separator: '+',
+}, {
+    ctrlKey: 'ctrl',
+    shiftKey: 'shift',
+    altKey: 'alt',
+    metaKey: 'win',
+    separator: '+',
+}, {
+    ctrlKey: 'ctrl',
+    shiftKey: 'shift',
+    altKey: 'alt',
+    metaKey: 'meta',
     separator: '+',
 });
 function _simpleAsString(modifiers, key, labels) {

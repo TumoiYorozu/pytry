@@ -46,7 +46,7 @@ export class DiffNavigator extends Disposable {
         this._init();
     }
     _init() {
-        let changes = this._editor.getLineChanges();
+        const changes = this._editor.getLineChanges();
         if (!changes) {
             return;
         }
@@ -59,7 +59,7 @@ export class DiffNavigator extends Disposable {
             if (this._editor.getLineChanges() !== null) {
                 this.revealFirst = false;
                 this.nextIdx = -1;
-                this.next(1 /* Immediate */);
+                this.next(1 /* ScrollType.Immediate */);
             }
         }
     }
@@ -101,13 +101,13 @@ export class DiffNavigator extends Disposable {
     }
     _initIdx(fwd) {
         let found = false;
-        let position = this._editor.getPosition();
+        const position = this._editor.getPosition();
         if (!position) {
             this.nextIdx = 0;
             return;
         }
         for (let i = 0, len = this.ranges.length; i < len && !found; i++) {
-            let range = this.ranges[i].range;
+            const range = this.ranges[i].range;
             if (position.isBeforeOrEqual(range.getStartPosition())) {
                 this.nextIdx = i + (fwd ? 0 : -1);
                 found = true;
@@ -141,10 +141,10 @@ export class DiffNavigator extends Disposable {
                 this.nextIdx = this.ranges.length - 1;
             }
         }
-        let info = this.ranges[this.nextIdx];
+        const info = this.ranges[this.nextIdx];
         this.ignoreSelectionChange = true;
         try {
-            let pos = info.range.getStartPosition();
+            const pos = info.range.getStartPosition();
             this._editor.setPosition(pos);
             this._editor.revealRangeInCenter(info.range, scrollType);
         }
@@ -155,10 +155,10 @@ export class DiffNavigator extends Disposable {
     canNavigate() {
         return this.ranges && this.ranges.length > 0;
     }
-    next(scrollType = 0 /* Smooth */) {
+    next(scrollType = 0 /* ScrollType.Smooth */) {
         this._move(true, scrollType);
     }
-    previous(scrollType = 0 /* Smooth */) {
+    previous(scrollType = 0 /* ScrollType.Smooth */) {
         this._move(false, scrollType);
     }
     dispose() {

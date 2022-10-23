@@ -5,7 +5,7 @@
 import * as extpath from './extpath.js';
 import { Schemas } from './network.js';
 import * as paths from './path.js';
-import { isWindows } from './platform.js';
+import { isLinux, isWindows } from './platform.js';
 import { compare as strCompare, equalsIgnoreCase } from './strings.js';
 import { URI, uriToFsPath } from './uri.js';
 export function originalFSPath(uri) {
@@ -70,7 +70,7 @@ export class ExtUri {
         }
         else {
             dirname = paths.posix.dirname(resource.path);
-            if (resource.authority && dirname.length && dirname.charCodeAt(0) !== 47 /* Slash */) {
+            if (resource.authority && dirname.length && dirname.charCodeAt(0) !== 47 /* CharCode.Slash */) {
                 console.error(`dirname("${resource.toString})) resulted in a relative path`);
                 dirname = '/'; // If a URI contains an authority component, then the path component must either be empty or begin with a CharCode.Slash ("/") character
             }
@@ -102,7 +102,8 @@ export class ExtUri {
             const relativePath = paths.relative(originalFSPath(from), originalFSPath(to));
             return isWindows ? extpath.toSlashes(relativePath) : relativePath;
         }
-        let fromPath = from.path || '/', toPath = to.path || '/';
+        let fromPath = from.path || '/';
+        const toPath = to.path || '/';
         if (this._ignorePathCasing(from)) {
             // make casing of fromPath match toPath
             let i = 0;
@@ -144,7 +145,7 @@ export class ExtUri {
         }
         else {
             const p = resource.path;
-            return (p.length > 1 && p.charCodeAt(p.length - 1) === 47 /* Slash */) && !(/^[a-zA-Z]:(\/$|\\$)/.test(resource.fsPath)); // ignore the slash at offset 0
+            return (p.length > 1 && p.charCodeAt(p.length - 1) === 47 /* CharCode.Slash */) && !(/^[a-zA-Z]:(\/$|\\$)/.test(resource.fsPath)); // ignore the slash at offset 0
         }
     }
     removeTrailingPathSeparator(resource, sep = paths.sep) {
@@ -163,7 +164,7 @@ export class ExtUri {
         else {
             sep = '/';
             const p = resource.path;
-            isRootSep = p.length === 1 && p.charCodeAt(p.length - 1) === 47 /* Slash */;
+            isRootSep = p.length === 1 && p.charCodeAt(p.length - 1) === 47 /* CharCode.Slash */;
         }
         if (!isRootSep && !hasTrailingPathSeparator(resource, sep)) {
             return resource.with({ path: resource.path + '/' });
@@ -179,6 +180,34 @@ export class ExtUri {
  * ```
  */
 export const extUri = new ExtUri(() => false);
+/**
+ * BIASED utility that _mostly_ ignored the case of urs paths. ONLY use this util if you
+ * understand what you are doing.
+ *
+ * This utility is INCOMPATIBLE with `uri.toString()`-usages and both CANNOT be used interchanged.
+ *
+ * When dealing with uris from files or documents, `extUri` (the unbiased friend)is sufficient
+ * because those uris come from a "trustworthy source". When creating unknown uris it's always
+ * better to use `IUriIdentityService` which exposes an `IExtUri`-instance which knows when path
+ * casing matters.
+ */
+export const extUriBiasedIgnorePathCase = new ExtUri(uri => {
+    // A file scheme resource is in the same platform as code, so ignore case for non linux platforms
+    // Resource can be from another platform. Lowering the case as an hack. Should come from File system provider
+    return uri.scheme === Schemas.file ? !isLinux : true;
+});
+/**
+ * BIASED utility that always ignores the casing of uris paths. ONLY use this util if you
+ * understand what you are doing.
+ *
+ * This utility is INCOMPATIBLE with `uri.toString()`-usages and both CANNOT be used interchanged.
+ *
+ * When dealing with uris from files or documents, `extUri` (the unbiased friend)is sufficient
+ * because those uris come from a "trustworthy source". When creating unknown uris it's always
+ * better to use `IUriIdentityService` which exposes an `IExtUri`-instance which knows when path
+ * casing matters.
+ */
+export const extUriIgnorePathCase = new ExtUri(_ => true);
 export const isEqual = extUri.isEqual.bind(extUri);
 export const isEqualOrParent = extUri.isEqualOrParent.bind(extUri);
 export const getComparisonKey = extUri.getComparisonKey.bind(extUri);

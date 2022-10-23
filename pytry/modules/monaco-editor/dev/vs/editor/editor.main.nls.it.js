@@ -1,6 +1,6 @@
 /*!-----------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
- * Version: 0.31.1(5a1b4999493d49c857497ad481d73a737439f305)
+ * Version: 0.34.1(0316a754aa4c25208bef91937efbce2ab1e3ce37)
  * Released under the MIT license
  * https://github.com/microsoft/vscode/blob/main/LICENSE.txt
  *-----------------------------------------------------------*/
@@ -12,7 +12,7 @@ define("vs/editor/editor.main.nls.it", {
 	"vs/base/browser/ui/findinput/findInput": [
 		"input",
 	],
-	"vs/base/browser/ui/findinput/findInputCheckboxes": [
+	"vs/base/browser/ui/findinput/findInputToggles": [
 		"Maiuscole/minuscole",
 		"Parola intera",
 		"Usa espressione regolare",
@@ -33,15 +33,13 @@ define("vs/editor/editor.main.nls.it", {
 	"vs/base/browser/ui/keybindingLabel/keybindingLabel": [
 		"Non associato",
 	],
-	"vs/base/browser/ui/menu/menu": [
-		"{0} ({1})",
-	],
 	"vs/base/browser/ui/tree/abstractTree": [
-		"Cancella",
-		"Disabilita filtro sul tipo",
-		"Abilita filtro sul tipo",
-		"Non sono stati trovati elementi",
-		"Abbinamento di {0} su {1} elementi",
+		"Filtro",
+		"Digitare per filtrare",
+		"Digitare per la ricerca",
+		"Digitare per la ricerca",
+		"Chiudi",
+		"Non sono stati trovati elementi.",
 	],
 	"vs/base/common/actions": [
 		"(vuoto)",
@@ -76,11 +74,15 @@ define("vs/editor/editor.main.nls.it", {
 		"ALT",
 		"Super",
 	],
+	"vs/base/common/platform": [
+		"_",
+	],
 	"vs/base/parts/quickinput/browser/quickInput": [
 		"Indietro",
 		"Premere \'INVIO\' per confermare l\'input oppure \'ESC\' per annullare",
 		"{0}/{1}",
 		"Digitare per ridurre il numero di risultati.",
+		"Attivare/Disattivare tutte le caselle di controllo",
 		"{0} risultati",
 		"{0} selezionati",
 		"OK",
@@ -91,17 +93,14 @@ define("vs/editor/editor.main.nls.it", {
 	"vs/base/parts/quickinput/browser/quickInputList": [
 		"Input rapido",
 	],
-	"vs/editor/browser/controller/coreCommands": [
-		"Si attiene alla fine anche quando si passa a righe più lunghe",
-		"Si attiene alla fine anche quando si passa a righe più lunghe",
-		"Cursori secondari rimossi",
-	],
 	"vs/editor/browser/controller/textAreaHandler": [
 		"editor",
 		"L\'editor non è accessibile in questo momento. Premere {0} per le opzioni.",
 	],
-	"vs/editor/browser/core/keybindingCancellation": [
-		"Indica se l\'editor esegue un\'operazione annullabile, ad esempio \'Anteprima riferimenti\'",
+	"vs/editor/browser/coreCommands": [
+		"Si attiene alla fine anche quando si passa a righe più lunghe",
+		"Si attiene alla fine anche quando si passa a righe più lunghe",
+		"Cursori secondari rimossi",
 	],
 	"vs/editor/browser/editorExtensions": [
 		"&&Annulla",
@@ -147,11 +146,11 @@ define("vs/editor/editor.main.nls.it", {
 		"Copia la riga eliminata ({0})",
 		"Copia riga modificata ({0})",
 	],
-	"vs/editor/common/config/commonEditorConfig": [
+	"vs/editor/common/config/editorConfigurationSchema": [
 		"Editor",
-		"Numero di spazi a cui equivale una tabulazione. Quando `#editor.detectIndentation#` è attivo, questa impostazione viene sostituita in base al contenuto del file.",
-		"Inserisce spazi quando viene premuto TAB. Quando `#editor.detectIndentation#` è attivo, questa impostazione viene sostituita in base al contenuto del file.",
-		"Controlla se `#editor.tabSize#` e `#editor.insertSpaces#` verranno rilevati automaticamente quando un file viene aperto in base al contenuto del file.",
+		"Numero di spazi a cui è uguale una scheda. Questa impostazione viene sottoposta a override in base al contenuto del file quando {0} è attivo.",
+		"Inserire spazi quando si preme \'TAB\'. Questa impostazione viene sottoposta a override in base al contenuto del file quando {0} è attivo.",
+		"Controlla se {0} e {1} verranno rilevati automaticamente quando un file viene aperto in base al contenuto del file.",
 		"Rimuovi gli spazi finali inseriti automaticamente.",
 		"Gestione speciale dei file di grandi dimensioni per disabilitare alcune funzionalità che fanno un uso intensivo della memoria.",
 		"Controlla se calcolare i completamenti in base alle parole presenti nel documento.",
@@ -174,12 +173,13 @@ define("vs/editor/editor.main.nls.it", {
 		"Timeout in millisecondi dopo il quale il calcolo delle differenze viene annullato. Usare 0 per indicare nessun timeout.",
 		"Dimensioni massime del file in MB per cui calcolare le differenze. Usare 0 per nessun limite.",
 		"Controlla se l\'editor diff mostra le differenze affiancate o incorporate.",
+		"Se questa opzione è abilitata, l\'editor diff mostra le frecce nel margine del glifo per ripristinare le modifiche.",
 		"Se abilitato, l\'editor differenze ignora le modifiche relative a spazi vuoti iniziali e finali.",
 		"Controlla se l\'editor diff mostra gli indicatori +/- per le modifiche aggiunte/rimosse.",
 		"Controlla se l\'editor visualizza CodeLens.",
 		"Il ritorno a capo automatico delle righe non viene mai applicato.",
 		"Il ritorno a capo automatico delle righe viene applicato in corrispondenza della larghezza del viewport.",
-		"Il ritorno a capo automatico delle righe viene applicato in base all\'impostazione `#editor.wordWrap#`.",
+		"Le righe andranno a capo in base all\'impostazione {0}.",
 	],
 	"vs/editor/common/config/editorOptions": [
 		"L\'editor userà le API della piattaforma per rilevare quando viene collegata un\'utilità per la lettura dello schermo.",
@@ -226,11 +226,18 @@ define("vs/editor/editor.main.nls.it", {
 		"Controlla se l\'area sensibile al passaggio del mouse deve rimanere visibile quando vi si passa sopra con il puntatore del mouse.",
 		"Preferisci la visualizzazione al passaggio del mouse sopra la riga, se c\'è spazio.",
 		"Abilita la lampadina delle azioni codice nell\'editor.",
+		"Shows the nested current scopes during the scroll at the top of the editor.",
 		"Abilita i suggerimenti incorporati nell\'Editor.",
-		"Controlla le dimensioni del carattere dei suggerimenti incorporati nell\'editor. Viene usato il valore predefinito 90% di `#editor.fontSize#` quando il valore configurato è minore di `5` o maggiore delle dimensioni del carattere dell\'editor.",
-		"Controlla la famiglia di caratteri dei suggerimenti incorporati nell\'Editor. Se impostato su vuoto, viene usato \'#editor.fontFamily#\'.",
+		"Gli hint di inlay sono abilitati",
+		"Gli hint di inlay vengono visualizzati per impostazione predefinita e vengono nascosti quando si tiene premuto {0}",
+		"Gli hint di inlay sono nascosti per impostazione predefinita e vengono visualizzati solo quando si tiene premuto {0}",
+		"Gli hint di inlay sono disabilitati",
+		"Controlla le dimensioni del carattere dei suggerimenti di inlay nell\'editor. Per impostazione predefinita, {0} viene usato quando il valore configurato è minore di {1} o maggiore delle dimensioni del carattere dell\'editor.",
+		"Controlla la famiglia di caratteri dei suggerimenti inlay nell\'editor. Se impostato su vuoto, viene usato {0}.",
+		"Abilita il riempimento attorno ai suggerimenti incorporati nell\'editor.",
 		"Controlla l\'altezza della riga. \r\n - Usare 0 per calcolare automaticamente l\'altezza della riga dalle dimensioni del carattere.\r\n - I valori compresi tra 0 e 8 verranno usati come moltiplicatore con le dimensioni del carattere.\r\n - I valori maggiori o uguali a 8 verranno usati come valori effettivi.",
 		"Controlla se la minimappa è visualizzata.",
+		"Controlla se la minimappa viene nascosta automaticamente.",
 		"La minimappa ha le stesse dimensioni del contenuto dell\'editor (e potrebbe supportare lo scorrimento).",
 		"Se necessario, la minimappa si ridurrà o si ingrandirà in modo da adattarsi all\'altezza dell\'editor (nessuno scorrimento).",
 		"Se necessario, la minimappa si ridurrà in modo che la larghezza non superi mai quella dell\'editor (nessuno scorrimento).",
@@ -244,10 +251,13 @@ define("vs/editor/editor.main.nls.it", {
 		"Controlla la quantità di spazio tra il bordo inferiore dell\'editor e l\'ultima riga.",
 		"Abilita un popup che mostra documentazione sui parametri e informazioni sui tipi mentre si digita.",
 		"Controlla se il menu dei suggerimenti per i parametri esegue un ciclo o si chiude quando viene raggiunta la fine dell\'elenco.",
+		"I suggerimenti rapidi vengono visualizzati all\'interno del widget dei suggerimenti",
+		"I suggerimenti rapidi vengono visualizzati come testo fantasma",
+		"I suggerimenti rapidi sono disabilitati",
 		"Abilita i suggerimenti rapidi all\'interno di stringhe.",
 		"Abilita i suggerimenti rapidi all\'interno di commenti.",
 		"Abilita i suggerimenti rapidi all\'esterno di stringhe e commenti.",
-		"Controlla se visualizzare automaticamente i suggerimenti durante la digitazione.",
+		"Controlla se i suggerimenti devono essere visualizzati automaticamente durante la digitazione. Può essere controllato per la digitazione in commenti, stringhe e altro codice. Il suggerimento rapido può essere configurato per essere visualizzato come testo fantasma o con il widget dei suggerimenti. Tenere anche conto dell\'impostazione \'{0}\' che controlla se i suggerimenti vengono attivati dai caratteri speciali.",
 		"I numeri di riga non vengono visualizzati.",
 		"I numeri di riga vengono visualizzati come numeri assoluti.",
 		"I numeri di riga vengono visualizzati come distanza in linee alla posizione del cursore.",
@@ -271,9 +281,12 @@ define("vs/editor/editor.main.nls.it", {
 		"Controlla se i caratteri che riservano spazio o non hanno larghezza sono evidenziati.",
 		"Controlla se i caratteri che possono essere confusi con i caratteri ASCII di base sono evidenziati, ad eccezione di quelli comuni nelle impostazioni locali dell\'utente corrente.",
 		"Controlla se anche i caratteri nei commenti debbano essere soggetti a evidenziazione Unicode.",
+		"Controlla se anche i caratteri nelle stringhe devono essere soggetti all\'evidenziazione unicode.",
 		"Definisce i caratteri consentiti che non vengono evidenziati.",
+		"I caratteri Unicode comuni nelle impostazioni locali consentite non vengono evidenziati.",
 		"Controlla se visualizzare automaticamente i suggerimenti inline nell\'Editor.",
-		"Controlla se la colorazione delle coppie di parentesi quadre è abilitata. Usare \'workbench.colorCustomizations\' per eseguire l\'override dei colori di evidenziazione delle parentesi quadre.",
+		"Controlla se la colorazione delle coppie di parentesi è abilitata. Usare {0} per eseguire l\'override dei colori di evidenziazione delle parentesi.",
+		"Controlla se ogni tipo di parentesi ha un pool di colori indipendente.",
 		"Abilita le guide per coppie di parentesi quadre.",
 		"Abilita le guide delle coppie di parentesi solo per la coppia di parentesi attive.",
 		"Disabilita le guide per coppie di parentesi quadre.",
@@ -282,8 +295,11 @@ define("vs/editor/editor.main.nls.it", {
 		"Abilita le guide orizzontali solo per la coppia di parentesi attive.",
 		"Disabilita le guide per coppie di parentesi orizzontali.",
 		"Controlla se le guide orizzontali delle coppie di parentesi sono abilitate o meno.",
-		"Controlla se le guide delle coppie di parentesi sono abilitate o meno.",
+		"Controlla se l\'editor debba evidenziare la coppia di parentesi attive.",
 		"Controlla se l\'editor deve eseguire il rendering delle guide con rientro.",
+		"Evidenzia la guida di rientro attiva.",
+		"Evidenzia la guida di rientro attiva anche se le guide delle parentesi quadre sono evidenziate.",
+		"Non evidenziare la guida di rientro attiva.",
 		"Controlla se l\'editor deve evidenziare la guida con rientro attiva.",
 		"Inserisce il suggerimento senza sovrascrivere il testo a destra del cursore.",
 		"Inserisce il suggerimento e sovrascrive il testo a destra del cursore.",
@@ -328,7 +344,8 @@ define("vs/editor/editor.main.nls.it", {
 		"Se è abilitata, IntelliSense mostra i suggerimenti relativi a `user`.",
 		"Se è abilitata, IntelliSense mostra i suggerimenti relativi a `issues`.",
 		"Indica se gli spazi vuoti iniziali e finali devono essere sempre selezionati.",
-		"Controlla se accettare i suggerimenti con i caratteri di commit. Ad esempio, in JavaScript il punto e virgola (\';\') può essere un carattere di commit che accetta un suggerimento e digita tale carattere.",
+		"Controlla se è possibile trascinare un file in un editor di testo tenendo premuto MAIUSC (invece di aprire il file in un editor).",
+		"Controlla se accettare i suggerimenti con i caratteri di commit. Ad esempio, in JavaScript il punto e virgola (`; `) può essere un carattere di commit che accetta un suggerimento e digita tale carattere.",
 		"Accetta un suggerimento con \'Invio\' solo quando si apporta una modifica al testo.",
 		"Controlla se i suggerimenti devono essere accettati con \'INVIO\' in aggiunta a \'TAB\'. In questo modo è possibile evitare ambiguità tra l\'inserimento di nuove righe e l\'accettazione di suggerimenti.",
 		"Controlla il numero di righe nell\'Editor che possono essere lette alla volta da un utilità per la lettura dello schermo. Quando viene rilevata un\'utilità per la lettura dello schermo, questo valore viene impostato su 500 per impostazione predefinita. Avviso: questa opzione può influire sulle prestazioni se il numero di righe è superiore a quello predefinito.",
@@ -376,6 +393,7 @@ define("vs/editor/editor.main.nls.it", {
 		"Controlla la strategia per il calcolo degli intervalli di riduzione.",
 		"Controlla se l\'editor deve evidenziare gli intervalli con riduzione del codice.",
 		"Controlla se l\'editor comprime automaticamente gli intervalli di importazione.",
+		"Numero massimo di aree riducibili. Se si aumenta questo valore, l\'editor potrebbe diventare meno reattivo quando l\'origine corrente contiene un numero elevato di aree riducibili.",
 		"Controlla se, facendo clic sul contenuto vuoto dopo una riga ridotta, la riga viene espansa.",
 		"Controlla la famiglia di caratteri.",
 		"Controlla se l\'editor deve formattare automaticamente il contenuto incollato. Deve essere disponibile un formattatore che deve essere in grado di formattare un intervallo in un documento.",
@@ -391,7 +409,7 @@ define("vs/editor/editor.main.nls.it", {
 		"Unire i cursori multipli se sovrapposti.",
 		"Rappresenta il tasto \'Control\' in Windows e Linux e il tasto \'Comando\' in macOS.",
 		"Rappresenta il tasto \'Alt\' in Windows e Linux e il tasto \'Opzione\' in macOS.",
-		"Modificatore da usare per aggiungere più cursori con il mouse. I gesti del mouse Vai alla definizione e Apri il collegamento si adatteranno in modo da non entrare in conflitto con il modificatore di selezione multipla. [Altre informazioni](https://code.visualstudio.com/docs/editor/codebasics#_multicursor-modifier).",
+		"Modificatore da usare per aggiungere più cursori con il mouse. I movimenti del mouse Vai alla definizione e Apri collegamento si adatteranno in modo da non entrare in conflitto con il [modificatore di selezione multipla](https://code.visualstudio.com/docs/editor/codebasics#_multicursor-modifier).",
 		"Ogni cursore incolla una singola riga del testo.",
 		"Ogni cursore incolla il testo completo.",
 		"Controlla l\'operazione Incolla quando il conteggio delle righe del testo incollato corrisponde al conteggio dei cursori.",
@@ -420,6 +438,7 @@ define("vs/editor/editor.main.nls.it", {
 		"Controlla se gli appunti primari di Linux devono essere supportati.",
 		"Controlla se l\'editor deve evidenziare gli elementi corrispondenti simili alla selezione.",
 		"Mostra sempre i comandi di riduzione.",
+		"Non visualizzare mai i controlli di riduzione e diminuire le dimensioni della barra di navigazione.",
 		"Mostra i comandi di riduzione solo quando il mouse è posizionato sul margine della barra di scorrimento.",
 		"Controlla se i controlli di riduzione sul margine della barra di scorrimento vengono visualizzati.",
 		"Controllo dissolvenza del codice inutilizzato.",
@@ -430,8 +449,8 @@ define("vs/editor/editor.main.nls.it", {
 		"Non mostrare i suggerimenti del frammento.",
 		"Controlla se i frammenti di codice sono visualizzati con altri suggerimenti e il modo in cui sono ordinati.",
 		"Controlla se per lo scorrimento dell\'editor verrà usata un\'animazione.",
-		"Dimensioni del carattere per il widget dei suggerimenti. Se impostato su `0`, viene usato il valore di `#editor.fontSize#`.",
-		"Altezza della riga per il widget dei suggerimenti. Se impostato su `0`, viene usato il valore `editor.lineHeight#`. Il valore minimo è 8.",
+		"Dimensioni del carattere per il widget dei suggerimenti. Se impostato su {0}, viene usato il valore di {1}.",
+		"Altezza della riga per il widget dei suggerimenti. Se impostato su {0}, viene usato il valore {1}. Il valore minimo è 8.",
 		"Controlla se i suggerimenti devono essere visualizzati automaticamente durante la digitazione dei caratteri trigger.",
 		"Consente di selezionare sempre il primo suggerimento.",
 		"Consente di selezionare suggerimenti recenti a meno che continuando a digitare non ne venga selezionato uno, ad esempio `console.| ->; console.log` perché `log` è stato completato di recente.",
@@ -461,6 +480,60 @@ define("vs/editor/editor.main.nls.it", {
 		"Presuppone che la larghezza sia identica per tutti caratteri. Si tratta di un algoritmo veloce che funziona correttamente per i tipi di carattere a spaziatura fissa e determinati script (come i caratteri latini) in cui i glifi hanno larghezza identica.",
 		"Delega il calcolo dei punti di ritorno a capo al browser. Si tratta di un algoritmo lento che potrebbe causare blocchi con file di grandi dimensioni, ma funziona correttamente in tutti gli altri casi.",
 		"Controlla l\'algoritmo che calcola i punti di ritorno a capo.",
+	],
+	"vs/editor/common/core/editorColorRegistry": [
+		"Colore di sfondo per l\'evidenziazione della riga alla posizione del cursore.",
+		"Colore di sfondo per il bordo intorno alla riga alla posizione del cursore.",
+		"Colore di sfondo degli intervalli evidenziati, ad esempio dalle funzionalità Quick Open e Trova. Il colore non deve essere opaco per evitare di nascondere le decorazioni sottostanti.",
+		"Colore di sfondo del bordo intorno agli intervalli selezionati.",
+		"Colore di sfondo del simbolo evidenziato, ad esempio per passare alla definizione o al simbolo successivo/precedente. Il colore non deve essere opaco per evitare di nascondere le decorazioni sottostanti.",
+		"Colore di sfondo del bordo intorno ai simboli selezionati.",
+		"Colore del cursore dell\'editor.",
+		"Colore di sfondo del cursore editor. Permette di personalizzare il colore di un carattere quando sovrapposto da un blocco cursore.",
+		"Colore dei caratteri di spazio vuoto nell\'editor.",
+		"Colore delle guide per i rientri dell\'editor.",
+		"Colore delle guide di indentazione dell\'editor attivo",
+		"Colore dei numeri di riga dell\'editor.",
+		"Colore del numero di riga attivo dell\'editor",
+		"Id è deprecato. In alternativa usare \'editorLineNumber.activeForeground\'.",
+		"Colore del numero di riga attivo dell\'editor",
+		"Colore dei righelli dell\'editor.",
+		"Colore primo piano delle finestre di CodeLens dell\'editor",
+		"Colore di sfondo delle parentesi corrispondenti",
+		"Colore delle caselle di parentesi corrispondenti",
+		"Colore del bordo del righello delle annotazioni.",
+		"Colore di sfondo del righello delle annotazioni dell\'editor.",
+		"Colore di sfondo della barra di navigazione dell\'editor. La barra contiene i margini di glifo e i numeri di riga.",
+		"Colore del bordo del codice sorgente non necessario (non usato) nell\'editor.",
+		"Opacità del codice sorgente non necessario (non usato) nell\'editor. Ad esempio, con \"#000000c0\" il rendering del codice verrà eseguito con il 75% di opacità. Per i temi a contrasto elevato, usare il colore del tema \'editorUnnecessaryCode.border\' per sottolineare il codice non necessario invece di opacizzarlo.",
+		"Colore del bordo del testo fantasma nell\'Editor.",
+		"Colore primo piano del testo fantasma nell\'Editor.",
+		"Colore di sfondo del testo fantasma nell\'editor.",
+		"Colore del marcatore del righello delle annotazioni per le evidenziazioni degli intervalli. Il colore non deve essere opaco per evitare di nascondere le decorazioni sottostanti.",
+		"Colore del marcatore del righello delle annotazioni per gli errori.",
+		"Colore del marcatore del righello delle annotazioni per gli avvisi.",
+		"Colore del marcatore del righello delle annotazioni per i messaggi di tipo informativo.",
+		"Colore primo piano delle parentesi quadre (1). Richiede l\'abilitazione della colorazione delle coppie di parentesi quadre.",
+		"Colore primo piano delle parentesi quadre (2). Richiede l\'abilitazione della colorazione delle coppie di parentesi quadre.",
+		"Colore primo piano delle parentesi quadre (3). Richiede l\'abilitazione della colorazione delle coppie di parentesi quadre.",
+		"Colore primo piano delle parentesi quadre (4). Richiede l\'abilitazione della colorazione delle coppie di parentesi quadre.",
+		"Colore primo piano delle parentesi quadre (5). Richiede l\'abilitazione della colorazione delle coppie di parentesi quadre.",
+		"Colore primo piano delle parentesi quadre (6). Richiede l\'abilitazione della colorazione delle coppie di parentesi quadre.",
+		"Colore di primo piano delle parentesi impreviste.",
+		"Colore di sfondo delle guide per coppie di parentesi inattive (1). Richiede l\'abilitazione delle guide per coppie di parentesi.",
+		"Colore di sfondo delle guide per coppie di parentesi inattive (2). Richiede l\'abilitazione delle guide per coppie di parentesi.",
+		"Colore di sfondo delle guide per coppie di parentesi inattive (3). Richiede l\'abilitazione delle guide per coppie di parentesi.",
+		"Colore di sfondo delle guide per coppie di parentesi inattive (4). Richiede l\'abilitazione delle guide per coppie di parentesi.",
+		"Colore di sfondo delle guide per coppie di parentesi inattive (5). Richiede l\'abilitazione delle guide per coppie di parentesi.",
+		"Colore di sfondo delle guide per coppie di parentesi inattive (6). Richiede l\'abilitazione delle guide per coppie di parentesi.",
+		"Colore di sfondo delle guide per coppie di parentesi attive (1). Richiede l\'abilitazione delle guide per coppie di parentesi.",
+		"Colore di sfondo delle guide per coppie di parentesi attive (2). Richiede l\'abilitazione delle guide per coppie di parentesi.",
+		"Colore di sfondo delle guide per coppie di parentesi attive (3). Richiede l\'abilitazione delle guide per coppie di parentesi.",
+		"Colore di sfondo delle guide per coppie di parentesi attive (4). Richiede l\'abilitazione delle guide per coppie di parentesi.",
+		"Colore di sfondo delle guide per coppie di parentesi attive (5). Richiede l\'abilitazione delle guide per coppie di parentesi.",
+		"Colore di sfondo delle guide per coppie di parentesi attive (6). Richiede l\'abilitazione delle guide per coppie di parentesi.",
+		"Colore del bordo utilizzato per evidenziare i caratteri Unicode.",
+		"Colore di sfondo usato per evidenziare i caratteri Unicode.",
 	],
 	"vs/editor/common/editorContextKeys": [
 		"Indica se il testo dell\'editor ha lo stato attivo (il cursore lampeggia)",
@@ -494,11 +567,11 @@ define("vs/editor/editor.main.nls.it", {
 		"Indica se per l\'editor esistono più provider di formattazione documenti",
 		"Indica se per l\'editor esistono più provider di formattazione di selezioni documento",
 	],
+	"vs/editor/common/languages/modesRegistry": [
+		"Testo normale",
+	],
 	"vs/editor/common/model/editStack": [
 		"Digitazione",
-	],
-	"vs/editor/common/modes/modesRegistry": [
-		"Testo normale",
 	],
 	"vs/editor/common/standaloneStrings": [
 		"Nessuna selezione",
@@ -536,60 +609,7 @@ define("vs/editor/editor.main.nls.it", {
 		"Attiva/disattiva tema a contrasto elevato",
 		"Effettuate {0} modifiche in {1} file",
 	],
-	"vs/editor/common/view/editorColorRegistry": [
-		"Colore di sfondo per l\'evidenziazione della riga alla posizione del cursore.",
-		"Colore di sfondo per il bordo intorno alla riga alla posizione del cursore.",
-		"Colore di sfondo degli intervalli evidenziati, ad esempio dalle funzionalità Quick Open e Trova. Il colore non deve essere opaco per evitare di nascondere le decorazioni sottostanti.",
-		"Colore di sfondo del bordo intorno agli intervalli selezionati.",
-		"Colore di sfondo del simbolo evidenziato, ad esempio per passare alla definizione o al simbolo successivo/precedente. Il colore non deve essere opaco per evitare di nascondere le decorazioni sottostanti.",
-		"Colore di sfondo del bordo intorno ai simboli selezionati.",
-		"Colore del cursore dell\'editor.",
-		"Colore di sfondo del cursore editor. Permette di personalizzare il colore di un carattere quando sovrapposto da un blocco cursore.",
-		"Colore dei caratteri di spazio vuoto nell\'editor.",
-		"Colore delle guide per i rientri dell\'editor.",
-		"Colore delle guide di indentazione dell\'editor attivo",
-		"Colore dei numeri di riga dell\'editor.",
-		"Colore del numero di riga attivo dell\'editor",
-		"Id è deprecato. In alternativa usare \'editorLineNumber.activeForeground\'.",
-		"Colore del numero di riga attivo dell\'editor",
-		"Colore dei righelli dell\'editor.",
-		"Colore primo piano delle finestre di CodeLens dell\'editor",
-		"Colore di sfondo delle parentesi corrispondenti",
-		"Colore delle caselle di parentesi corrispondenti",
-		"Colore del bordo del righello delle annotazioni.",
-		"Colore di sfondo del righello delle annotazioni dell\'editor. Viene usato solo quando la minimappa è abilitata e posizionata sul lato destro dell\'editor.",
-		"Colore di sfondo della barra di navigazione dell\'editor. La barra contiene i margini di glifo e i numeri di riga.",
-		"Colore del bordo del codice sorgente non necessario (non usato) nell\'editor.",
-		"Opacità del codice sorgente non necessario (non usato) nell\'editor. Ad esempio, con \"#000000c0\" il rendering del codice verrà eseguito con il 75% di opacità. Per i temi a contrasto elevato, usare il colore del tema \'editorUnnecessaryCode.border\' per sottolineare il codice non necessario invece di opacizzarlo.",
-		"Colore del bordo del testo fantasma nell\'Editor.",
-		"Colore primo piano del testo fantasma nell\'Editor.",
-		"Colore di sfondo del testo fantasma nell\'editor.",
-		"Colore del marcatore del righello delle annotazioni per le evidenziazioni degli intervalli. Il colore non deve essere opaco per evitare di nascondere le decorazioni sottostanti.",
-		"Colore del marcatore del righello delle annotazioni per gli errori.",
-		"Colore del marcatore del righello delle annotazioni per gli avvisi.",
-		"Colore del marcatore del righello delle annotazioni per i messaggi di tipo informativo.",
-		"Colore primo piano delle parentesi quadre (1). Richiede l\'abilitazione della colorazione delle coppie di parentesi quadre.",
-		"Colore primo piano delle parentesi quadre (2). Richiede l\'abilitazione della colorazione delle coppie di parentesi quadre.",
-		"Colore primo piano delle parentesi quadre (3). Richiede l\'abilitazione della colorazione delle coppie di parentesi quadre.",
-		"Colore primo piano delle parentesi quadre (4). Richiede l\'abilitazione della colorazione delle coppie di parentesi quadre.",
-		"Colore primo piano delle parentesi quadre (5). Richiede l\'abilitazione della colorazione delle coppie di parentesi quadre.",
-		"Colore primo piano delle parentesi quadre (6). Richiede l\'abilitazione della colorazione delle coppie di parentesi quadre.",
-		"Colore di primo piano delle parentesi impreviste.",
-		"Colore di sfondo delle guide per coppie di parentesi inattive (1). Richiede l\'abilitazione delle guide per coppie di parentesi.",
-		"Colore di sfondo delle guide per coppie di parentesi inattive (2). Richiede l\'abilitazione delle guide per coppie di parentesi.",
-		"Colore di sfondo delle guide per coppie di parentesi inattive (3). Richiede l\'abilitazione delle guide per coppie di parentesi.",
-		"Colore di sfondo delle guide per coppie di parentesi inattive (4). Richiede l\'abilitazione delle guide per coppie di parentesi.",
-		"Colore di sfondo delle guide per coppie di parentesi inattive (5). Richiede l\'abilitazione delle guide per coppie di parentesi.",
-		"Colore di sfondo delle guide per coppie di parentesi inattive (6). Richiede l\'abilitazione delle guide per coppie di parentesi.",
-		"Colore di sfondo delle guide per coppie di parentesi attive (1). Richiede l\'abilitazione delle guide per coppie di parentesi.",
-		"Colore di sfondo delle guide per coppie di parentesi attive (2). Richiede l\'abilitazione delle guide per coppie di parentesi.",
-		"Colore di sfondo delle guide per coppie di parentesi attive (3). Richiede l\'abilitazione delle guide per coppie di parentesi.",
-		"Colore di sfondo delle guide per coppie di parentesi attive (4). Richiede l\'abilitazione delle guide per coppie di parentesi.",
-		"Colore di sfondo delle guide per coppie di parentesi attive (5). Richiede l\'abilitazione delle guide per coppie di parentesi.",
-		"Colore di sfondo delle guide per coppie di parentesi attive (6). Richiede l\'abilitazione delle guide per coppie di parentesi.",
-		"Colore del bordo utilizzato per evidenziare i caratteri Unicode.",
-	],
-	"vs/editor/contrib/anchorSelect/anchorSelect": [
+	"vs/editor/contrib/anchorSelect/browser/anchorSelect": [
 		"Ancoraggio della selezione",
 		"Ancoraggio impostato alla posizione {0}:{1}",
 		"Imposta ancoraggio della selezione",
@@ -597,20 +617,20 @@ define("vs/editor/editor.main.nls.it", {
 		"Seleziona da ancoraggio a cursore",
 		"Annulla ancoraggio della selezione",
 	],
-	"vs/editor/contrib/bracketMatching/bracketMatching": [
+	"vs/editor/contrib/bracketMatching/browser/bracketMatching": [
 		"Colore del marcatore del righello delle annotazioni per la corrispondenza delle parentesi.",
 		"Vai alla parentesi quadra",
 		"Seleziona fino alla parentesi",
 		"Vai alla parentesi &&quadra",
 	],
-	"vs/editor/contrib/caretOperations/caretOperations": [
+	"vs/editor/contrib/caretOperations/browser/caretOperations": [
 		"Sposta testo selezionato a sinistra",
 		"Sposta testo selezionato a destra",
 	],
-	"vs/editor/contrib/caretOperations/transpose": [
+	"vs/editor/contrib/caretOperations/browser/transpose": [
 		"Trasponi lettere",
 	],
-	"vs/editor/contrib/clipboard/clipboard": [
+	"vs/editor/contrib/clipboard/browser/clipboard": [
 		"&&Taglia",
 		"Taglia",
 		"Taglia",
@@ -621,13 +641,18 @@ define("vs/editor/editor.main.nls.it", {
 		"Copia",
 		"Copia con nome",
 		"Copia con nome",
+		"Condividi",
 		"&&Incolla",
 		"Incolla",
 		"Incolla",
 		"Incolla",
 		"Copia con evidenziazione sintassi",
 	],
-	"vs/editor/contrib/codeAction/codeActionCommands": [
+	"vs/editor/contrib/codeAction/browser/codeActionCommands": [
+		"Non sono disponibili refactoring preferiti per \'{0}\'",
+		"Non sono disponibili refactoring per \'{0}\'",
+		"Non sono disponibili refactoring preferiti",
+		"Refactoring non disponibili",
 		"Tipo dell\'azione codice da eseguire.",
 		"Controlla quando vengono applicate le azioni restituite.",
 		"Applica sempre la prima azione codice restituita.",
@@ -642,10 +667,7 @@ define("vs/editor/editor.main.nls.it", {
 		"Non sono disponibili azioni codice preferite",
 		"Azioni codice non disponibili",
 		"Effettua refactoring...",
-		"Non sono disponibili refactoring preferiti per \'{0}\'",
-		"Non sono disponibili refactoring per \'{0}\'",
-		"Non sono disponibili refactoring preferiti",
-		"Refactoring non disponibili",
+		"Refactoring con anteprima...",
 		"Azione origine...",
 		"Non sono disponibili azioni origine preferite per \'{0}\'",
 		"Non sono disponibili azioni origine per \'{0}\'",
@@ -658,18 +680,25 @@ define("vs/editor/editor.main.nls.it", {
 		"Correzione automatica...",
 		"Non sono disponibili correzioni automatiche",
 	],
-	"vs/editor/contrib/codeAction/lightBulbWidget": [
+	"vs/editor/contrib/codeAction/browser/codeActionMenu": [
+		"Whether the code action list widget is visible",
+		"{0} to Refactor, {1} to Preview",
+	],
+	"vs/editor/contrib/codeAction/browser/codeActionWidgetContribution": [
+		"Enabling this adjusts how the code action menu is rendered.",
+	],
+	"vs/editor/contrib/codeAction/browser/lightBulbWidget": [
 		"Mostra azioni codice. Correzione rapida preferita disponibile ({0})",
 		"Mostra Azioni codice ({0})",
 		"Mostra Azioni codice",
 	],
-	"vs/editor/contrib/codelens/codelensController": [
+	"vs/editor/contrib/codelens/browser/codelensController": [
 		"Mostra comandi di CodeLens per la riga corrente",
 	],
-	"vs/editor/contrib/colorPicker/colorPickerWidget": [
+	"vs/editor/contrib/colorPicker/browser/colorPickerWidget": [
 		"Fare clic per attivare/disattivare le opzioni di colore (rgb/hsl/hex)",
 	],
-	"vs/editor/contrib/comment/comment": [
+	"vs/editor/contrib/comment/browser/comment": [
 		"Attiva/disattiva commento per la riga",
 		"Attiva/Disattiva commento per la &&riga",
 		"Aggiungi commento per la riga",
@@ -677,14 +706,32 @@ define("vs/editor/editor.main.nls.it", {
 		"Attiva/Disattiva commento per il blocco",
 		"Attiva/Disattiva commento per il &&blocco",
 	],
-	"vs/editor/contrib/contextmenu/contextmenu": [
+	"vs/editor/contrib/contextmenu/browser/contextmenu": [
+		"Minimappa",
+		"Esegui rendering dei caratteri",
+		"Dimensioni verticali",
+		"Proporzionale",
+		"Riempimento",
+		"Adatta",
+		"Dispositivo di scorrimento",
+		"Passaggio del mouse",
+		"Sempre",
 		"Mostra il menu di scelta rapida editor",
 	],
-	"vs/editor/contrib/cursorUndo/cursorUndo": [
+	"vs/editor/contrib/copyPaste/browser/copyPasteContribution": [
+		"Abilita/disabilita l\'esecuzione delle modifiche dalle estensioni quando si incolla.",
+	],
+	"vs/editor/contrib/cursorUndo/browser/cursorUndo": [
 		"Cursore - Annulla",
 		"Cursore - Ripeti",
 	],
-	"vs/editor/contrib/find/findController": [
+	"vs/editor/contrib/dropIntoEditor/browser/dropIntoEditorContribution": [
+		"Esecuzione dei gestori di rilascio in corso...",
+	],
+	"vs/editor/contrib/editorState/browser/keybindingCancellation": [
+		"Indica se l\'editor esegue un\'operazione annullabile, ad esempio \'Anteprima riferimenti\'",
+	],
+	"vs/editor/contrib/find/browser/findController": [
 		"Trova",
 		"&&Trova",
 		"Esegue l\'override del contrassegno \"Usa espressione regolare\".\r\nIl contrassegno non verrà salvato per il futuro.\r\n0: Non eseguire alcuna operazione\r\n1: Vero\r\n2: Falso",
@@ -700,7 +747,7 @@ define("vs/editor/editor.main.nls.it", {
 		"Sostituisci",
 		"&&Sostituisci",
 	],
-	"vs/editor/contrib/find/findWidget": [
+	"vs/editor/contrib/find/browser/findWidget": [
 		"Icona per \'Trova nella selezione\' nel widget di ricerca dell\'editor.",
 		"Icona per indicare che il widget di ricerca dell\'editor è compresso.",
 		"Icona per indicare che il widget di ricerca dell\'editor è espanso.",
@@ -728,7 +775,8 @@ define("vs/editor/editor.main.nls.it", {
 		"{0} trovati per \'{1}\'",
 		"Il tasto di scelta rapida CTRL+INVIO ora consente di inserire l\'interruzione di linea invece di sostituire tutto. Per eseguire l\'override di questo comportamento, è possibile modificare il tasto di scelta rapida per editor.action.replaceAll.",
 	],
-	"vs/editor/contrib/folding/folding": [
+	"vs/editor/contrib/folding/browser/folding": [
+		"Il numero di aree riducibili è limitato a un massimo di {0}. Aumentare l\'opzione di configurazione [\'Numero massimo di aree riducibili\'](command:workbench.action.openSettings?[\" editor.foldingMaximumRegions\"]) per abilitarne altre.",
 		"Espandi",
 		"Espandi in modo ricorsivo",
 		"Riduci",
@@ -744,30 +792,34 @@ define("vs/editor/editor.main.nls.it", {
 		"Vai alla cartella principale",
 		"Passa all\'intervallo di riduzione precedente",
 		"Passa all\'intervallo di riduzione successivo",
+		"Crea intervallo di riduzione manuale dalla selezione",
+		"Rimuovi intervalli di riduzione manuale",
 		"Livello riduzione {0}",
 		"Colore di sfondo degli intervalli con riduzione. Il colore non deve essere opaco per evitare di nascondere le decorazioni sottostanti.",
 		"Colore del controllo di riduzione nella barra di navigazione dell\'editor.",
 	],
-	"vs/editor/contrib/folding/foldingDecorations": [
+	"vs/editor/contrib/folding/browser/foldingDecorations": [
 		"Icona per gli intervalli espansi nel margine del glifo dell\'editor.",
 		"Icona per gli intervalli compressi nel margine del glifo dell\'editor.",
+		"Icona per gli intervalli compressi nel margine del glifo dell\'editor.",
+		"Icona per gli intervalli espansi manualmente nel margine del glifo dell\'editor.",
 	],
-	"vs/editor/contrib/fontZoom/fontZoom": [
+	"vs/editor/contrib/fontZoom/browser/fontZoom": [
 		"Zoom avanti tipo di carattere editor",
 		"Zoom indietro tipo di carattere editor",
 		"Reimpostazione zoom tipo di carattere editor",
 	],
-	"vs/editor/contrib/format/format": [
+	"vs/editor/contrib/format/browser/format": [
 		"È stata apportata 1 modifica di formattazione a riga {0}",
 		"Sono state apportate {0} modifiche di formattazione a riga {1}",
 		"È stata apportata 1 modifica di formattazione tra le righe {0} e {1}",
 		"Sono state apportate {0} modifiche di formattazione tra le righe {1} e {2}",
 	],
-	"vs/editor/contrib/format/formatActions": [
+	"vs/editor/contrib/format/browser/formatActions": [
 		"Formatta documento",
 		"Formatta selezione",
 	],
-	"vs/editor/contrib/gotoError/gotoError": [
+	"vs/editor/contrib/gotoError/browser/gotoError": [
 		"Vai al problema successivo (Errore, Avviso, Informazioni)",
 		"Icona per il marcatore Vai a successivo.",
 		"Vai al problema precedente (Errore, Avviso, Informazioni)",
@@ -777,7 +829,7 @@ define("vs/editor/editor.main.nls.it", {
 		"Vai al problema precedente nei file (Errore, Avviso, Informazioni)",
 		"&&Problema precedente",
 	],
-	"vs/editor/contrib/gotoError/gotoErrorWidget": [
+	"vs/editor/contrib/gotoError/browser/gotoErrorWidget": [
 		"Errore",
 		"Avviso",
 		"Info",
@@ -793,7 +845,7 @@ define("vs/editor/editor.main.nls.it", {
 		"Intestazione informativa per lo sfondo del widget di spostamento tra marcatori dell\'editor.",
 		"Sfondo del widget di spostamento tra marcatori dell\'editor.",
 	],
-	"vs/editor/contrib/gotoSymbol/goToCommands": [
+	"vs/editor/contrib/gotoSymbol/browser/goToCommands": [
 		"Anteprima",
 		"Definizioni",
 		"Non è stata trovata alcuna definizione per \'{0}\'",
@@ -834,25 +886,25 @@ define("vs/editor/editor.main.nls.it", {
 		"Vai a &&Implementazioni",
 		"Vai a &&riferimenti",
 	],
-	"vs/editor/contrib/gotoSymbol/link/goToDefinitionAtPosition": [
+	"vs/editor/contrib/gotoSymbol/browser/link/goToDefinitionAtPosition": [
 		"Fare clic per visualizzare {0} definizioni.",
 	],
-	"vs/editor/contrib/gotoSymbol/peek/referencesController": [
+	"vs/editor/contrib/gotoSymbol/browser/peek/referencesController": [
 		"Indica se l\'anteprima riferimenti è visibile, come \'Visualizza in anteprima riferimenti\' o \'Visualizza in anteprima la definizione\'",
 		"Caricamento...",
 		"{0} ({1})",
 	],
-	"vs/editor/contrib/gotoSymbol/peek/referencesTree": [
+	"vs/editor/contrib/gotoSymbol/browser/peek/referencesTree": [
 		"{0} riferimenti",
 		"{0} riferimento",
 		"Riferimenti",
 	],
-	"vs/editor/contrib/gotoSymbol/peek/referencesWidget": [
+	"vs/editor/contrib/gotoSymbol/browser/peek/referencesWidget": [
 		"anteprima non disponibile",
 		"Nessun risultato",
 		"Riferimenti",
 	],
-	"vs/editor/contrib/gotoSymbol/referencesModel": [
+	"vs/editor/contrib/gotoSymbol/browser/referencesModel": [
 		"simbolo in {0} alla riga {1} colonna {2}",
 		"simbolo in {0} alla riga {1} colonna {2}, {3}",
 		"1 simbolo in {0}, percorso completo {1}",
@@ -862,31 +914,31 @@ define("vs/editor/editor.main.nls.it", {
 		"Trovati {0} simboli in {1}",
 		"Trovati {0} simboli in {1} file",
 	],
-	"vs/editor/contrib/gotoSymbol/symbolNavigation": [
+	"vs/editor/contrib/gotoSymbol/browser/symbolNavigation": [
 		"Indica se sono presenti posizioni dei simboli a cui è possibile passare solo tramite la tastiera.",
 		"Simbolo {0} di {1}, {2} per il successivo",
 		"Simbolo {0} di {1}",
 	],
-	"vs/editor/contrib/hover/hover": [
+	"vs/editor/contrib/hover/browser/hover": [
 		"Visualizza passaggio del mouse",
 		"Mostra anteprima definizione al passaggio del mouse",
 	],
-	"vs/editor/contrib/hover/markdownHoverParticipant": [
+	"vs/editor/contrib/hover/browser/markdownHoverParticipant": [
 		"Caricamento...",
 		"Per motivi di prestazioni la tokenizzazione viene ignorata per le righe lunghe. È possibile effettuare questa configurazione tramite `editor.maxTokenizationLineLength`.",
 	],
-	"vs/editor/contrib/hover/markerHoverParticipant": [
+	"vs/editor/contrib/hover/browser/markerHoverParticipant": [
 		"Visualizza problema",
 		"Non sono disponibili correzioni rapide",
 		"Verifica disponibilità correzioni rapide...",
 		"Non sono disponibili correzioni rapide",
 		"Correzione rapida...",
 	],
-	"vs/editor/contrib/inPlaceReplace/inPlaceReplace": [
+	"vs/editor/contrib/inPlaceReplace/browser/inPlaceReplace": [
 		"Sostituisci con il valore precedente",
 		"Sostituisci con il valore successivo",
 	],
-	"vs/editor/contrib/indentation/indentation": [
+	"vs/editor/contrib/indentation/browser/indentation": [
 		"Converti rientro in spazi",
 		"Converti rientro in tabulazioni",
 		"Dimensione tabulazione configurata",
@@ -897,7 +949,17 @@ define("vs/editor/editor.main.nls.it", {
 		"Imposta nuovo rientro per righe",
 		"Re-Indenta le Linee Selezionate",
 	],
-	"vs/editor/contrib/inlineCompletions/ghostTextController": [
+	"vs/editor/contrib/inlayHints/browser/inlayHintsHover": [
+		"Fai doppio clic per inserire",
+		"CMD+clic",
+		"CTRL+clic",
+		"Opzione+clic",
+		"ALT+clic",
+		"Vai alla definizione ({0}), fai clic con il pulsante destro del mouse per altre informazioni",
+		"Vai alla definizione ({0})",
+		"Esegui il comando",
+	],
+	"vs/editor/contrib/inlineCompletions/browser/ghostTextController": [
 		"Se è visibile un suggerimento inline",
 		"Se il suggerimento in linea inizia con spazi vuoti",
 		"Indica se il suggerimento inline inizia con uno spazio vuoto minore di quello che verrebbe inserito dalla tabulazione",
@@ -905,16 +967,16 @@ define("vs/editor/editor.main.nls.it", {
 		"Mostrare suggerimento inline precedente",
 		"Trigger del suggerimento inline",
 	],
-	"vs/editor/contrib/inlineCompletions/inlineCompletionsHoverParticipant": [
+	"vs/editor/contrib/inlineCompletions/browser/ghostTextHoverParticipant": [
 		"Avanti",
 		"Indietro",
 		"Accettare",
 		"Suggerimento:",
 	],
-	"vs/editor/contrib/lineSelection/lineSelection": [
+	"vs/editor/contrib/lineSelection/browser/lineSelection": [
 		"Espandere selezione riga",
 	],
-	"vs/editor/contrib/linesOperations/linesOperations": [
+	"vs/editor/contrib/linesOperations/browser/linesOperations": [
 		"Copia la riga in alto",
 		"&&Copia la riga in alto",
 		"Copia la riga in basso",
@@ -942,12 +1004,15 @@ define("vs/editor/editor.main.nls.it", {
 		"Converti in minuscolo",
 		"Trasforma in Tutte Iniziali Maiuscole",
 		"Trasforma in snake case",
+		"Trasformare in caso Kebab",
 	],
-	"vs/editor/contrib/linkedEditing/linkedEditing": [
+	"vs/editor/contrib/linkedEditing/browser/linkedEditing": [
 		"Avvia modifica collegata",
 		"Colore di sfondo quando l\'editor viene rinominato automaticamente in base al tipo.",
 	],
-	"vs/editor/contrib/links/links": [
+	"vs/editor/contrib/links/browser/links": [
+		"Non è stato possibile aprire questo collegamento perché il formato non è valido: {0}",
+		"Non è stato possibile aprire questo collegamento perché manca la destinazione.",
 		"Esegui il comando",
 		"Visita il collegamento",
 		"CMD+clic",
@@ -955,15 +1020,12 @@ define("vs/editor/editor.main.nls.it", {
 		"Opzione+clic",
 		"ALT+clic",
 		"Esegue il comando {0}",
-		"Non è stato possibile aprire questo collegamento perché il formato non è valido: {0}",
-		"Non è stato possibile aprire questo collegamento perché manca la destinazione.",
 		"Apri collegamento",
 	],
-	"vs/editor/contrib/message/messageController": [
+	"vs/editor/contrib/message/browser/messageController": [
 		"Indica se l\'editor visualizza attualmente un messaggio inline",
-		"Non è possibile modificare nell\'editor di sola lettura",
 	],
-	"vs/editor/contrib/multicursor/multicursor": [
+	"vs/editor/contrib/multicursor/browser/multicursor": [
 		"Cursore aggiunto: {0}",
 		"Cursori aggiunti: {0}",
 		"Aggiungi cursore sopra",
@@ -983,17 +1045,21 @@ define("vs/editor/editor.main.nls.it", {
 		"Seleziona tutte le occorrenze del risultato ricerca",
 		"Seleziona &&tutte le occorrenze",
 		"Cambia tutte le occorrenze",
+		"Attival cursore successivo",
+		"Attiva il cursore successivo",
+		"Cursore precedente stato attivo",
+		"Imposta lo stato attivo sul cursore precedente",
 	],
-	"vs/editor/contrib/parameterHints/parameterHints": [
+	"vs/editor/contrib/parameterHints/browser/parameterHints": [
 		"Attiva i suggerimenti per i parametri",
 	],
-	"vs/editor/contrib/parameterHints/parameterHintsWidget": [
+	"vs/editor/contrib/parameterHints/browser/parameterHintsWidget": [
 		"Icona per visualizzare il suggerimento del parametro successivo.",
 		"Icona per visualizzare il suggerimento del parametro precedente.",
 		"{0}, suggerimento",
 		"Colore di primo piano dell’articolo attivo nel suggerimento di parametro.",
 	],
-	"vs/editor/contrib/peekView/peekView": [
+	"vs/editor/contrib/peekView/browser/peekView": [
 		"Indica se l\'editor di codice corrente è incorporato nell\'anteprima",
 		"Chiudi",
 		"Colore di sfondo dell\'area del titolo della visualizzazione rapida.",
@@ -1011,14 +1077,14 @@ define("vs/editor/editor.main.nls.it", {
 		"Colore dell\'evidenziazione delle corrispondenze nell\'editor di visualizzazioni rapide.",
 		"Bordo dell\'evidenziazione delle corrispondenze nell\'editor di visualizzazioni rapide.",
 	],
-	"vs/editor/contrib/quickAccess/gotoLineQuickAccess": [
+	"vs/editor/contrib/quickAccess/browser/gotoLineQuickAccess": [
 		"Aprire prima un editor di testo per passare a una riga.",
 		"Vai a riga {0} e carattere {1}.",
 		"Vai alla riga {0}.",
 		"Riga corrente: {0}, carattere: {1}. Digitare un numero di riga a cui passare compreso tra 1 e {2}.",
 		"Riga corrente: {0}, Carattere: {1}. Digitare un numero di riga a cui passare.",
 	],
-	"vs/editor/contrib/quickAccess/gotoSymbolQuickAccess": [
+	"vs/editor/contrib/quickAccess/browser/gotoSymbolQuickAccess": [
 		"Per passare a un simbolo, aprire prima un editor di testo con informazioni sui simboli.",
 		"L\'editor di testo attivo non fornisce informazioni sui simboli.",
 		"Non ci sono simboli dell\'editor corrispondenti",
@@ -1053,34 +1119,39 @@ define("vs/editor/editor.main.nls.it", {
 		"campi ({0})",
 		"costanti ({0})",
 	],
-	"vs/editor/contrib/rename/rename": [
+	"vs/editor/contrib/readOnlyMessage/browser/contribution": [
+		"Non è possibile modificare nell\'input di sola lettura",
+		"Non è possibile modificare nell\'editor di sola lettura",
+	],
+	"vs/editor/contrib/rename/browser/rename": [
 		"Nessun risultato.",
 		"Si è verificato un errore sconosciuto durante la risoluzione del percorso di ridenominazione",
-		"Ridenominazione di \'{0}\'",
-		"Ridenominazione di {0}",
+		"Ridenominazione di \'{0}\' in \'{1}\'",
+		"Ridenominazione di {0} in {1}",
 		"Correttamente rinominato \'{0}\' in \'{1}\'. Sommario: {2}",
 		"La ridenominazione non è riuscita ad applicare le modifiche",
 		"La ridenominazione non è riuscita a calcolare le modifiche",
 		"Rinomina simbolo",
 		"Abilita/Disabilita l\'opzione per visualizzare le modifiche in anteprima prima della ridenominazione",
 	],
-	"vs/editor/contrib/rename/renameInputField": [
+	"vs/editor/contrib/rename/browser/renameInputField": [
 		"Indica se il widget di ridenominazione input è visibile",
 		"Consente di rinominare l\'input. Digitare il nuovo nome e premere INVIO per eseguire il commit.",
 		"{0} per rinominare, {1} per visualizzare in anteprima",
 	],
-	"vs/editor/contrib/smartSelect/smartSelect": [
+	"vs/editor/contrib/smartSelect/browser/smartSelect": [
 		"Espandi selezione",
 		"Espan&&di selezione",
 		"Riduci selezione",
 		"&&Riduci selezione",
 	],
-	"vs/editor/contrib/snippet/snippetController2": [
+	"vs/editor/contrib/snippet/browser/snippetController2": [
 		"Indica se l\'editor è quello corrente nella modalità frammenti",
 		"Indica se è presente una tabulazione successiva in modalità frammenti",
 		"Indica se è presente una tabulazione precedente in modalità frammenti",
+		"Vai al segnaposto successivo...",
 	],
-	"vs/editor/contrib/snippet/snippetVariables": [
+	"vs/editor/contrib/snippet/browser/snippetVariables": [
 		"Domenica",
 		"Lunedì",
 		"Martedì",
@@ -1120,8 +1191,8 @@ define("vs/editor/editor.main.nls.it", {
 		"Nov",
 		"Dic",
 	],
-	"vs/editor/contrib/suggest/suggest": [
-		"Indica se i suggerimenti sono visibili",
+	"vs/editor/contrib/suggest/browser/suggest": [
+		"Indica se i suggerimenti sono evidenziati",
 		"Indica se i dettagli dei suggerimenti sono visibili",
 		"Indica se sono presenti più suggerimenti da cui scegliere",
 		"Indica se l\'inserimento del suggerimento corrente comporta una modifica oppure se completa già l\'input",
@@ -1130,7 +1201,7 @@ define("vs/editor/editor.main.nls.it", {
 		"Indica se il comportamento predefinito è quello di inserimento o sostituzione",
 		"Indica se il suggerimento corrente supporta la risoluzione di ulteriori dettagli",
 	],
-	"vs/editor/contrib/suggest/suggestController": [
+	"vs/editor/contrib/suggest/browser/suggestController": [
 		"In seguito all\'accettazione di \'{0}\' sono state apportate altre {1} modifiche",
 		"Attiva suggerimento",
 		"Inserisci",
@@ -1142,7 +1213,7 @@ define("vs/editor/editor.main.nls.it", {
 		"mostra dettagli",
 		"Reimposta le dimensioni del widget dei suggerimenti",
 	],
-	"vs/editor/contrib/suggest/suggestWidget": [
+	"vs/editor/contrib/suggest/browser/suggestWidget": [
 		"Colore di sfondo del widget dei suggerimenti.",
 		"Colore del bordo del widget dei suggerimenti.",
 		"Colore primo piano del widget dei suggerimenti.",
@@ -1154,21 +1225,24 @@ define("vs/editor/editor.main.nls.it", {
 		"Colore primo piano dello stato del widget dei suggerimenti.",
 		"Caricamento...",
 		"Non ci sono suggerimenti.",
-		"{0}, documenti: {1}",
 		"Suggerisci",
+		"({0},{1}) {2}",
+		"{0} {1}",
+		"{0}, {1}",
+		"{0}, documenti: {1}",
 	],
-	"vs/editor/contrib/suggest/suggestWidgetDetails": [
+	"vs/editor/contrib/suggest/browser/suggestWidgetDetails": [
 		"Chiudi",
 		"Caricamento...",
 	],
-	"vs/editor/contrib/suggest/suggestWidgetRenderer": [
+	"vs/editor/contrib/suggest/browser/suggestWidgetRenderer": [
 		"Icona per visualizzare altre informazioni nel widget dei suggerimenti.",
 		"Altre informazioni",
 	],
-	"vs/editor/contrib/suggest/suggestWidgetStatus": [
+	"vs/editor/contrib/suggest/browser/suggestWidgetStatus": [
 		"{0} ({1})",
 	],
-	"vs/editor/contrib/symbolIcons/symbolIcons": [
+	"vs/editor/contrib/symbolIcons/browser/symbolIcons": [
 		"Colore primo piano per i simboli di matrice. Questi simboli vengono visualizzati nella struttura, nell\'elemento di navigazione e nel widget dei suggerimenti.",
 		"Colore primo piano per i simboli booleani. Questi simboli vengono visualizzati nella struttura, nell\'elemento di navigazione e nel widget dei suggerimenti.",
 		"Colore primo piano per i simboli di classe. Questi simboli vengono visualizzati nella struttura, nell\'elemento di navigazione e nel widget dei suggerimenti.",
@@ -1203,15 +1277,15 @@ define("vs/editor/editor.main.nls.it", {
 		"Colore primo piano per i simboli di unità. Questi simboli vengono visualizzati nella struttura, nell\'elemento di navigazione e nel widget dei suggerimenti.",
 		"Colore primo piano per i simboli di variabile. Questi simboli vengono visualizzati nella struttura, nell\'elemento di navigazione e nel widget dei suggerimenti.",
 	],
-	"vs/editor/contrib/toggleTabFocusMode/toggleTabFocusMode": [
+	"vs/editor/contrib/toggleTabFocusMode/browser/toggleTabFocusMode": [
 		"Attiva/Disattiva l\'uso di TAB per spostare lo stato attivo",
 		"Se si preme TAB, lo stato attivo verrà spostato sull\'elemento con stato attivabile successivo.",
 		"Se si preme TAB, verrà inserito il carattere di tabulazione",
 	],
-	"vs/editor/contrib/tokenization/tokenization": [
+	"vs/editor/contrib/tokenization/browser/tokenization": [
 		"Sviluppatore: Forza retokenizzazione",
 	],
-	"vs/editor/contrib/unicodeHighlighter/unicodeHighlighter": [
+	"vs/editor/contrib/unicodeHighlighter/browser/unicodeHighlighter": [
 		"Icona visualizzata con un messaggio di avviso nell\'editor delle estensioni.",
 		"Questo documento contiene molti caratteri Unicode ASCII non di base",
 		"Il documento contiene molti caratteri Unicode ambigui",
@@ -1220,6 +1294,10 @@ define("vs/editor/editor.main.nls.it", {
 		"Il carattere {0} è invisibile.",
 		"Il carattere {0} non è un carattere ASCII di base.",
 		"Modificare impostazioni",
+		"Disabilita evidenziazione nei commenti",
+		"Disabilita l\'evidenziazione dei caratteri nei commenti",
+		"Disabilita evidenziazione nelle stringhe",
+		"Disabilita l\'evidenziazione dei caratteri nelle stringhe",
 		"Disabilitare evidenziazione ambigua",
 		"Disabilitare l\'evidenziazione dei caratteri ambigui",
 		"Disabilitare evidenziazione invisibile",
@@ -1229,16 +1307,17 @@ define("vs/editor/editor.main.nls.it", {
 		"Mostrare opzioni di esclusione",
 		"Escludere {0} (carattere invisibile) dall\'evidenziazione",
 		"Escludere {0} dall’essere evidenziata",
+		"Consentire i caratteri Unicode più comuni nel linguaggio \"{0}\".",
 		"Configurare opzioni evidenziazione Unicode",
 	],
-	"vs/editor/contrib/unusualLineTerminators/unusualLineTerminators": [
+	"vs/editor/contrib/unusualLineTerminators/browser/unusualLineTerminators": [
 		"Caratteri di terminazione di riga insoliti",
 		"Sono stati rilevati caratteri di terminazione di riga insoliti",
 		"Il file \"\r\n\" contiene uno o più caratteri di terminazione di riga insoliti, ad esempio separatore di riga (LS) o separatore di paragrafo (PS).{0}\r\nÈ consigliabile rimuoverli dal file. È possibile configurare questa opzione tramite `editor.unusualLineTerminators`.",
 		"Rimuovi i caratteri di terminazione di riga insoliti",
 		"Ignora",
 	],
-	"vs/editor/contrib/wordHighlighter/wordHighlighter": [
+	"vs/editor/contrib/wordHighlighter/browser/wordHighlighter": [
 		"Colore di sfondo di un simbolo durante l\'accesso in lettura, ad esempio durante la lettura di una variabile. Il colore non deve essere opaco per evitare di nascondere le decorazioni sottostanti.",
 		"Colore di sfondo di un simbolo durante l\'accesso in scrittura, ad esempio durante la scrittura in una variabile. Il colore non deve essere opaco per evitare di nascondere le decorazioni sottostanti.",
 		"Colore del bordo di un simbolo durante l\'accesso in lettura, ad esempio durante la lettura di una variabile.",
@@ -1249,12 +1328,16 @@ define("vs/editor/editor.main.nls.it", {
 		"Vai al precedente simbolo evidenziato",
 		"Attiva/disattiva evidenziazione simbolo",
 	],
-	"vs/editor/contrib/wordOperations/wordOperations": [
+	"vs/editor/contrib/wordOperations/browser/wordOperations": [
 		"Elimina parola",
 	],
 	"vs/platform/actions/browser/menuEntryActionViewItem": [
 		"{0} ({1})",
 		"{0} ({1})",
+		"{0}\r\n[{1}] {2}",
+	],
+	"vs/platform/actions/common/menuService": [
+		"Nascondi \'{0}\'",
 	],
 	"vs/platform/configuration/common/configurationRegistry": [
 		"Override configurazione predefinita del linguaggio",
@@ -1266,6 +1349,7 @@ define("vs/editor/editor.main.nls.it", {
 		"Non è possibile registrare una proprietà vuota",
 		"Non è possibile registrare \'{0}\'. Corrisponde al criterio di proprietà \'\\\\[.*\\\\]$\' per la descrizione delle impostazioni dell\'editor specifiche del linguaggio. Usare il contributo \'configurationDefaults\'.",
 		"Non è possibile registrare \'{0}\'. Questa proprietà è già registrata.",
+		"Impossibile registrare \'{0}\'. Il {1} dei criteri associato è già registrato con {2}.",
 	],
 	"vs/platform/contextkey/browser/contextKeyService": [
 		"Comando che restituisce informazioni sulle chiavi di contesto",
@@ -1277,7 +1361,11 @@ define("vs/editor/editor.main.nls.it", {
 		"Indica se la piattaforma è un Web browser",
 		"Indica se il sistema operativo è macOS in una piattaforma non basata su browser",
 		"Indica se il sistema operativo è iOS",
+		"Tipo di qualità del VS Code",
 		"Indica se lo stato attivo della tastiera si trova all\'interno di una casella di input",
+	],
+	"vs/platform/history/browser/contextScopedHistoryWidget": [
+		"Indica se i suggerimenti sono visibili",
 	],
 	"vs/platform/keybinding/common/abstractKeybindingService": [
 		"È stato premuto ({0}). In attesa del secondo tasto...",
@@ -1295,11 +1383,14 @@ define("vs/editor/editor.main.nls.it", {
 		"Controlla se elenchi e alberi prevedono lo scorrimento uniforme.",
 		"Moltiplicatore da usare sui valori `deltaX` e `deltaY` degli eventi di scorrimento della rotellina del mouse.",
 		"Moltiplicatore della velocità di scorrimento quando si preme `Alt`.",
+		"Evidenziare gli elementi durante la ricerca. L\'ulteriore spostamento verso l\'alto e verso il basso attraverserà solo gli elementi evidenziati.",
+		"Filtra gli elementi durante la ricerca.",
+		"Controlla la modalità di ricerca predefinita per elenchi e alberi nel workbench.",
 		"Con lo stile di spostamento da tastiera simple lo stato attivo si trova sugli elementi che corrispondono all\'input da tastiera. L\'abbinamento viene effettuato solo in base ai prefissi.",
 		"Con lo stile di spostamento da tastiera highlight vengono evidenziati gli elementi corrispondenti all\'input da tastiera. Spostandosi ulteriormente verso l\'alto o verso il basso ci si sposterà solo negli elementi evidenziati.",
 		"Con lo stile di spostamento da tastiera filter verranno filtrati e nascosti tutti gli elementi che non corrispondono all\'input da tastiera.",
 		"Controlla lo stile di spostamento da tastiera per elenchi e alberi nel workbench. Le opzioni sono: simple, highlight e filter.",
-		"Controlla se gli spostamenti da tastiera per elenchi e alberi vengono attivati semplicemente premendo un tasto. Se è impostato su `false`, gli spostamenti da tastiera vengono attivati solo durante l\'esecuzione del comando `list.toggleKeyboardNavigation`, al quale è possibile assegnare un tasto di scelta rapida.",
+		"Usare invece \'workbench.list.defaultFindMode\'.",
 		"Controlla l\'espansione delle cartelle di alberi quando si fa clic sui nomi delle cartelle. Tenere presente che alcuni alberi ed elenchi potrebbero scegliere di ignorare questa impostazione se non è applicabile.",
 	],
 	"vs/platform/markers/common/markers": [
@@ -1314,12 +1405,11 @@ define("vs/editor/editor.main.nls.it", {
 		"Il comando \'{0}\' ha restituito un errore ({1})",
 	],
 	"vs/platform/quickinput/browser/helpQuickAccess": [
-		"comandi globali",
-		"comandi dell\'editor",
 		"{0}, {1}",
 	],
 	"vs/platform/theme/common/colorRegistry": [
 		"Colore primo piano generale. Questo colore viene usato solo se non è sostituito da quello di un componente.",
+		"Primo piano generale per gli elementi disabilitati. Questo colore viene usato solo e non è sostituito da quello di un componente.",
 		"Colore primo piano globale per i messaggi di errore. Questo colore viene usato solo se non è sostituito da quello di un componente.",
 		"Colore primo piano del testo che fornisce informazioni aggiuntive, ad esempio per un\'etichetta di testo.",
 		"Colore predefinito per le icone nel workbench.",
@@ -1360,6 +1450,7 @@ define("vs/editor/editor.main.nls.it", {
 		"Colore primo piano del widget della casella di controllo.",
 		"Colore del bordo del widget della casella di controllo.",
 		"Colore primo piano del pulsante.",
+		"Colore del separatore pulsante.",
 		"Colore di sfondo del pulsante.",
 		"Colore di sfondo del pulsante al passaggio del mouse.",
 		"Colore del bordo del pulsante.",
@@ -1387,6 +1478,8 @@ define("vs/editor/editor.main.nls.it", {
 		"Colore dei bordi di ridimensionamento attivi.",
 		"Colore di sfondo dell\'editor.",
 		"Colore primo piano predefinito dell\'editor.",
+		"Colore di sfondo dello scorrimento permanente per l\'editor",
+		"Colore di sfondo dello scorrimento permanente al passaggio del mouse per l\'editor",
 		"Colore di sfondo dei widget dell\'editor, ad esempio Trova/Sostituisci.",
 		"Colore primo piano dei widget dell\'editor, ad esempio Trova/Sostituisci.",
 		"Colore del bordo dei widget dell\'editor. Il colore viene usato solo se il widget sceglie di avere un bordo e se il colore non è sottoposto a override da un widget.",
@@ -1429,6 +1522,12 @@ define("vs/editor/editor.main.nls.it", {
 		"Colore usato per l\'icona delle azioni di correzione automatica con lampadina.",
 		"Colore di sfondo per il testo che è stato inserito. Il colore non deve essere opaco per evitare di nascondere le decorazioni sottostanti.",
 		"Colore di sfondo per il testo che è stato rimosso. Il colore non deve essere opaco per evitare di nascondere le decorazioni sottostanti.",
+		"Colore di sfondo per le righe che sono state inserite. Il colore non deve essere opaco per evitare di nascondere le decorazioni sottostanti.",
+		"Colore di sfondo per le righe che sono state rimosse. Il colore non deve essere opaco per evitare di nascondere le decorazioni sottostanti.",
+		"Colore di sfondo per il margine in cui sono state inserite le righe.",
+		"Colore di sfondo per il margine in cui sono state rimosse le righe.",
+		"Primo piano del righello delle annotazioni delle differenze per il contenuto inserito.",
+		"Primo piano del righello delle annotazioni delle differenze per il contenuto rimosso.",
 		"Colore del contorno del testo che è stato inserito.",
 		"Colore del contorno del testo che è stato rimosso.",
 		"Colore del bordo tra due editor di testo.",
@@ -1436,6 +1535,7 @@ define("vs/editor/editor.main.nls.it", {
 		"Colore di sfondo dell\'elenco/albero per l\'elemento con lo stato attivo quando l\'elenco/albero è attivo. Un elenco/albero attivo ha lo stato attivo della tastiera, a differenza di uno inattivo.",
 		"Colore primo piano dell\'elenco/albero per l\'elemento con lo stato attivo quando l\'elenco/albero è attivo. Un elenco/albero attivo ha lo stato attivo della tastiera, a differenza di uno inattivo.",
 		"Colore del contorno dell\'elenco/albero per l\'elemento con lo stato attivo quando l\'elenco/albero è attivo. Un elenco/albero attivo ha lo stato attivo della tastiera, a differenza di uno inattivo.",
+		"Colore del contorno dell\'elenco/albero per l\'elemento con lo stato attivo quando l\'elenco/albero è attivo e selezionato. Un elenco/albero attivo ha lo stato attivo della tastiera, a differenza di uno inattivo.",
 		"Colore di sfondo dell\'elenco/albero per l\'elemento selezionato quando l\'elenco/albero è attivo. Un elenco/albero attivo ha lo stato attivo della tastiera, a differenza di uno inattivo.",
 		"Colore primo piano dell\'elenco/albero per l\'elemento selezionato quando l\'elenco/albero è attivo. Un elenco/albero attivo ha lo stato attivo della tastiera, a differenza di uno inattivo.",
 		"Colore primo piano dell’icona dell\'elenco/albero per l\'elemento selezionato quando l\'elenco/albero è attivo. Un elenco/albero attivo ha lo stato attivo della tastiera, a differenza di uno inattivo.",
@@ -1455,6 +1555,7 @@ define("vs/editor/editor.main.nls.it", {
 		"Colore di sfondo del widget del filtro per tipo in elenchi e alberi.",
 		"Colore del contorno del widget del filtro per tipo in elenchi e alberi.",
 		"Colore del contorno del widget del filtro per tipo in elenchi e alberi quando non sono presenti corrispondenze.",
+		"Colore ombreggiatura del widget del filtro in elenchi e alberi.",
 		"Colore di sfondo della corrispondenza filtrata.",
 		"Colore del bordo della corrispondenza filtrata.",
 		"Colore del tratto dell\'albero per le guide per i rientri.",
@@ -1496,7 +1597,6 @@ define("vs/editor/editor.main.nls.it", {
 		"Colore primo piano del righello delle annotazioni del predecessore comune per i conflitti di merge inline.",
 		"Colore del marcatore del righello delle annotazioni per la ricerca di corrispondenze. Il colore non deve essere opaco per evitare di nascondere le decorazioni sottostanti.",
 		"Colore del marcatore del righello delle annotazioni per le evidenziazioni delle selezioni. Il colore non deve essere opaco per evitare di nascondere le decorazioni sottostanti.",
-		"Anteprima colore del marcatore del righello per i caratteri Unicode evidenziati. Il colore non deve essere opaco per evitare di nascondere le decorazioni sottostanti.",
 		"Colore del marcatore della minimappa per la ricerca delle corrispondenze.",
 		"Colore del marcatore della minimappa per le selezioni ripetute dell\'editor.",
 		"Colore del marcatore della minimappa per la selezione dell\'editor.",
@@ -1504,7 +1604,6 @@ define("vs/editor/editor.main.nls.it", {
 		"Colore del marcatore della minimappa per gli avvisi.",
 		"Colore di sfondo della minimappa.",
 		"Opacità degli elementi in primo piano di cui è stato eseguito il rendering nella minimappa. Ad esempio, con \"#000000c0\" il rendering degli elementi verrà eseguito con il 75% di opacità.",
-		"Colore del marcatore della minimappa per i caratteri Unicode evidenziati.",
 		"Colore di sfondo del dispositivo di scorrimento della minimappa.",
 		"Colore di sfondo del dispositivo di scorrimento della minimappa al passaggio del mouse.",
 		"Colore di sfondo del dispositivo di scorrimento della minimappa quando si fa clic con il mouse.",
@@ -1542,7 +1641,7 @@ define("vs/editor/editor.main.nls.it", {
 		"Non è stato possibile annullare \'{0}\' perché è già in esecuzione un\'operazione di annullamento o ripetizione.",
 		"Annullare \'{0}\'?",
 		"Sì",
-		"Annulla",
+		"No",
 		"Non è stato possibile ripetere \'{0}\' in tutti i file. {1}",
 		"Non è stato possibile ripetere \'{0}\' in tutti i file. {1}",
 		"Non è stato possibile ripetere \'{0}\' in tutti i file perché sono state apportate modifiche a {1}",
@@ -1550,7 +1649,7 @@ define("vs/editor/editor.main.nls.it", {
 		"Non è stato possibile ripetere \'{0}\' su tutti i file perché nel frattempo è stata eseguita un\'operazione di annullamento o ripetizione",
 		"Non è stato possibile ripetere \'{0}\' perché è già in esecuzione un\'operazione di annullamento o ripetizione.",
 	],
-	"vs/platform/workspaces/common/workspaces": [
+	"vs/platform/workspace/common/workspace": [
 		"Area di lavoro del codice",
 	]
 });

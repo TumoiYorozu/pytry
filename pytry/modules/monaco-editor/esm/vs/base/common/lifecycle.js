@@ -86,7 +86,7 @@ export function isDisposable(thing) {
 }
 export function dispose(arg) {
     if (Iterable.is(arg)) {
-        let errors = [];
+        const errors = [];
         for (const d of arg) {
             if (d) {
                 try {
@@ -142,6 +142,12 @@ export class DisposableStore {
         markAsDisposed(this);
         this._isDisposed = true;
         this.clear();
+    }
+    /**
+     * Returns `true` if this object has been disposed
+     */
+    get isDisposed() {
+        return this._isDisposed;
     }
     /**
      * Dispose of all registered disposables but do not mark this object as disposed.
@@ -238,6 +244,47 @@ export class MutableDisposable {
             setParentOfDisposable(oldValue, null);
         }
         return oldValue;
+    }
+}
+export class RefCountedDisposable {
+    constructor(_disposable) {
+        this._disposable = _disposable;
+        this._counter = 1;
+    }
+    acquire() {
+        this._counter++;
+        return this;
+    }
+    release() {
+        if (--this._counter === 0) {
+            this._disposable.dispose();
+        }
+        return this;
+    }
+}
+/**
+ * A safe disposable can be `unset` so that a leaked reference (listener)
+ * can be cut-off.
+ */
+export class SafeDisposable {
+    constructor() {
+        this.dispose = () => { };
+        this.unset = () => { };
+        this.isset = () => false;
+        trackDisposable(this);
+    }
+    set(fn) {
+        let callback = fn;
+        this.unset = () => callback = undefined;
+        this.isset = () => callback !== undefined;
+        this.dispose = () => {
+            if (callback) {
+                callback();
+                callback = undefined;
+                markAsDisposed(this);
+            }
+        };
+        return this;
     }
 }
 export class ImmortalReference {

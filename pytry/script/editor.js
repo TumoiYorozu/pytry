@@ -1,5 +1,7 @@
 export let sourceEditor, inputEditor, outputEditor;
-let sourceSession, inputSession, outputSession;
+export let sourceSession, inputSession, outputSession;
+export let sourceChangeListenner = [];
+let decorationsCollection = null;
 
 /**
  * エディタの初期化を行う
@@ -53,10 +55,18 @@ export function initialize(sourceEditorId, inputEditorId, outputEditorId) {
       'bracketPairColorization.enabled': true,
       renderWhitespace: 'all',
       formatOnType: true,
+      glyphMargin: true,
     });
     sourceEditor.setModel(sourceSession);
     sourceSession.onDidChangeContent((event) => {
       localStorage.setItem('source_text', encodeURIComponent(sourceEditor.getValue()));
+      if (event.changes[0].text.includes('\n')) {
+        clearSourceEditorDecoration();
+        clearSourceEditorMarker('Error');
+      }
+      for (const listenner of sourceChangeListenner) {
+        listenner();
+      }
     });
 
     inputSession = monaco.editor.createModel(inputText, 'text');
@@ -209,23 +219,6 @@ function updateStdinHighlight() {
   }
 }
 
-export function clearSourceEditorDecoration() {
-  sourceEditor.markers = [];
-  monaco.editor.setModelMarkers(sourceEditor.getModel(), 'message', sourceEditor.markers);
-}
-
-export function addSourceEditorErrorDecoration(lineNumber, message) {
-  sourceEditor.markers = [{
-    startLineNumber: lineNumber,
-    startColumn: 1,
-    endLineNumber: lineNumber,
-    endColumn: 1000,
-    message: message,
-    severity: monaco.MarkerSeverity.Error,
-  }];
-  monaco.editor.setModelMarkers(sourceEditor.getModel(), 'message', sourceEditor.markers);
-}
-
 export function clearOutputEditor() {
   outputEditor.setValue('');
   outputEditor.revealLine(0);
@@ -233,4 +226,40 @@ export function clearOutputEditor() {
 
 export function addToOutputEditor(text) {
   outputEditor.setValue(outputEditor.getValue() + text);
+}
+
+export function clearSourceEditorMarker(mode) {
+  sourceEditor.markers = [];
+  monaco.editor.setModelMarkers(sourceEditor.getModel(), mode, sourceEditor.markers);
+}
+
+export function addSourceEditorMarker(lineNumber, message, mode) {
+  sourceEditor.markers = [{
+    startLineNumber: lineNumber,
+    startColumn: 1,
+    endLineNumber: lineNumber,
+    endColumn: 1000,
+    message: message,
+    severity: mode == 'Error' ? monaco.MarkerSeverity.Error : mode == 'Warning' ? monaco.MarkerSeverity.Warning : monaco.MarkerSeverity.Info,
+  }];
+  monaco.editor.setModelMarkers(sourceEditor.getModel(), mode, sourceEditor.markers);
+}
+
+export function clearSourceEditorDecoration() {
+  if (decorationsCollection !== null) {
+    decorationsCollection.clear();
+    decorationsCollection = null;
+  }
+}
+
+export function addSourceEditorDecoration(lineNumber, glyphMarginClassName) {
+  decorationsCollection = sourceEditor.createDecorationsCollection([
+    {
+      range: new monaco.Range(lineNumber, 1, lineNumber, 1000),
+      options: {
+        isWholeLine: true,
+        glyphMarginClassName: glyphMarginClassName
+      }
+    }
+  ]);
 }

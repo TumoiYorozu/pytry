@@ -101,16 +101,15 @@ export class TextAreaInput extends Disposable {
         this.writeScreenReaderContent('ctor');
         this._hasFocus = false;
         this._currentComposition = null;
-        this._nextCommand = 0 /* Type */;
         let lastKeyDown = null;
         this._register(this._textArea.onKeyDown((_e) => {
             const e = new StandardKeyboardEvent(_e);
-            if (e.keyCode === 109 /* KEY_IN_COMPOSITION */
-                || (this._currentComposition && e.keyCode === 1 /* Backspace */)) {
+            if (e.keyCode === 109 /* KeyCode.KEY_IN_COMPOSITION */
+                || (this._currentComposition && e.keyCode === 1 /* KeyCode.Backspace */)) {
                 // Stop propagation for keyDown events if the IME is processing key input
                 e.stopPropagation();
             }
-            if (e.equals(9 /* Escape */)) {
+            if (e.equals(9 /* KeyCode.Escape */)) {
                 // Prevent default always for `Esc`, otherwise it will generate a keypress
                 // See https://msdn.microsoft.com/en-us/library/ie/ms536939(v=vs.85).aspx
                 e.preventDefault();
@@ -133,31 +132,29 @@ export class TextAreaInput extends Disposable {
                 return;
             }
             this._currentComposition = currentComposition;
-            if (this._OS === 2 /* Macintosh */
+            if (this._OS === 2 /* OperatingSystem.Macintosh */
+                && lastKeyDown
+                && lastKeyDown.equals(109 /* KeyCode.KEY_IN_COMPOSITION */)
                 && this._textAreaState.selectionStart === this._textAreaState.selectionEnd
                 && this._textAreaState.selectionStart > 0
-                && this._textAreaState.value.substr(this._textAreaState.selectionStart - 1, 1) === e.data) {
-                const isArrowKey = (lastKeyDown && lastKeyDown.equals(109 /* KEY_IN_COMPOSITION */)
-                    && (lastKeyDown.code === 'ArrowRight' || lastKeyDown.code === 'ArrowLeft'));
-                if (isArrowKey || this._browser.isFirefox) {
-                    // Handling long press case on Chromium/Safari macOS + arrow key => pretend the character was selected
-                    // or long press case on Firefox on macOS
-                    if (_debugComposition) {
-                        console.log(`[compositionstart] Handling long press case on macOS + arrow key or Firefox`, e);
-                    }
-                    // Pretend the previous character was composed (in order to get it removed by subsequent compositionupdate events)
-                    currentComposition.handleCompositionUpdate('x');
-                    this._onCompositionStart.fire({ revealDeltaColumns: -1 });
-                    return;
+                && this._textAreaState.value.substr(this._textAreaState.selectionStart - 1, 1) === e.data
+                && (lastKeyDown.code === 'ArrowRight' || lastKeyDown.code === 'ArrowLeft')) {
+                // Handling long press case on Chromium/Safari macOS + arrow key => pretend the character was selected
+                if (_debugComposition) {
+                    console.log(`[compositionstart] Handling long press case on macOS + arrow key`, e);
                 }
+                // Pretend the previous character was composed (in order to get it removed by subsequent compositionupdate events)
+                currentComposition.handleCompositionUpdate('x');
+                this._onCompositionStart.fire({ data: e.data });
+                return;
             }
             if (this._browser.isAndroid) {
                 // when tapping on the editor, Android enters composition mode to edit the current word
                 // so we cannot clear the textarea on Android and we must pretend the current word was selected
-                this._onCompositionStart.fire({ revealDeltaColumns: -this._textAreaState.selectionStart });
+                this._onCompositionStart.fire({ data: e.data });
                 return;
             }
-            this._onCompositionStart.fire({ revealDeltaColumns: 0 });
+            this._onCompositionStart.fire({ data: e.data });
         }));
         this._register(this._textArea.onCompositionUpdate((e) => {
             if (_debugComposition) {
@@ -224,26 +221,17 @@ export class TextAreaInput extends Disposable {
                 return;
             }
             const newState = TextAreaState.readFromTextArea(this._textArea);
-            const typeInput = TextAreaState.deduceInput(this._textAreaState, newState, /*couldBeEmojiInput*/ this._OS === 2 /* Macintosh */);
+            const typeInput = TextAreaState.deduceInput(this._textAreaState, newState, /*couldBeEmojiInput*/ this._OS === 2 /* OperatingSystem.Macintosh */);
             if (typeInput.replacePrevCharCnt === 0 && typeInput.text.length === 1 && strings.isHighSurrogate(typeInput.text.charCodeAt(0))) {
                 // Ignore invalid input but keep it around for next time
                 return;
             }
             this._textAreaState = newState;
-            const typeInputIsNoOp = (typeInput.text === ''
-                && typeInput.replacePrevCharCnt === 0
-                && typeInput.replaceNextCharCnt === 0
-                && typeInput.positionDelta === 0);
-            if (this._nextCommand === 0 /* Type */) {
-                if (!typeInputIsNoOp) {
-                    this._onType.fire(typeInput);
-                }
-            }
-            else {
-                if (!typeInputIsNoOp) {
-                    this._firePaste(typeInput.text, null);
-                }
-                this._nextCommand = 0 /* Type */;
+            if (typeInput.text !== ''
+                || typeInput.replacePrevCharCnt !== 0
+                || typeInput.replaceNextCharCnt !== 0
+                || typeInput.positionDelta !== 0) {
+                this._onType.fire(typeInput);
             }
         }));
         // --- Clipboard operations
@@ -261,19 +249,20 @@ export class TextAreaInput extends Disposable {
             // Pretend here we touched the text area, as the `paste` event will most likely
             // result in a `selectionchange` event which we want to ignore
             this._textArea.setIgnoreSelectionChangeTime('received paste event');
-            if (ClipboardEventUtils.canUseTextData(e)) {
-                const [pastePlainText, metadata] = ClipboardEventUtils.getTextData(e);
-                if (pastePlainText !== '') {
-                    this._firePaste(pastePlainText, metadata);
-                }
+            e.preventDefault();
+            if (!e.clipboardData) {
+                return;
             }
-            else {
-                if (this._textArea.getSelectionStart() !== this._textArea.getSelectionEnd()) {
-                    // Clean up the textarea, to get a clean paste
-                    this._setAndWriteTextAreaState('paste', TextAreaState.EMPTY);
-                }
-                this._nextCommand = 1 /* Paste */;
+            let [text, metadata] = ClipboardEventUtils.getTextData(e.clipboardData);
+            if (!text) {
+                return;
             }
+            // try the in-memory store
+            metadata = metadata || InMemoryClipboardMetadataManager.INSTANCE.get(text);
+            this._onPaste.fire({
+                text: text,
+                metadata: metadata
+            });
         }));
         this._register(this._textArea.onFocus(() => {
             const hadFocus = this._hasFocus;
@@ -437,7 +426,7 @@ export class TextAreaInput extends Disposable {
         this._setAndWriteTextAreaState(reason, this._host.getScreenReaderContent(this._textAreaState));
     }
     _ensureClipboardGetsEditorSelection(e) {
-        const dataToCopy = this._host.getDataToCopy(ClipboardEventUtils.canUseTextData(e));
+        const dataToCopy = this._host.getDataToCopy();
         const storedMetadata = {
             version: 1,
             isFromEmptySelection: dataToCopy.isFromEmptySelection,
@@ -448,64 +437,41 @@ export class TextAreaInput extends Disposable {
         // When writing "LINE\r\n" to the clipboard and then pasting,
         // Firefox pastes "LINE\n", so let's work around this quirk
         (this._browser.isFirefox ? dataToCopy.text.replace(/\r\n/g, '\n') : dataToCopy.text), storedMetadata);
-        if (!ClipboardEventUtils.canUseTextData(e)) {
-            // Looks like an old browser. The strategy is to place the text
-            // we'd like to be copied to the clipboard in the textarea and select it.
-            this._setAndWriteTextAreaState('copy or cut', TextAreaState.selectedText(dataToCopy.text));
-            return;
+        e.preventDefault();
+        if (e.clipboardData) {
+            ClipboardEventUtils.setTextData(e.clipboardData, dataToCopy.text, dataToCopy.html, storedMetadata);
         }
-        ClipboardEventUtils.setTextData(e, dataToCopy.text, dataToCopy.html, storedMetadata);
-    }
-    _firePaste(text, metadata) {
-        if (!metadata) {
-            // try the in-memory store
-            metadata = InMemoryClipboardMetadataManager.INSTANCE.get(text);
-        }
-        this._onPaste.fire({
-            text: text,
-            metadata: metadata
-        });
     }
 }
 class ClipboardEventUtils {
-    static canUseTextData(e) {
-        if (e.clipboardData) {
-            return true;
-        }
-        return false;
-    }
-    static getTextData(e) {
-        if (e.clipboardData) {
-            e.preventDefault();
-            const text = e.clipboardData.getData(Mimes.text);
-            let metadata = null;
-            const rawmetadata = e.clipboardData.getData('vscode-editor-data');
-            if (typeof rawmetadata === 'string') {
-                try {
-                    metadata = JSON.parse(rawmetadata);
-                    if (metadata.version !== 1) {
-                        metadata = null;
-                    }
-                }
-                catch (err) {
-                    // no problem!
+    static getTextData(clipboardData) {
+        const text = clipboardData.getData(Mimes.text);
+        let metadata = null;
+        const rawmetadata = clipboardData.getData('vscode-editor-data');
+        if (typeof rawmetadata === 'string') {
+            try {
+                metadata = JSON.parse(rawmetadata);
+                if (metadata.version !== 1) {
+                    metadata = null;
                 }
             }
-            return [text, metadata];
-        }
-        throw new Error('ClipboardEventUtils.getTextData: Cannot use text data!');
-    }
-    static setTextData(e, text, html, metadata) {
-        if (e.clipboardData) {
-            e.clipboardData.setData(Mimes.text, text);
-            if (typeof html === 'string') {
-                e.clipboardData.setData('text/html', html);
+            catch (err) {
+                // no problem!
             }
-            e.clipboardData.setData('vscode-editor-data', JSON.stringify(metadata));
-            e.preventDefault();
-            return;
         }
-        throw new Error('ClipboardEventUtils.setTextData: Cannot use text data!');
+        if (text.length === 0 && metadata === null && clipboardData.files.length > 0) {
+            // no textual data pasted, generate text from file names
+            const files = Array.prototype.slice.call(clipboardData.files, 0);
+            return [files.map(file => file.name).join('\n'), null];
+        }
+        return [text, metadata];
+    }
+    static setTextData(clipboardData, text, html, metadata) {
+        clipboardData.setData(Mimes.text, text);
+        if (typeof html === 'string') {
+            clipboardData.setData('text/html', html);
+        }
+        clipboardData.setData('vscode-editor-data', JSON.stringify(metadata));
     }
 }
 export class TextAreaWrapper extends Disposable {

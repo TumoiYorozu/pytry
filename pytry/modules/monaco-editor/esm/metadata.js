@@ -6,75 +6,86 @@ exports.features = [
   },
   {
     "label": "anchorSelect",
-    "entry": "vs/editor/contrib/anchorSelect/anchorSelect"
+    "entry": "vs/editor/contrib/anchorSelect/browser/anchorSelect"
   },
   {
     "label": "bracketMatching",
-    "entry": "vs/editor/contrib/bracketMatching/bracketMatching"
+    "entry": "vs/editor/contrib/bracketMatching/browser/bracketMatching"
+  },
+  {
+    "label": "browser",
+    "entry": "vs/editor/browser/coreCommands"
   },
   {
     "label": "caretOperations",
-    "entry": "vs/editor/contrib/caretOperations/caretOperations"
+    "entry": [
+      "vs/editor/contrib/caretOperations/browser/caretOperations",
+      "vs/editor/contrib/caretOperations/browser/transpose"
+    ]
   },
   {
     "label": "clipboard",
-    "entry": "vs/editor/contrib/clipboard/clipboard"
+    "entry": "vs/editor/contrib/clipboard/browser/clipboard"
   },
   {
     "label": "codeAction",
-    "entry": "vs/editor/contrib/codeAction/codeActionContributions"
+    "entry": "vs/editor/contrib/codeAction/browser/codeActionContributions"
   },
   {
     "label": "codelens",
-    "entry": "vs/editor/contrib/codelens/codelensController"
+    "entry": "vs/editor/contrib/codelens/browser/codelensController"
   },
   {
     "label": "colorPicker",
-    "entry": "vs/editor/contrib/colorPicker/colorContributions"
+    "entry": "vs/editor/contrib/colorPicker/browser/colorContributions"
   },
   {
     "label": "comment",
-    "entry": "vs/editor/contrib/comment/comment"
+    "entry": "vs/editor/contrib/comment/browser/comment"
   },
   {
     "label": "contextmenu",
-    "entry": "vs/editor/contrib/contextmenu/contextmenu"
+    "entry": "vs/editor/contrib/contextmenu/browser/contextmenu"
   },
   {
-    "label": "coreCommands",
-    "entry": "vs/editor/browser/controller/coreCommands"
+    "label": "copyPaste",
+    "entry": "vs/editor/contrib/copyPaste/browser/copyPasteContribution"
   },
   {
     "label": "cursorUndo",
-    "entry": "vs/editor/contrib/cursorUndo/cursorUndo"
+    "entry": "vs/editor/contrib/cursorUndo/browser/cursorUndo"
   },
   {
     "label": "dnd",
-    "entry": "vs/editor/contrib/dnd/dnd"
+    "entry": "vs/editor/contrib/dnd/browser/dnd"
   },
   {
     "label": "documentSymbols",
-    "entry": "vs/editor/contrib/documentSymbols/documentSymbols"
+    "entry": "vs/editor/contrib/documentSymbols/browser/documentSymbols"
+  },
+  {
+    "label": "dropIntoEditor",
+    "entry": "vs/editor/contrib/dropIntoEditor/browser/dropIntoEditorContribution"
   },
   {
     "label": "find",
-    "entry": "vs/editor/contrib/find/findController"
+    "entry": "vs/editor/contrib/find/browser/findController"
   },
   {
     "label": "folding",
-    "entry": "vs/editor/contrib/folding/folding"
+    "entry": "vs/editor/contrib/folding/browser/folding"
   },
   {
     "label": "fontZoom",
-    "entry": "vs/editor/contrib/fontZoom/fontZoom"
+    "entry": "vs/editor/contrib/fontZoom/browser/fontZoom"
   },
   {
     "label": "format",
-    "entry": "vs/editor/contrib/format/formatActions"
+    "entry": "vs/editor/contrib/format/browser/formatActions"
   },
   {
     "label": "gotoError",
-    "entry": "vs/editor/contrib/gotoError/gotoError"
+    "entry": "vs/editor/contrib/gotoError/browser/gotoError"
   },
   {
     "label": "gotoLine",
@@ -83,13 +94,13 @@ exports.features = [
   {
     "label": "gotoSymbol",
     "entry": [
-      "vs/editor/contrib/gotoSymbol/goToCommands",
-      "vs/editor/contrib/gotoSymbol/link/goToDefinitionAtPosition"
+      "vs/editor/contrib/gotoSymbol/browser/goToCommands",
+      "vs/editor/contrib/gotoSymbol/browser/link/goToDefinitionAtPosition"
     ]
   },
   {
     "label": "hover",
-    "entry": "vs/editor/contrib/hover/hover"
+    "entry": "vs/editor/contrib/hover/browser/hover"
   },
   {
     "label": "iPadShowKeyboard",
@@ -97,19 +108,19 @@ exports.features = [
   },
   {
     "label": "inPlaceReplace",
-    "entry": "vs/editor/contrib/inPlaceReplace/inPlaceReplace"
+    "entry": "vs/editor/contrib/inPlaceReplace/browser/inPlaceReplace"
   },
   {
     "label": "indentation",
-    "entry": "vs/editor/contrib/indentation/indentation"
+    "entry": "vs/editor/contrib/indentation/browser/indentation"
   },
   {
     "label": "inlayHints",
-    "entry": "vs/editor/contrib/inlayHints/inlayHintsController"
+    "entry": "vs/editor/contrib/inlayHints/browser/inlayHintsContribution"
   },
   {
     "label": "inlineCompletions",
-    "entry": "vs/editor/contrib/inlineCompletions/ghostTextController"
+    "entry": "vs/editor/contrib/inlineCompletions/browser/ghostText.contribution"
   },
   {
     "label": "inspectTokens",
@@ -117,27 +128,27 @@ exports.features = [
   },
   {
     "label": "lineSelection",
-    "entry": "vs/editor/contrib/lineSelection/lineSelection"
+    "entry": "vs/editor/contrib/lineSelection/browser/lineSelection"
   },
   {
     "label": "linesOperations",
-    "entry": "vs/editor/contrib/linesOperations/linesOperations"
+    "entry": "vs/editor/contrib/linesOperations/browser/linesOperations"
   },
   {
     "label": "linkedEditing",
-    "entry": "vs/editor/contrib/linkedEditing/linkedEditing"
+    "entry": "vs/editor/contrib/linkedEditing/browser/linkedEditing"
   },
   {
     "label": "links",
-    "entry": "vs/editor/contrib/links/links"
+    "entry": "vs/editor/contrib/links/browser/links"
   },
   {
     "label": "multicursor",
-    "entry": "vs/editor/contrib/multicursor/multicursor"
+    "entry": "vs/editor/contrib/multicursor/browser/multicursor"
   },
   {
     "label": "parameterHints",
-    "entry": "vs/editor/contrib/parameterHints/parameterHints"
+    "entry": "vs/editor/contrib/parameterHints/browser/parameterHints"
   },
   {
     "label": "quickCommand",
@@ -152,24 +163,35 @@ exports.features = [
     "entry": "vs/editor/standalone/browser/quickAccess/standaloneGotoSymbolQuickAccess"
   },
   {
+    "label": "readOnlyMessage",
+    "entry": "vs/editor/contrib/readOnlyMessage/browser/contribution"
+  },
+  {
     "label": "referenceSearch",
     "entry": "vs/editor/standalone/browser/referenceSearch/standaloneReferenceSearch"
   },
   {
     "label": "rename",
-    "entry": "vs/editor/contrib/rename/rename"
+    "entry": "vs/editor/contrib/rename/browser/rename"
   },
   {
     "label": "smartSelect",
-    "entry": "vs/editor/contrib/smartSelect/smartSelect"
+    "entry": "vs/editor/contrib/smartSelect/browser/smartSelect"
   },
   {
-    "label": "snippets",
-    "entry": "vs/editor/contrib/snippet/snippetController2"
+    "label": "snippet",
+    "entry": "vs/editor/contrib/snippet/browser/snippetController2"
+  },
+  {
+    "label": "stickyScroll",
+    "entry": "vs/editor/contrib/stickyScroll/browser/stickyScroll"
   },
   {
     "label": "suggest",
-    "entry": "vs/editor/contrib/suggest/suggestController"
+    "entry": [
+      "vs/editor/contrib/suggest/browser/suggestController",
+      "vs/editor/contrib/suggest/browser/suggestInlineCompletions"
+    ]
   },
   {
     "label": "toggleHighContrast",
@@ -177,35 +199,35 @@ exports.features = [
   },
   {
     "label": "toggleTabFocusMode",
-    "entry": "vs/editor/contrib/toggleTabFocusMode/toggleTabFocusMode"
+    "entry": "vs/editor/contrib/toggleTabFocusMode/browser/toggleTabFocusMode"
   },
   {
-    "label": "transpose",
-    "entry": "vs/editor/contrib/caretOperations/transpose"
+    "label": "tokenization",
+    "entry": "vs/editor/contrib/tokenization/browser/tokenization"
   },
   {
     "label": "unicodeHighlighter",
-    "entry": "vs/editor/contrib/unicodeHighlighter/unicodeHighlighter"
+    "entry": "vs/editor/contrib/unicodeHighlighter/browser/unicodeHighlighter"
   },
   {
     "label": "unusualLineTerminators",
-    "entry": "vs/editor/contrib/unusualLineTerminators/unusualLineTerminators"
+    "entry": "vs/editor/contrib/unusualLineTerminators/browser/unusualLineTerminators"
   },
   {
     "label": "viewportSemanticTokens",
-    "entry": "vs/editor/contrib/viewportSemanticTokens/viewportSemanticTokens"
+    "entry": "vs/editor/contrib/viewportSemanticTokens/browser/viewportSemanticTokens"
   },
   {
     "label": "wordHighlighter",
-    "entry": "vs/editor/contrib/wordHighlighter/wordHighlighter"
+    "entry": "vs/editor/contrib/wordHighlighter/browser/wordHighlighter"
   },
   {
     "label": "wordOperations",
-    "entry": "vs/editor/contrib/wordOperations/wordOperations"
+    "entry": "vs/editor/contrib/wordOperations/browser/wordOperations"
   },
   {
     "label": "wordPartOperations",
-    "entry": "vs/editor/contrib/wordPartOperations/wordPartOperations"
+    "entry": "vs/editor/contrib/wordPartOperations/browser/wordPartOperations"
   }
 ];
 exports.languages = [
@@ -265,6 +287,10 @@ exports.languages = [
     }
   },
   {
+    "label": "cypher",
+    "entry": "vs/basic-languages/cypher/cypher.contribution"
+  },
+  {
     "label": "dart",
     "entry": "vs/basic-languages/dart/dart.contribution"
   },
@@ -283,6 +309,10 @@ exports.languages = [
   {
     "label": "flow9",
     "entry": "vs/basic-languages/flow9/flow9.contribution"
+  },
+  {
+    "label": "freemarker2",
+    "entry": "vs/basic-languages/freemarker2/freemarker2.contribution"
   },
   {
     "label": "fsharp",

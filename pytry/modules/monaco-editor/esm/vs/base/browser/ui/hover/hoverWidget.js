@@ -3,6 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import * as dom from '../../dom.js';
+import { StandardKeyboardEvent } from '../../keyboardEvent.js';
 import { DomScrollableElement } from '../scrollbar/scrollableElement.js';
 import { Disposable } from '../../../common/lifecycle.js';
 import './hover.css';
@@ -16,19 +17,20 @@ export class HoverWidget extends Disposable {
         this.containerDomNode.setAttribute('role', 'tooltip');
         this.contentsDomNode = document.createElement('div');
         this.contentsDomNode.className = 'monaco-hover-content';
-        this._scrollbar = this._register(new DomScrollableElement(this.contentsDomNode, {
+        this.scrollbar = this._register(new DomScrollableElement(this.contentsDomNode, {
             consumeMouseWheelIfScrollbarIsNeeded: true
         }));
-        this.containerDomNode.appendChild(this._scrollbar.getDomNode());
+        this.containerDomNode.appendChild(this.scrollbar.getDomNode());
     }
     onContentsChanged() {
-        this._scrollbar.scanDomNode();
+        this.scrollbar.scanDomNode();
     }
 }
 export class HoverAction extends Disposable {
     constructor(parent, actionOptions, keybindingLabel) {
         super();
         this.actionContainer = dom.append(parent, $('div.action-container'));
+        this.actionContainer.setAttribute('tabindex', '0');
         this.action = dom.append(this.actionContainer, $('a.action'));
         this.action.setAttribute('role', 'button');
         if (actionOptions.iconClass) {
@@ -36,10 +38,18 @@ export class HoverAction extends Disposable {
         }
         const label = dom.append(this.action, $('span'));
         label.textContent = keybindingLabel ? `${actionOptions.label} (${keybindingLabel})` : actionOptions.label;
-        this._register(dom.addDisposableListener(this.actionContainer, dom.EventType.MOUSE_DOWN, e => {
+        this._register(dom.addDisposableListener(this.actionContainer, dom.EventType.CLICK, e => {
             e.stopPropagation();
             e.preventDefault();
             actionOptions.run(this.actionContainer);
+        }));
+        this._register(dom.addDisposableListener(this.actionContainer, dom.EventType.KEY_UP, e => {
+            const event = new StandardKeyboardEvent(e);
+            if (event.equals(3 /* KeyCode.Enter */)) {
+                e.stopPropagation();
+                e.preventDefault();
+                actionOptions.run(this.actionContainer);
+            }
         }));
         this.setEnabled(true);
     }

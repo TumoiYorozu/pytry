@@ -21,7 +21,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { toErrorMessage } from '../../../base/common/errorMessage.js';
-import { isPromiseCanceledError } from '../../../base/common/errors.js';
+import { isCancellationError } from '../../../base/common/errors.js';
 import { matchesContiguousSubString, matchesPrefix, matchesWords, or } from '../../../base/common/filters.js';
 import { Disposable } from '../../../base/common/lifecycle.js';
 import { LRUCache } from '../../../base/common/map.js';
@@ -132,7 +132,7 @@ let AbstractCommandsQuickAccessProvider = class AbstractCommandsQuickAccessProvi
                             yield this.commandService.executeCommand(commandPick.commandId);
                         }
                         catch (error) {
-                            if (!isPromiseCanceledError(error)) {
+                            if (!isCancellationError(error)) {
                                 this.dialogService.show(Severity.Error, localize('canNotRun', "Command '{0}' resulted in an error ({1})", commandPick.label, toErrorMessage(error)));
                             }
                         }
@@ -173,7 +173,7 @@ let CommandsHistory = class CommandsHistory extends Disposable {
         }
     }
     load() {
-        const raw = this.storageService.get(CommandsHistory.PREF_KEY_CACHE, 0 /* GLOBAL */);
+        const raw = this.storageService.get(CommandsHistory.PREF_KEY_CACHE, 0 /* StorageScope.PROFILE */);
         let serializedCache;
         if (raw) {
             try {
@@ -194,7 +194,7 @@ let CommandsHistory = class CommandsHistory extends Disposable {
             }
             entries.forEach(entry => cache.set(entry.key, entry.value));
         }
-        CommandsHistory.counter = this.storageService.getNumber(CommandsHistory.PREF_KEY_COUNTER, 0 /* GLOBAL */, CommandsHistory.counter);
+        CommandsHistory.counter = this.storageService.getNumber(CommandsHistory.PREF_KEY_COUNTER, 0 /* StorageScope.PROFILE */, CommandsHistory.counter);
     }
     push(commandId) {
         if (!CommandsHistory.cache) {
@@ -213,8 +213,8 @@ let CommandsHistory = class CommandsHistory extends Disposable {
         }
         const serializedCache = { usesLRU: true, entries: [] };
         CommandsHistory.cache.forEach((value, key) => serializedCache.entries.push({ key, value }));
-        storageService.store(CommandsHistory.PREF_KEY_CACHE, JSON.stringify(serializedCache), 0 /* GLOBAL */, 0 /* USER */);
-        storageService.store(CommandsHistory.PREF_KEY_COUNTER, CommandsHistory.counter, 0 /* GLOBAL */, 0 /* USER */);
+        storageService.store(CommandsHistory.PREF_KEY_CACHE, JSON.stringify(serializedCache), 0 /* StorageScope.PROFILE */, 0 /* StorageTarget.USER */);
+        storageService.store(CommandsHistory.PREF_KEY_COUNTER, CommandsHistory.counter, 0 /* StorageScope.PROFILE */, 0 /* StorageTarget.USER */);
     }
     static getConfiguredCommandHistoryLength(configurationService) {
         var _a, _b;

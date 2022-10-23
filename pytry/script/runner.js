@@ -39,6 +39,7 @@ export async function run() {
 
   disableReady();
 
+  editor.clearSourceEditorMarker('Error');
   editor.clearSourceEditorDecoration();
   editor.clearOutputEditor();
 
@@ -76,7 +77,8 @@ ${content}==================`);
     let err = [...translated.matchAll(/プログラムの (\d*) 行目/g)];
     if (err != null && err.length != 0) {
       let lineNumber = Number(err[err.length - 1][1]);
-      editor.addSourceEditorErrorDecoration(lineNumber, translated);
+      editor.addSourceEditorMarker(lineNumber, translated, 'Error');
+      editor.addSourceEditorDecoration(lineNumber, 'glyphMarginError');
     }
   }
 

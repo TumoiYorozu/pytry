@@ -19,7 +19,7 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 };
 import { CancellationTokenSource } from './cancellation.js';
-import { canceled } from './errors.js';
+import { CancellationError } from './errors.js';
 import { Emitter, Event } from './event.js';
 import { toDisposable } from './lifecycle.js';
 import { setTimeout0 } from './platform.js';
@@ -33,7 +33,7 @@ export function createCancelablePromise(callback) {
         const subscription = source.token.onCancellationRequested(() => {
             subscription.dispose();
             source.dispose();
-            reject(canceled());
+            reject(new CancellationError());
         });
         Promise.resolve(thenable).then(value => {
             subscription.dispose();
@@ -61,7 +61,13 @@ export function createCancelablePromise(callback) {
     };
 }
 export function raceCancellation(promise, token, defaultValue) {
-    return Promise.race([promise, new Promise(resolve => token.onCancellationRequested(() => resolve(defaultValue)))]);
+    return new Promise((resolve, reject) => {
+        const ref = token.onCancellationRequested(() => {
+            ref.dispose();
+            resolve(defaultValue);
+        });
+        promise.then(resolve, reject).finally(() => ref.dispose());
+    });
 }
 /**
  * A helper to prevent accumulation of sequential async tasks.
@@ -125,6 +131,35 @@ export class Throttler {
         });
     }
 }
+const timeoutDeferred = (timeout, fn) => {
+    let scheduled = true;
+    const handle = setTimeout(() => {
+        scheduled = false;
+        fn();
+    }, timeout);
+    return {
+        isTriggered: () => scheduled,
+        dispose: () => {
+            clearTimeout(handle);
+            scheduled = false;
+        },
+    };
+};
+const microtaskDeferred = (fn) => {
+    let scheduled = true;
+    queueMicrotask(() => {
+        if (scheduled) {
+            scheduled = false;
+            fn();
+        }
+    });
+    return {
+        isTriggered: () => scheduled,
+        dispose: () => { scheduled = false; },
+    };
+};
+/** Can be passed into the Delayed to defer using a microtask */
+export const MicrotaskDelay = Symbol('MicrotaskDelay');
 /**
  * A helper to delay (debounce) execution of a task that is being requested often.
  *
@@ -151,7 +186,7 @@ export class Throttler {
 export class Delayer {
     constructor(defaultDelay) {
         this.defaultDelay = defaultDelay;
-        this.timeout = null;
+        this.deferred = null;
         this.completionPromise = null;
         this.doResolve = null;
         this.doReject = null;
@@ -175,31 +210,30 @@ export class Delayer {
                 return undefined;
             });
         }
-        this.timeout = setTimeout(() => {
-            this.timeout = null;
-            if (this.doResolve) {
-                this.doResolve(null);
-            }
-        }, delay);
+        const fn = () => {
+            var _a;
+            this.deferred = null;
+            (_a = this.doResolve) === null || _a === void 0 ? void 0 : _a.call(this, null);
+        };
+        this.deferred = delay === MicrotaskDelay ? microtaskDeferred(fn) : timeoutDeferred(delay, fn);
         return this.completionPromise;
     }
     isTriggered() {
-        return this.timeout !== null;
+        var _a;
+        return !!((_a = this.deferred) === null || _a === void 0 ? void 0 : _a.isTriggered());
     }
     cancel() {
+        var _a;
         this.cancelTimeout();
         if (this.completionPromise) {
-            if (this.doReject) {
-                this.doReject(canceled());
-            }
+            (_a = this.doReject) === null || _a === void 0 ? void 0 : _a.call(this, new CancellationError());
             this.completionPromise = null;
         }
     }
     cancelTimeout() {
-        if (this.timeout !== null) {
-            clearTimeout(this.timeout);
-            this.timeout = null;
-        }
+        var _a;
+        (_a = this.deferred) === null || _a === void 0 ? void 0 : _a.dispose();
+        this.deferred = null;
     }
     dispose() {
         this.cancel();
@@ -238,7 +272,7 @@ export function timeout(millis, token) {
         const disposable = token.onCancellationRequested(() => {
             clearTimeout(handle);
             disposable.dispose();
-            reject(canceled());
+            reject(new CancellationError());
         });
     });
 }
@@ -367,9 +401,8 @@ export class RunOnceScheduler {
         }
     }
     doRun() {
-        if (this.runner) {
-            this.runner();
-        }
+        var _a;
+        (_a = this.runner) === null || _a === void 0 ? void 0 : _a.call(this);
     }
 }
 /**
@@ -383,7 +416,7 @@ export let runWhenIdle;
                 if (disposed) {
                     return;
                 }
-                const end = Date.now() + 3; // yield often
+                const end = Date.now() + 15; // one frame at 64fps
                 runner(Object.freeze({
                     didTimeout: true,
                     timeRemaining() {
@@ -460,16 +493,30 @@ export class IdleValue {
  */
 export class DeferredPromise {
     constructor() {
+        this.rejected = false;
         this.resolved = false;
         this.p = new Promise((c, e) => {
             this.completeCallback = c;
             this.errorCallback = e;
         });
     }
+    get isRejected() {
+        return this.rejected;
+    }
+    get isSettled() {
+        return this.rejected || this.resolved;
+    }
     complete(value) {
         return new Promise(resolve => {
             this.completeCallback(value);
             this.resolved = true;
+            resolve();
+        });
+    }
+    cancel() {
+        new Promise(resolve => {
+            this.errorCallback(new CancellationError());
+            this.rejected = true;
             resolve();
         });
     }
@@ -529,7 +576,7 @@ export var Promises;
  */
 export class AsyncIterableObject {
     constructor(executor) {
-        this._state = 0 /* Initial */;
+        this._state = 0 /* AsyncIterableSourceState.Initial */;
         this._results = [];
         this._error = null;
         this._onStateChanged = new Emitter();
@@ -593,13 +640,13 @@ export class AsyncIterableObject {
         return {
             next: () => __awaiter(this, void 0, void 0, function* () {
                 do {
-                    if (this._state === 2 /* DoneError */) {
+                    if (this._state === 2 /* AsyncIterableSourceState.DoneError */) {
                         throw this._error;
                     }
                     if (i < this._results.length) {
                         return { done: false, value: this._results[i++] };
                     }
-                    if (this._state === 1 /* DoneOK */) {
+                    if (this._state === 1 /* AsyncIterableSourceState.DoneOK */) {
                         return { done: true, value: undefined };
                     }
                     yield Event.toPromise(this._onStateChanged.event);
@@ -687,7 +734,7 @@ export class AsyncIterableObject {
      * **NOTE** If `resolve()` or `reject()` have already been called, this method has no effect.
      */
     emitOne(value) {
-        if (this._state !== 0 /* Initial */) {
+        if (this._state !== 0 /* AsyncIterableSourceState.Initial */) {
             return;
         }
         // it is important to add new values at the end,
@@ -701,7 +748,7 @@ export class AsyncIterableObject {
      * **NOTE** If `resolve()` or `reject()` have already been called, this method has no effect.
      */
     emitMany(values) {
-        if (this._state !== 0 /* Initial */) {
+        if (this._state !== 0 /* AsyncIterableSourceState.Initial */) {
             return;
         }
         // it is important to add new values at the end,
@@ -716,10 +763,10 @@ export class AsyncIterableObject {
      * **NOTE** If `resolve()` or `reject()` have already been called, this method has no effect.
      */
     resolve() {
-        if (this._state !== 0 /* Initial */) {
+        if (this._state !== 0 /* AsyncIterableSourceState.Initial */) {
             return;
         }
-        this._state = 1 /* DoneOK */;
+        this._state = 1 /* AsyncIterableSourceState.DoneOK */;
         this._onStateChanged.fire();
     }
     /**
@@ -729,10 +776,10 @@ export class AsyncIterableObject {
      * **NOTE** If `resolve()` or `reject()` have already been called, this method has no effect.
      */
     reject(error) {
-        if (this._state !== 0 /* Initial */) {
+        if (this._state !== 0 /* AsyncIterableSourceState.Initial */) {
             return;
         }
-        this._state = 2 /* DoneError */;
+        this._state = 2 /* AsyncIterableSourceState.DoneError */;
         this._error = error;
         this._onStateChanged.fire();
     }
@@ -755,7 +802,7 @@ export function createCancelableAsyncIterable(callback) {
         const subscription = source.token.onCancellationRequested(() => {
             subscription.dispose();
             source.dispose();
-            emitter.reject(canceled());
+            emitter.reject(new CancellationError());
         });
         try {
             try {

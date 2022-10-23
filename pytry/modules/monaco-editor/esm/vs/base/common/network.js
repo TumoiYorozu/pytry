@@ -36,7 +36,7 @@ export var Schemas;
     Schemas.command = 'command';
     Schemas.vscodeRemote = 'vscode-remote';
     Schemas.vscodeRemoteResource = 'vscode-remote-resource';
-    Schemas.userData = 'vscode-userdata';
+    Schemas.vscodeUserData = 'vscode-userdata';
     Schemas.vscodeCustomEditor = 'vscode-custom-editor';
     Schemas.vscodeNotebook = 'vscode-notebook';
     Schemas.vscodeNotebookCell = 'vscode-notebook-cell';
@@ -72,7 +72,12 @@ export var Schemas;
      * Scheme used vs live share
      */
     Schemas.vsls = 'vsls';
+    /**
+     * Scheme used for the Source Control commit input's text document
+     */
+    Schemas.vscodeSourceControl = 'vscode-scm';
 })(Schemas || (Schemas = {}));
+export const connectionTokenQueryName = 'tkn';
 class RemoteAuthoritiesImpl {
     constructor() {
         this._hosts = Object.create(null);
@@ -80,6 +85,7 @@ class RemoteAuthoritiesImpl {
         this._connectionTokens = Object.create(null);
         this._preferredWebSchema = 'http';
         this._delegate = null;
+        this._remoteResourcesPath = `/${Schemas.vscodeRemoteResource}`;
     }
     setPreferredWebSchema(schema) {
         this._preferredWebSchema = schema;
@@ -97,12 +103,12 @@ class RemoteAuthoritiesImpl {
         const connectionToken = this._connectionTokens[authority];
         let query = `path=${encodeURIComponent(uri.path)}`;
         if (typeof connectionToken === 'string') {
-            query += `&tkn=${encodeURIComponent(connectionToken)}`;
+            query += `&${connectionTokenQueryName}=${encodeURIComponent(connectionToken)}`;
         }
         return URI.from({
             scheme: platform.isWeb ? this._preferredWebSchema : Schemas.vscodeRemoteResource,
             authority: `${host}:${port}`,
-            path: `/vscode-remote-resource`,
+            path: this._remoteResourcesPath,
             query
         });
     }
@@ -123,7 +129,7 @@ class FileAccessImpl {
             // ...and we run in native environments
             platform.isNative ||
                 // ...or web worker extensions on desktop
-                (typeof platform.globals.importScripts === 'function' && platform.globals.origin === `${Schemas.vscodeFileResource}://${FileAccessImpl.FALLBACK_AUTHORITY}`))) {
+                (platform.isWebWorker && platform.globals.origin === `${Schemas.vscodeFileResource}://${FileAccessImpl.FALLBACK_AUTHORITY}`))) {
             return uri.with({
                 scheme: Schemas.vscodeFileResource,
                 // We need to provide an authority here so that it can serve

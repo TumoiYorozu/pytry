@@ -1,9 +1,11 @@
 import * as editor from './editor.js';
+import * as compiler from './compiler.js';
 import * as formatter from './formatter.js';
 import * as runner from './runner.js';
 
 window.addEventListener('load', (event) => {
   editor.initialize('source-editor', 'input-editor', 'output-editor');
+  compiler.initialize();
   formatter.initialize();
   runner.initialize('run');
 

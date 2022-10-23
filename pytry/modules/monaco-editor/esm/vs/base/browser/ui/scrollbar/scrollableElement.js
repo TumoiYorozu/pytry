@@ -156,12 +156,15 @@ export class AbstractScrollableElement extends Widget {
         this._mouseWheelToDispose = [];
         this._setListeningToMouseWheel(this._options.handleMouseWheel);
         this.onmouseover(this._listenOnDomNode, (e) => this._onMouseOver(e));
-        this.onnonbubblingmouseout(this._listenOnDomNode, (e) => this._onMouseOut(e));
+        this.onmouseleave(this._listenOnDomNode, (e) => this._onMouseLeave(e));
         this._hideTimeout = this._register(new TimeoutTimer());
         this._isDragging = false;
         this._mouseIsOver = false;
         this._shouldRender = true;
         this._revealOnScroll = true;
+    }
+    get options() {
+        return this._options;
     }
     dispose() {
         this._mouseWheelToDispose = dispose(this._mouseWheelToDispose);
@@ -180,11 +183,11 @@ export class AbstractScrollableElement extends Widget {
         };
     }
     /**
-     * Delegate a mouse down event to the vertical scrollbar.
+     * Delegate a pointer down event to the vertical scrollbar.
      * This is to help with clicking somewhere else and having the scrollbar react.
      */
-    delegateVerticalScrollbarMouseDown(browserEvent) {
-        this._verticalScrollbar.delegateMouseDown(browserEvent);
+    delegateVerticalScrollbarPointerDown(browserEvent) {
+        this._verticalScrollbar.delegatePointerDown(browserEvent);
     }
     getScrollDimensions() {
         return this._scrollable.getScrollDimensions();
@@ -391,7 +394,7 @@ export class AbstractScrollableElement extends Widget {
         this._isDragging = false;
         this._hide();
     }
-    _onMouseOut(e) {
+    _onMouseLeave(e) {
         this._mouseIsOver = false;
         this._hide();
     }
@@ -420,15 +423,16 @@ export class ScrollableElement extends AbstractScrollableElement {
     constructor(element, options) {
         options = options || {};
         options.mouseWheelSmoothScroll = false;
-        const scrollable = new Scrollable(0, (callback) => dom.scheduleAtNextAnimationFrame(callback));
+        const scrollable = new Scrollable({
+            forceIntegerValues: true,
+            smoothScrollDuration: 0,
+            scheduleAtNextAnimationFrame: (callback) => dom.scheduleAtNextAnimationFrame(callback)
+        });
         super(element, options, scrollable);
         this._register(scrollable);
     }
     setScrollPosition(update) {
         this._scrollable.setScrollPositionNow(update);
-    }
-    getScrollPosition() {
-        return this._scrollable.getCurrentScrollPosition();
     }
 }
 export class SmoothScrollableElement extends AbstractScrollableElement {
@@ -447,9 +451,17 @@ export class SmoothScrollableElement extends AbstractScrollableElement {
         return this._scrollable.getCurrentScrollPosition();
     }
 }
-export class DomScrollableElement extends ScrollableElement {
+export class DomScrollableElement extends AbstractScrollableElement {
     constructor(element, options) {
-        super(element, options);
+        options = options || {};
+        options.mouseWheelSmoothScroll = false;
+        const scrollable = new Scrollable({
+            forceIntegerValues: false,
+            smoothScrollDuration: 0,
+            scheduleAtNextAnimationFrame: (callback) => dom.scheduleAtNextAnimationFrame(callback)
+        });
+        super(element, options, scrollable);
+        this._register(scrollable);
         this._element = element;
         this.onScroll((e) => {
             if (e.scrollTopChanged) {
@@ -460,6 +472,12 @@ export class DomScrollableElement extends ScrollableElement {
             }
         });
         this.scanDomNode();
+    }
+    setScrollPosition(update) {
+        this._scrollable.setScrollPositionNow(update);
+    }
+    getScrollPosition() {
+        return this._scrollable.getCurrentScrollPosition();
     }
     scanDomNode() {
         // width, scrollLeft, scrollWidth, height, scrollTop, scrollHeight
@@ -491,11 +509,11 @@ function resolveOptions(opts) {
         mouseWheelSmoothScroll: (typeof opts.mouseWheelSmoothScroll !== 'undefined' ? opts.mouseWheelSmoothScroll : true),
         arrowSize: (typeof opts.arrowSize !== 'undefined' ? opts.arrowSize : 11),
         listenOnDomNode: (typeof opts.listenOnDomNode !== 'undefined' ? opts.listenOnDomNode : null),
-        horizontal: (typeof opts.horizontal !== 'undefined' ? opts.horizontal : 1 /* Auto */),
+        horizontal: (typeof opts.horizontal !== 'undefined' ? opts.horizontal : 1 /* ScrollbarVisibility.Auto */),
         horizontalScrollbarSize: (typeof opts.horizontalScrollbarSize !== 'undefined' ? opts.horizontalScrollbarSize : 10),
         horizontalSliderSize: (typeof opts.horizontalSliderSize !== 'undefined' ? opts.horizontalSliderSize : 0),
         horizontalHasArrows: (typeof opts.horizontalHasArrows !== 'undefined' ? opts.horizontalHasArrows : false),
-        vertical: (typeof opts.vertical !== 'undefined' ? opts.vertical : 1 /* Auto */),
+        vertical: (typeof opts.vertical !== 'undefined' ? opts.vertical : 1 /* ScrollbarVisibility.Auto */),
         verticalScrollbarSize: (typeof opts.verticalScrollbarSize !== 'undefined' ? opts.verticalScrollbarSize : 10),
         verticalHasArrows: (typeof opts.verticalHasArrows !== 'undefined' ? opts.verticalHasArrows : false),
         verticalSliderSize: (typeof opts.verticalSliderSize !== 'undefined' ? opts.verticalSliderSize : 0),
