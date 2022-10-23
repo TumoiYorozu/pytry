@@ -31,7 +31,7 @@ h6 {
 
 header {
   height: 3rem;
-  background-color: #444;
+  background-color: #244558;
 }
 
 h1 {
@@ -40,8 +40,14 @@ h1 {
   margin: 0.6rem 1.6rem;
 }
 
-.logo-type {
+.logo-mark {
   height: 1.8rem;
+  margin-right: 1rem;
+}
+
+.logo-type {
+  height: 1.4rem;
+  margin: 0.2rem 0;
 }
 
 .config-button {
