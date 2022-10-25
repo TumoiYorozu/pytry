@@ -7,6 +7,17 @@ body {
   font-family: "Noto Sans JP", sans-serif;
 }
 
+h2 {
+  margin-top: 4rem;
+  margin-bottom: 1rem;
+  font-size: 1.6rem;
+}
+
+li {
+  padding-top: 0.3rem;
+  padding-bottom: 0.3rem;
+}
+
 .title {
   position: relative;
   color: white;

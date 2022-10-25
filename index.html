@@ -9,14 +9,12 @@
   <link href="./style/style.css" rel="stylesheet" />
   <link href="./img/favicon.ico" rel="icon" />
 
-  <meta name="description"
-    content="PyTry (パイトライ) は初心者のための Python 開発環境です．日本語エラーメッセージ，標準入力を読み込むコードのワンクリック入力，ソースコード自動保存，オートフォーマットなどの便利機能を搭載しています！">
+  <meta name="description" content="PyTry (パイトライ) は初心者のための Python 開発環境です．日本語エラーメッセージ，標準入力を読み込むコードのワンクリック入力，ソースコード自動保存，オートフォーマットなどの便利機能を搭載しています！">
 
   <meta property="og:url" content="https://pro-ktmr.github.io/pytry/" />
   <meta property="og:type" content="article" />
   <meta property="og:title" content="PyTry | 初心者のための Python 開発環境" />
-  <meta property="og:description"
-    content="PyTry (パイトライ) は初心者のための Python 開発環境です．日本語エラーメッセージ，標準入力を読み込むコードのワンクリック入力，ソースコード自動保存，オートフォーマットなどの便利機能を搭載しています！" />
+  <meta property="og:description" content="PyTry (パイトライ) は初心者のための Python 開発環境です．日本語エラーメッセージ，標準入力を読み込むコードのワンクリック入力，ソースコード自動保存，オートフォーマットなどの便利機能を搭載しています！" />
   <meta property="og:image" content="https://pro-ktmr.github.io/pytry/img/ogp.jpg" />
   <meta property="og:site_name" content="PyTry | 初心者のための Python 開発環境" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -53,34 +51,44 @@
       </div>
       <div class="notice-body">
         <p>
-          いつも PyTry をご利用いただきありがとうございます．近頃 PyTry
-          を想定以上にご利用いただき，学校の授業でご採用いただくケースも発生してまいりました．そこで，より便利にご利用いただく方法などをご案内するため，サイトにトップページを設けることにしました．サイトの構成変更に伴いご迷惑をおかけすることもあるかと存じますが，ご理解いただきますようよろしくお願い申し上げます．
-        </p>
-        <p>
-          また，ツール本体についても機能の追加や改善を予定しております．上記「今すぐ使う」ボタンからご利用可能な最新版に万一不具合が発生していましたら，<a
-            href="./stable/">安定版</a>を代わりにご利用いただけますと幸いです．
+          2022 年 12 月 31 日に PyTry の更新を行いました．上記「今すぐ使う」ボタンからご利用可能な最新版に万一不具合が発生していましたら，代わりに<a href="./stable/">安定版</a>をご利用いただけますと幸いです．
         </p>
       </div>
     </div>
-    <p>
-      PyTry (パイトライ) は競技プログラミング初心者のための Python
-      開発環境です．日本語エラーメッセージ，標準入力を読み込むコードのワンクリック入力，ソースコード自動保存，オートフォーマットなどの便利機能を搭載しています！
-    </p>
-    <p>
-      under construction...
-    </p>
-    <h2>仕様</h2>
+    <h2>仕様と特徴</h2>
     <div>
-      <ul>
+      <ol>
         <li>
-          エディタ部分は <a href="https://microsoft.github.io/monaco-editor/" target="_blank">Monaco Editor</a> の v0.32.0 です．VS
-          Code でも使用されている使いやすい環境です．
+          初心者向けのシンプルな UI で，日本語に完全対応しています．
         </li>
         <li>
-          コード部分に使用しているフォントは <a href="https://github.com/yuru7/udev-gothic" target="_blank">UDEV Gothic</a>
-          です．可読性に優れた等幅フォントとなっています．
+          エディタ部分は <a href="https://microsoft.github.io/monaco-editor/" target="_blank">Monaco Editor</a> の v0.32.0 です．VS Code でも使用されている使いやすい環境です．シンタックスハイライト，対応する括弧の色付け，非 ASCII 文字のハイライトなどを設定しています．
         </li>
-      </ul>
+        <li>
+          コード部分に使用しているフォントは <a href="https://github.com/yuru7/udev-gothic" target="_blank">UDEV Gothic</a> です．可読性に優れた等幅フォントとなっています．
+        </li>
+        <li>
+          Python の処理系は <a href="https://pyodide.org/en/stable/" target="_blank">Pyodide</a> の Version 0.21.0 です．Python のバージョンは 3.10.2 です．NumPy に標準で対応しているほか，micropip で各種モジュールを追加インストールすることも可能です．
+        </li>
+        <li>
+          コードは 1 文字入力するたびにブラウザ内のローカルストレージに保存されます．ブラウザを誤って閉じてしまっても再び開けば途中から実装できます．
+        </li>
+        <li>
+          標準入力を受け取るための複雑なコードはワンクリックで挿入できます．ハイライトもされるため，誤って部分的に消してしまってもすぐに気づけます．
+        </li>
+        <li>
+          実行ボタン押下時に black によるオートフォーマットを実行します．初心者でも美しく見やすいコードを書けます．
+        </li>
+        <li>
+          実装中にもリアルタイムでエラーを表示します．実行時のエラーも検出します．
+        </li>
+        <li>
+          実行時の基本的なエラーメッセージは日本語で表示されます．さらに「なぜ間違っているか」だけでなく「どうすれば直せるか」まで提示する場合もあります．
+        </li>
+        <li>
+          無限ループの発生時も 10 秒経てば自動でタイムアウトします．
+        </li>
+      </ol>
     </div>
   </div>
 </body>
