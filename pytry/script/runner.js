@@ -70,9 +70,7 @@ function workerListenner(message) {
   if (kind == 'error') {
     const translated = errorTranslator.translate(content);
     editor.addToOutputEditor(`${translated}
-${hintFinder.findHints(editor.sourceEditor.getValue())}
-=== エラー原文 ===
-${content}==================`);
+${hintFinder.findHints(editor.sourceEditor.getValue())}`);
 
     let err = [...translated.matchAll(/プログラムの (\d*) 行目/g)];
     if (err != null && err.length != 0) {
