@@ -1,7 +1,7 @@
 export let sourceEditor, inputEditor, outputEditor;
 export let sourceSession, inputSession, outputSession;
 export let sourceChangeListenner = [];
-let decorationsCollection = null;
+let decorationsCollection = [];
 
 /**
  * エディタの初期化を行う
@@ -246,20 +246,25 @@ export function addSourceEditorMarker(lineNumber, message, mode) {
 }
 
 export function clearSourceEditorDecoration() {
-  if (decorationsCollection !== null) {
-    decorationsCollection.clear();
-    decorationsCollection = null;
+  if (decorationsCollection !== []) {
+    decorationsCollection = sourceEditor.deltaDecorations(
+      decorationsCollection,
+      []
+    );
   }
 }
 
 export function addSourceEditorDecoration(lineNumber, glyphMarginClassName) {
-  decorationsCollection = sourceEditor.createDecorationsCollection([
-    {
-      range: new monaco.Range(lineNumber, 1, lineNumber, 1000),
-      options: {
-        isWholeLine: true,
-        glyphMarginClassName: glyphMarginClassName
+  decorationsCollection = sourceEditor.deltaDecorations(
+    [],
+    [
+      {
+        range: new monaco.Range(lineNumber, 1, lineNumber, 1000),
+        options: {
+          isWholeLine: true,
+          glyphMarginClassName: glyphMarginClassName
+        }
       }
-    }
-  ]);
+    ]
+  );
 }
