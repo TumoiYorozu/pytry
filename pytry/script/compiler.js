@@ -1,7 +1,7 @@
 import * as editor from './editor.js';
 import * as errorTranslator from './error-translator.js';
 
-let worker, timer = null;
+let worker, timer = null, previousError = '';
 
 /**
  * コンパイラの初期化を行う
@@ -31,16 +31,22 @@ function startCompilation(doesDetectError) {
 }
 
 function workerListenner(message) {
-  editor.clearSourceEditorMarker('Warning');
-
   const error = message.data.error;
-  const mode = message.data.mode;
-  if (error == '' || mode == false) return;
+  const doesDetectError = message.data.mode;
 
-  const translated = errorTranslator.translate(error);
-  let err = [...translated.matchAll(/プログラムの (\d*) 行目/g)];
-  if (err != null && err.length != 0) {
-    let lineNumber = Number(err[err.length - 1][1]);
-    editor.addSourceEditorMarker(lineNumber, translated, 'Warning');
+  if (!doesDetectError) {
+    if (error == '' || error != previousError) {
+      editor.clearSourceEditorMarker('Warning');
+    }
   }
+  else {
+    const translated = errorTranslator.translate(error);
+    let err = [...translated.matchAll(/プログラムの (\d*) 行目/g)];
+    if (err != null && err.length != 0) {
+      let lineNumber = Number(err[err.length - 1][1]);
+      editor.addSourceEditorMarker(lineNumber, translated, 'Warning');
+    }
+  }
+
+  previousError = error;
 }
