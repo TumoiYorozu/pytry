@@ -30,8 +30,8 @@ import { normalizePath } from '../../../base/common/resources.js';
 import { URI } from '../../../base/common/uri.js';
 import { ICodeEditorService } from './codeEditorService.js';
 import { ICommandService } from '../../../platform/commands/common/commands.js';
-import { EditorOpenSource } from '../../../platform/editor/common/editor.js';
-import { extractSelection, matchesScheme, matchesSomeScheme } from '../../../platform/opener/common/opener.js';
+import { EditorOpenContext } from '../../../platform/editor/common/editor.js';
+import { matchesScheme, matchesSomeScheme, selectionFragment } from '../../../platform/opener/common/opener.js';
 let CommandOpener = class CommandOpener {
     constructor(_commandService) {
         this._commandService = _commandService;
@@ -84,14 +84,16 @@ let EditorOpener = class EditorOpener {
             if (typeof target === 'string') {
                 target = URI.parse(target);
             }
-            const { selection, uri } = extractSelection(target);
-            target = uri;
+            const selection = selectionFragment(target);
+            if (selection) {
+                target = target.with({ fragment: '' });
+            }
             if (target.scheme === Schemas.file) {
                 target = normalizePath(target); // workaround for non-normalized paths (https://github.com/microsoft/vscode/issues/12954)
             }
             yield this._editorService.openCodeEditor({
                 resource: target,
-                options: Object.assign({ selection, source: (options === null || options === void 0 ? void 0 : options.fromUserGesture) ? EditorOpenSource.USER : EditorOpenSource.API }, options === null || options === void 0 ? void 0 : options.editorOptions)
+                options: Object.assign({ selection, context: (options === null || options === void 0 ? void 0 : options.fromUserGesture) ? EditorOpenContext.USER : EditorOpenContext.API }, options === null || options === void 0 ? void 0 : options.editorOptions)
             }, this._editorService.getFocusedCodeEditor(), options === null || options === void 0 ? void 0 : options.openToSide);
             return true;
         });
@@ -164,7 +166,7 @@ let OpenerService = class OpenerService {
             // validate against the original URI that this URI resolves to, if one exists
             const validationTarget = (_a = this._resolvedUriTargets.get(targetURI)) !== null && _a !== void 0 ? _a : target;
             for (const validator of this._validators) {
-                if (!(yield validator.shouldOpen(validationTarget, options))) {
+                if (!(yield validator.shouldOpen(validationTarget))) {
                     return false;
                 }
             }

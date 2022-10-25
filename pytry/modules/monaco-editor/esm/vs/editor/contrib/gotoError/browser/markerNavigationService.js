@@ -47,13 +47,11 @@ let MarkerList = class MarkerList {
         const compareOrder = this._configService.getValue('problems.sortOrder');
         const compareMarker = (a, b) => {
             let res = compare(a.resource.toString(), b.resource.toString());
-            if (res === 0) {
-                if (compareOrder === 'position') {
-                    res = Range.compareRangesUsingStarts(a, b) || MarkerSeverity.compare(a.severity, b.severity);
-                }
-                else {
-                    res = MarkerSeverity.compare(a.severity, b.severity) || Range.compareRangesUsingStarts(a, b);
-                }
+            if (compareOrder === 'position') {
+                res = Range.compareRangesUsingStarts(a, b) || MarkerSeverity.compare(a.severity, b.severity);
+            }
+            else {
+                res = MarkerSeverity.compare(a.severity, b.severity) || Range.compareRangesUsingStarts(a, b);
             }
             return res;
         };
@@ -134,7 +132,7 @@ let MarkerList = class MarkerList {
         if (this._markers.length === 0) {
             return false;
         }
-        const oldIdx = this._nextIdx;
+        let oldIdx = this._nextIdx;
         if (this._nextIdx === -1) {
             this._initIdx(model, position, fwd);
         }
@@ -175,7 +173,7 @@ let MarkerNavigationService = class MarkerNavigationService {
         this._provider = new LinkedList();
     }
     getMarkerList(resource) {
-        for (const provider of this._provider) {
+        for (let provider of this._provider) {
             const result = provider.getMarkerList(resource);
             if (result) {
                 return result;

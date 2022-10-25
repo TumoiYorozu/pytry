@@ -1,29 +1,18 @@
-"use strict";
 /*!-----------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
- * Version: 0.34.1(547870b6881302c5b4ff32173c16d06009e3588f)
+ * Version: 0.32.0(e1570658ecca35c72429e624c18df24ae4286ef8)
  * Released under the MIT license
  * https://github.com/microsoft/monaco-editor/blob/main/LICENSE.txt
  *-----------------------------------------------------------------------------*/
 define("vs/language/json/jsonWorker", ["require"],(require)=>{
 var moduleExports = (() => {
   var __defProp = Object.defineProperty;
-  var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
-  var __getOwnPropNames = Object.getOwnPropertyNames;
-  var __hasOwnProp = Object.prototype.hasOwnProperty;
+  var __markAsModule = (target) => __defProp(target, "__esModule", { value: true });
   var __export = (target, all) => {
+    __markAsModule(target);
     for (var name in all)
       __defProp(target, name, { get: all[name], enumerable: true });
   };
-  var __copyProps = (to, from, except, desc) => {
-    if (from && typeof from === "object" || typeof from === "function") {
-      for (let key of __getOwnPropNames(from))
-        if (!__hasOwnProp.call(to, key) && key !== except)
-          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
-    }
-    return to;
-  };
-  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
   // src/language/json/jsonWorker.ts
   var jsonWorker_exports = {};
@@ -33,6 +22,7 @@ var moduleExports = (() => {
   });
 
   // node_modules/jsonc-parser/lib/esm/impl/scanner.js
+  "use strict";
   function createScanner(text, ignoreTrivia) {
     if (ignoreTrivia === void 0) {
       ignoreTrivia = false;
@@ -382,6 +372,7 @@ var moduleExports = (() => {
   }
 
   // node_modules/jsonc-parser/lib/esm/impl/format.js
+  "use strict";
   function format(documentText, range, options) {
     var initialIndentLevel;
     var formatText;
@@ -417,19 +408,19 @@ var moduleExports = (() => {
     } else {
       indentValue = "	";
     }
-    var scanner = createScanner(formatText, false);
+    var scanner2 = createScanner(formatText, false);
     var hasError = false;
     function newLineAndIndent() {
       return eol + repeat(indentValue, initialIndentLevel + indentLevel);
     }
     function scanNext() {
-      var token = scanner.scan();
+      var token = scanner2.scan();
       lineBreak = false;
       while (token === 15 || token === 14) {
         lineBreak = lineBreak || token === 14;
-        token = scanner.scan();
+        token = scanner2.scan();
       }
-      hasError = token === 16 || scanner.getTokenError() !== 0;
+      hasError = token === 16 || scanner2.getTokenError() !== 0;
       return token;
     }
     var editOperations = [];
@@ -440,19 +431,19 @@ var moduleExports = (() => {
     }
     var firstToken = scanNext();
     if (firstToken !== 17) {
-      var firstTokenStart = scanner.getTokenOffset() + formatTextStart;
+      var firstTokenStart = scanner2.getTokenOffset() + formatTextStart;
       var initialIndent = repeat(indentValue, initialIndentLevel);
       addEdit(initialIndent, formatTextStart, firstTokenStart);
     }
     while (firstToken !== 17) {
-      var firstTokenEnd = scanner.getTokenOffset() + scanner.getTokenLength() + formatTextStart;
+      var firstTokenEnd = scanner2.getTokenOffset() + scanner2.getTokenLength() + formatTextStart;
       var secondToken = scanNext();
       var replaceContent = "";
       var needsLineBreak = false;
       while (!lineBreak && (secondToken === 12 || secondToken === 13)) {
-        var commentTokenStart = scanner.getTokenOffset() + formatTextStart;
+        var commentTokenStart = scanner2.getTokenOffset() + formatTextStart;
         addEdit(" ", firstTokenEnd, commentTokenStart);
-        firstTokenEnd = scanner.getTokenOffset() + scanner.getTokenLength() + formatTextStart;
+        firstTokenEnd = scanner2.getTokenOffset() + scanner2.getTokenLength() + formatTextStart;
         needsLineBreak = secondToken === 12;
         replaceContent = needsLineBreak ? newLineAndIndent() : "";
         secondToken = scanNext();
@@ -522,7 +513,7 @@ var moduleExports = (() => {
       if (secondToken === 17) {
         replaceContent = options.insertFinalNewline ? eol : "";
       }
-      var secondTokenStart = scanner.getTokenOffset() + formatTextStart;
+      var secondTokenStart = scanner2.getTokenOffset() + formatTextStart;
       addEdit(replaceContent, firstTokenEnd, secondTokenStart);
       firstToken = secondToken;
     }
@@ -571,6 +562,7 @@ var moduleExports = (() => {
   }
 
   // node_modules/jsonc-parser/lib/esm/impl/parser.js
+  "use strict";
   var ParseOptions;
   (function(ParseOptions2) {
     ParseOptions2.DEFAULT = {
@@ -647,7 +639,7 @@ var moduleExports = (() => {
       case "array":
         return node.children.map(getNodeValue);
       case "object":
-        var obj = /* @__PURE__ */ Object.create(null);
+        var obj = Object.create(null);
         for (var _i = 0, _a = node.children; _i < _a.length; _i++) {
           var prop = _a[_i];
           var valueNode = prop.children[1];
@@ -920,7 +912,11 @@ var moduleExports = (() => {
     return true;
   }
 
+  // node_modules/jsonc-parser/lib/esm/impl/edit.js
+  "use strict";
+
   // node_modules/jsonc-parser/lib/esm/main.js
+  "use strict";
   var createScanner2 = createScanner;
   var parse2 = parse;
   var findNodeAtOffset2 = findNodeAtOffset;
@@ -1032,6 +1028,7 @@ var moduleExports = (() => {
   }
 
   // node_modules/vscode-languageserver-types/lib/esm/main.js
+  "use strict";
   var integer;
   (function(integer2) {
     integer2.MIN_VALUE = -2147483648;
@@ -1428,61 +1425,61 @@ var moduleExports = (() => {
       this.changeAnnotations = changeAnnotations;
     }
     TextEditChangeImpl2.prototype.insert = function(position, newText, annotation) {
-      var edit;
+      var edit2;
       var id;
       if (annotation === void 0) {
-        edit = TextEdit.insert(position, newText);
+        edit2 = TextEdit.insert(position, newText);
       } else if (ChangeAnnotationIdentifier.is(annotation)) {
         id = annotation;
-        edit = AnnotatedTextEdit.insert(position, newText, annotation);
+        edit2 = AnnotatedTextEdit.insert(position, newText, annotation);
       } else {
         this.assertChangeAnnotations(this.changeAnnotations);
         id = this.changeAnnotations.manage(annotation);
-        edit = AnnotatedTextEdit.insert(position, newText, id);
+        edit2 = AnnotatedTextEdit.insert(position, newText, id);
       }
-      this.edits.push(edit);
+      this.edits.push(edit2);
       if (id !== void 0) {
         return id;
       }
     };
     TextEditChangeImpl2.prototype.replace = function(range, newText, annotation) {
-      var edit;
+      var edit2;
       var id;
       if (annotation === void 0) {
-        edit = TextEdit.replace(range, newText);
+        edit2 = TextEdit.replace(range, newText);
       } else if (ChangeAnnotationIdentifier.is(annotation)) {
         id = annotation;
-        edit = AnnotatedTextEdit.replace(range, newText, annotation);
+        edit2 = AnnotatedTextEdit.replace(range, newText, annotation);
       } else {
         this.assertChangeAnnotations(this.changeAnnotations);
         id = this.changeAnnotations.manage(annotation);
-        edit = AnnotatedTextEdit.replace(range, newText, id);
+        edit2 = AnnotatedTextEdit.replace(range, newText, id);
       }
-      this.edits.push(edit);
+      this.edits.push(edit2);
       if (id !== void 0) {
         return id;
       }
     };
     TextEditChangeImpl2.prototype.delete = function(range, annotation) {
-      var edit;
+      var edit2;
       var id;
       if (annotation === void 0) {
-        edit = TextEdit.del(range);
+        edit2 = TextEdit.del(range);
       } else if (ChangeAnnotationIdentifier.is(annotation)) {
         id = annotation;
-        edit = AnnotatedTextEdit.del(range, annotation);
+        edit2 = AnnotatedTextEdit.del(range, annotation);
       } else {
         this.assertChangeAnnotations(this.changeAnnotations);
         id = this.changeAnnotations.manage(annotation);
-        edit = AnnotatedTextEdit.del(range, id);
+        edit2 = AnnotatedTextEdit.del(range, id);
       }
-      this.edits.push(edit);
+      this.edits.push(edit2);
       if (id !== void 0) {
         return id;
       }
     };
-    TextEditChangeImpl2.prototype.add = function(edit) {
-      this.edits.push(edit);
+    TextEditChangeImpl2.prototype.add = function(edit2) {
+      this.edits.push(edit2);
     };
     TextEditChangeImpl2.prototype.all = function() {
       return this.edits;
@@ -1499,7 +1496,7 @@ var moduleExports = (() => {
   }();
   var ChangeAnnotations = function() {
     function ChangeAnnotations2(annotations) {
-      this._annotations = annotations === void 0 ? /* @__PURE__ */ Object.create(null) : annotations;
+      this._annotations = annotations === void 0 ? Object.create(null) : annotations;
       this._counter = 0;
       this._size = 0;
     }
@@ -1540,7 +1537,7 @@ var moduleExports = (() => {
   var WorkspaceChange = function() {
     function WorkspaceChange2(workspaceEdit) {
       var _this = this;
-      this._textEditChanges = /* @__PURE__ */ Object.create(null);
+      this._textEditChanges = Object.create(null);
       if (workspaceEdit !== void 0) {
         this._workspaceEdit = workspaceEdit;
         if (workspaceEdit.documentChanges) {
@@ -1620,7 +1617,7 @@ var moduleExports = (() => {
     };
     WorkspaceChange2.prototype.initChanges = function() {
       if (this._workspaceEdit.documentChanges === void 0 && this._workspaceEdit.changes === void 0) {
-        this._workspaceEdit.changes = /* @__PURE__ */ Object.create(null);
+        this._workspaceEdit.changes = Object.create(null);
       }
     };
     WorkspaceChange2.prototype.createFile = function(uri, optionsOrAnnotation, options) {
@@ -2289,6 +2286,7 @@ var moduleExports = (() => {
   })(Is || (Is = {}));
 
   // node_modules/vscode-languageserver-textdocument/lib/esm/main.js
+  "use strict";
   var FullTextDocument2 = class {
     constructor(uri, languageId, version, content) {
       this._uri = uri;
@@ -3313,7 +3311,7 @@ var moduleExports = (() => {
       }
     }
     function _validateObjectNode(node2, schema2, validationResult2, matchingSchemas2) {
-      var seenKeys = /* @__PURE__ */ Object.create(null);
+      var seenKeys = Object.create(null);
       var unprocessedProperties = [];
       for (var _i = 0, _a = node2.properties; _i < _a.length; _i++) {
         var propertyNode = _a[_i];
@@ -3485,17 +3483,17 @@ var moduleExports = (() => {
     var problems = [];
     var lastProblemOffset = -1;
     var text = textDocument.getText();
-    var scanner = createScanner2(text, false);
+    var scanner2 = createScanner2(text, false);
     var commentRanges = config && config.collectComments ? [] : void 0;
     function _scanNext() {
       while (true) {
-        var token_1 = scanner.scan();
+        var token_1 = scanner2.scan();
         _checkScanError();
         switch (token_1) {
           case 12:
           case 13:
             if (Array.isArray(commentRanges)) {
-              commentRanges.push(Range.create(textDocument.positionAt(scanner.getTokenOffset()), textDocument.positionAt(scanner.getTokenOffset() + scanner.getTokenLength())));
+              commentRanges.push(Range.create(textDocument.positionAt(scanner2.getTokenOffset()), textDocument.positionAt(scanner2.getTokenOffset() + scanner2.getTokenLength())));
             }
             break;
           case 15:
@@ -3507,7 +3505,7 @@ var moduleExports = (() => {
       }
     }
     function _accept(token2) {
-      if (scanner.getToken() === token2) {
+      if (scanner2.getToken() === token2) {
         _scanNext();
         return true;
       }
@@ -3533,8 +3531,8 @@ var moduleExports = (() => {
       if (skipUntil === void 0) {
         skipUntil = [];
       }
-      var start = scanner.getTokenOffset();
-      var end = scanner.getTokenOffset() + scanner.getTokenLength();
+      var start = scanner2.getTokenOffset();
+      var end = scanner2.getTokenOffset() + scanner2.getTokenLength();
       if (start === end && start > 0) {
         start--;
         while (start > 0 && /\s/.test(text.charAt(start))) {
@@ -3547,7 +3545,7 @@ var moduleExports = (() => {
         _finalize(node, false);
       }
       if (skipUntilAfter.length + skipUntil.length > 0) {
-        var token_2 = scanner.getToken();
+        var token_2 = scanner2.getToken();
         while (token_2 !== 17) {
           if (skipUntilAfter.indexOf(token_2) !== -1) {
             _scanNext();
@@ -3561,7 +3559,7 @@ var moduleExports = (() => {
       return node;
     }
     function _checkScanError() {
-      switch (scanner.getTokenError()) {
+      switch (scanner2.getTokenError()) {
         case 4:
           _error(localize2("InvalidUnicode", "Invalid unicode sequence in string."), ErrorCode.InvalidUnicode);
           return true;
@@ -3584,28 +3582,28 @@ var moduleExports = (() => {
       return false;
     }
     function _finalize(node, scanNext) {
-      node.length = scanner.getTokenOffset() + scanner.getTokenLength() - node.offset;
+      node.length = scanner2.getTokenOffset() + scanner2.getTokenLength() - node.offset;
       if (scanNext) {
         _scanNext();
       }
       return node;
     }
     function _parseArray(parent) {
-      if (scanner.getToken() !== 3) {
+      if (scanner2.getToken() !== 3) {
         return void 0;
       }
-      var node = new ArrayASTNodeImpl(parent, scanner.getTokenOffset());
+      var node = new ArrayASTNodeImpl(parent, scanner2.getTokenOffset());
       _scanNext();
       var count = 0;
       var needsComma = false;
-      while (scanner.getToken() !== 4 && scanner.getToken() !== 17) {
-        if (scanner.getToken() === 5) {
+      while (scanner2.getToken() !== 4 && scanner2.getToken() !== 17) {
+        if (scanner2.getToken() === 5) {
           if (!needsComma) {
             _error(localize2("ValueExpected", "Value expected"), ErrorCode.ValueExpected);
           }
-          var commaOffset = scanner.getTokenOffset();
+          var commaOffset = scanner2.getTokenOffset();
           _scanNext();
-          if (scanner.getToken() === 4) {
+          if (scanner2.getToken() === 4) {
             if (needsComma) {
               _errorAtRange(localize2("TrailingComma", "Trailing comma"), ErrorCode.TrailingComma, commaOffset, commaOffset + 1);
             }
@@ -3622,20 +3620,20 @@ var moduleExports = (() => {
         }
         needsComma = true;
       }
-      if (scanner.getToken() !== 4) {
+      if (scanner2.getToken() !== 4) {
         return _error(localize2("ExpectedCloseBracket", "Expected comma or closing bracket"), ErrorCode.CommaOrCloseBacketExpected, node);
       }
       return _finalize(node, true);
     }
     var keyPlaceholder = new StringASTNodeImpl(void 0, 0, 0);
     function _parseProperty(parent, keysSeen) {
-      var node = new PropertyASTNodeImpl(parent, scanner.getTokenOffset(), keyPlaceholder);
+      var node = new PropertyASTNodeImpl(parent, scanner2.getTokenOffset(), keyPlaceholder);
       var key = _parseString(node);
       if (!key) {
-        if (scanner.getToken() === 16) {
+        if (scanner2.getToken() === 16) {
           _error(localize2("DoubleQuotesExpected", "Property keys must be doublequoted"), ErrorCode.Undefined);
-          var keyNode = new StringASTNodeImpl(node, scanner.getTokenOffset(), scanner.getTokenLength());
-          keyNode.value = scanner.getTokenValue();
+          var keyNode = new StringASTNodeImpl(node, scanner2.getTokenOffset(), scanner2.getTokenLength());
+          keyNode.value = scanner2.getTokenValue();
           key = keyNode;
           _scanNext();
         } else {
@@ -3653,12 +3651,12 @@ var moduleExports = (() => {
       } else {
         keysSeen[key.value] = node;
       }
-      if (scanner.getToken() === 6) {
-        node.colonOffset = scanner.getTokenOffset();
+      if (scanner2.getToken() === 6) {
+        node.colonOffset = scanner2.getTokenOffset();
         _scanNext();
       } else {
         _error(localize2("ColonExpected", "Colon expected"), ErrorCode.ColonExpected);
-        if (scanner.getToken() === 10 && textDocument.positionAt(key.offset + key.length).line < textDocument.positionAt(scanner.getTokenOffset()).line) {
+        if (scanner2.getToken() === 10 && textDocument.positionAt(key.offset + key.length).line < textDocument.positionAt(scanner2.getTokenOffset()).line) {
           node.length = key.length;
           return node;
         }
@@ -3672,21 +3670,21 @@ var moduleExports = (() => {
       return node;
     }
     function _parseObject(parent) {
-      if (scanner.getToken() !== 1) {
+      if (scanner2.getToken() !== 1) {
         return void 0;
       }
-      var node = new ObjectASTNodeImpl(parent, scanner.getTokenOffset());
-      var keysSeen = /* @__PURE__ */ Object.create(null);
+      var node = new ObjectASTNodeImpl(parent, scanner2.getTokenOffset());
+      var keysSeen = Object.create(null);
       _scanNext();
       var needsComma = false;
-      while (scanner.getToken() !== 2 && scanner.getToken() !== 17) {
-        if (scanner.getToken() === 5) {
+      while (scanner2.getToken() !== 2 && scanner2.getToken() !== 17) {
+        if (scanner2.getToken() === 5) {
           if (!needsComma) {
             _error(localize2("PropertyExpected", "Property expected"), ErrorCode.PropertyExpected);
           }
-          var commaOffset = scanner.getTokenOffset();
+          var commaOffset = scanner2.getTokenOffset();
           _scanNext();
-          if (scanner.getToken() === 2) {
+          if (scanner2.getToken() === 2) {
             if (needsComma) {
               _errorAtRange(localize2("TrailingComma", "Trailing comma"), ErrorCode.TrailingComma, commaOffset, commaOffset + 1);
             }
@@ -3703,26 +3701,26 @@ var moduleExports = (() => {
         }
         needsComma = true;
       }
-      if (scanner.getToken() !== 2) {
+      if (scanner2.getToken() !== 2) {
         return _error(localize2("ExpectedCloseBrace", "Expected comma or closing brace"), ErrorCode.CommaOrCloseBraceExpected, node);
       }
       return _finalize(node, true);
     }
     function _parseString(parent) {
-      if (scanner.getToken() !== 10) {
+      if (scanner2.getToken() !== 10) {
         return void 0;
       }
-      var node = new StringASTNodeImpl(parent, scanner.getTokenOffset());
-      node.value = scanner.getTokenValue();
+      var node = new StringASTNodeImpl(parent, scanner2.getTokenOffset());
+      node.value = scanner2.getTokenValue();
       return _finalize(node, true);
     }
     function _parseNumber(parent) {
-      if (scanner.getToken() !== 11) {
+      if (scanner2.getToken() !== 11) {
         return void 0;
       }
-      var node = new NumberASTNodeImpl(parent, scanner.getTokenOffset());
-      if (scanner.getTokenError() === 0) {
-        var tokenValue = scanner.getTokenValue();
+      var node = new NumberASTNodeImpl(parent, scanner2.getTokenOffset());
+      if (scanner2.getTokenError() === 0) {
+        var tokenValue = scanner2.getTokenValue();
         try {
           var numberValue = JSON.parse(tokenValue);
           if (!isNumber(numberValue)) {
@@ -3738,13 +3736,13 @@ var moduleExports = (() => {
     }
     function _parseLiteral(parent) {
       var node;
-      switch (scanner.getToken()) {
+      switch (scanner2.getToken()) {
         case 7:
-          return _finalize(new NullASTNodeImpl(parent, scanner.getTokenOffset()), true);
+          return _finalize(new NullASTNodeImpl(parent, scanner2.getTokenOffset()), true);
         case 8:
-          return _finalize(new BooleanASTNodeImpl(parent, true, scanner.getTokenOffset()), true);
+          return _finalize(new BooleanASTNodeImpl(parent, true, scanner2.getTokenOffset()), true);
         case 9:
-          return _finalize(new BooleanASTNodeImpl(parent, false, scanner.getTokenOffset()), true);
+          return _finalize(new BooleanASTNodeImpl(parent, false, scanner2.getTokenOffset()), true);
         default:
           return void 0;
       }
@@ -3758,7 +3756,7 @@ var moduleExports = (() => {
       _root = _parseValue(_root);
       if (!_root) {
         _error(localize2("Invalid symbol", "Expected a JSON object, array or literal."), ErrorCode.Undefined);
-      } else if (scanner.getToken() !== 17) {
+      } else if (scanner2.getToken() !== 17) {
         _error(localize2("End of file expected", "End of file expected."), ErrorCode.Undefined);
       }
     }
@@ -4660,9 +4658,9 @@ var moduleExports = (() => {
       return text.substring(i + 1, offset);
     };
     JSONCompletion2.prototype.evaluateSeparatorAfter = function(document, offset) {
-      var scanner = createScanner2(document.getText(), true);
-      scanner.setPosition(offset);
-      var token = scanner.scan();
+      var scanner2 = createScanner2(document.getText(), true);
+      scanner2.setPosition(offset);
+      var token = scanner2.scan();
       switch (token) {
         case 5:
         case 2:
@@ -4674,14 +4672,14 @@ var moduleExports = (() => {
       }
     };
     JSONCompletion2.prototype.findItemAtOffset = function(node, document, offset) {
-      var scanner = createScanner2(document.getText(), true);
+      var scanner2 = createScanner2(document.getText(), true);
       var children = node.items;
       for (var i = children.length - 1; i >= 0; i--) {
         var child = children[i];
         if (offset > child.offset + child.length) {
-          scanner.setPosition(child.offset + child.length);
-          var token = scanner.scan();
-          if (token === 5 && offset >= scanner.getTokenOffset() + scanner.getTokenLength()) {
+          scanner2.setPosition(child.offset + child.length);
+          var token = scanner2.scan();
+          if (token === 5 && offset >= scanner2.getTokenOffset() + scanner2.getTokenLength()) {
             return i + 1;
           }
           return i;
@@ -4692,13 +4690,13 @@ var moduleExports = (() => {
       return 0;
     };
     JSONCompletion2.prototype.isInComment = function(document, start, offset) {
-      var scanner = createScanner2(document.getText(), false);
-      scanner.setPosition(start);
-      var token = scanner.scan();
-      while (token !== 17 && scanner.getTokenOffset() + scanner.getTokenLength() < offset) {
-        token = scanner.scan();
+      var scanner2 = createScanner2(document.getText(), false);
+      scanner2.setPosition(start);
+      var token = scanner2.scan();
+      while (token !== 17 && scanner2.getTokenOffset() + scanner2.getTokenLength() < offset) {
+        token = scanner2.scan();
       }
-      return (token === 12 || token === 13) && scanner.getTokenOffset() <= offset;
+      return (token === 12 || token === 13) && scanner2.getTokenOffset() <= offset;
     };
     JSONCompletion2.prototype.fromMarkup = function(markupString) {
       if (markupString && this.doesSupportMarkdown()) {
@@ -5831,7 +5829,7 @@ var moduleExports = (() => {
     "use strict";
     var t = { 470: (t2) => {
       function e2(t3) {
-        if ("string" != typeof t3)
+        if (typeof t3 != "string")
           throw new TypeError("Path must be a string. Received " + JSON.stringify(t3));
       }
       function r2(t3, e3) {
@@ -5839,22 +5837,22 @@ var moduleExports = (() => {
           if (h < t3.length)
             r3 = t3.charCodeAt(h);
           else {
-            if (47 === r3)
+            if (r3 === 47)
               break;
             r3 = 47;
           }
-          if (47 === r3) {
-            if (i === h - 1 || 1 === a2)
+          if (r3 === 47) {
+            if (i === h - 1 || a2 === 1)
               ;
-            else if (i !== h - 1 && 2 === a2) {
-              if (n2.length < 2 || 2 !== o || 46 !== n2.charCodeAt(n2.length - 1) || 46 !== n2.charCodeAt(n2.length - 2)) {
+            else if (i !== h - 1 && a2 === 2) {
+              if (n2.length < 2 || o !== 2 || n2.charCodeAt(n2.length - 1) !== 46 || n2.charCodeAt(n2.length - 2) !== 46) {
                 if (n2.length > 2) {
                   var s = n2.lastIndexOf("/");
                   if (s !== n2.length - 1) {
-                    -1 === s ? (n2 = "", o = 0) : o = (n2 = n2.slice(0, s)).length - 1 - n2.lastIndexOf("/"), i = h, a2 = 0;
+                    s === -1 ? (n2 = "", o = 0) : o = (n2 = n2.slice(0, s)).length - 1 - n2.lastIndexOf("/"), i = h, a2 = 0;
                     continue;
                   }
-                } else if (2 === n2.length || 1 === n2.length) {
+                } else if (n2.length === 2 || n2.length === 1) {
                   n2 = "", o = 0, i = h, a2 = 0;
                   continue;
                 }
@@ -5864,118 +5862,118 @@ var moduleExports = (() => {
               n2.length > 0 ? n2 += "/" + t3.slice(i + 1, h) : n2 = t3.slice(i + 1, h), o = h - i - 1;
             i = h, a2 = 0;
           } else
-            46 === r3 && -1 !== a2 ? ++a2 : a2 = -1;
+            r3 === 46 && a2 !== -1 ? ++a2 : a2 = -1;
         }
         return n2;
       }
       var n = { resolve: function() {
         for (var t3, n2 = "", o = false, i = arguments.length - 1; i >= -1 && !o; i--) {
           var a2;
-          i >= 0 ? a2 = arguments[i] : (void 0 === t3 && (t3 = process.cwd()), a2 = t3), e2(a2), 0 !== a2.length && (n2 = a2 + "/" + n2, o = 47 === a2.charCodeAt(0));
+          i >= 0 ? a2 = arguments[i] : (t3 === void 0 && (t3 = process.cwd()), a2 = t3), e2(a2), a2.length !== 0 && (n2 = a2 + "/" + n2, o = a2.charCodeAt(0) === 47);
         }
         return n2 = r2(n2, !o), o ? n2.length > 0 ? "/" + n2 : "/" : n2.length > 0 ? n2 : ".";
       }, normalize: function(t3) {
-        if (e2(t3), 0 === t3.length)
+        if (e2(t3), t3.length === 0)
           return ".";
-        var n2 = 47 === t3.charCodeAt(0), o = 47 === t3.charCodeAt(t3.length - 1);
-        return 0 !== (t3 = r2(t3, !n2)).length || n2 || (t3 = "."), t3.length > 0 && o && (t3 += "/"), n2 ? "/" + t3 : t3;
+        var n2 = t3.charCodeAt(0) === 47, o = t3.charCodeAt(t3.length - 1) === 47;
+        return (t3 = r2(t3, !n2)).length !== 0 || n2 || (t3 = "."), t3.length > 0 && o && (t3 += "/"), n2 ? "/" + t3 : t3;
       }, isAbsolute: function(t3) {
-        return e2(t3), t3.length > 0 && 47 === t3.charCodeAt(0);
+        return e2(t3), t3.length > 0 && t3.charCodeAt(0) === 47;
       }, join: function() {
-        if (0 === arguments.length)
+        if (arguments.length === 0)
           return ".";
         for (var t3, r3 = 0; r3 < arguments.length; ++r3) {
           var o = arguments[r3];
-          e2(o), o.length > 0 && (void 0 === t3 ? t3 = o : t3 += "/" + o);
+          e2(o), o.length > 0 && (t3 === void 0 ? t3 = o : t3 += "/" + o);
         }
-        return void 0 === t3 ? "." : n.normalize(t3);
+        return t3 === void 0 ? "." : n.normalize(t3);
       }, relative: function(t3, r3) {
         if (e2(t3), e2(r3), t3 === r3)
           return "";
         if ((t3 = n.resolve(t3)) === (r3 = n.resolve(r3)))
           return "";
-        for (var o = 1; o < t3.length && 47 === t3.charCodeAt(o); ++o)
+        for (var o = 1; o < t3.length && t3.charCodeAt(o) === 47; ++o)
           ;
-        for (var i = t3.length, a2 = i - o, h = 1; h < r3.length && 47 === r3.charCodeAt(h); ++h)
+        for (var i = t3.length, a2 = i - o, h = 1; h < r3.length && r3.charCodeAt(h) === 47; ++h)
           ;
         for (var s = r3.length - h, c = a2 < s ? a2 : s, f2 = -1, u = 0; u <= c; ++u) {
           if (u === c) {
             if (s > c) {
-              if (47 === r3.charCodeAt(h + u))
+              if (r3.charCodeAt(h + u) === 47)
                 return r3.slice(h + u + 1);
-              if (0 === u)
+              if (u === 0)
                 return r3.slice(h + u);
             } else
-              a2 > c && (47 === t3.charCodeAt(o + u) ? f2 = u : 0 === u && (f2 = 0));
+              a2 > c && (t3.charCodeAt(o + u) === 47 ? f2 = u : u === 0 && (f2 = 0));
             break;
           }
           var l = t3.charCodeAt(o + u);
           if (l !== r3.charCodeAt(h + u))
             break;
-          47 === l && (f2 = u);
+          l === 47 && (f2 = u);
         }
         var p = "";
         for (u = o + f2 + 1; u <= i; ++u)
-          u !== i && 47 !== t3.charCodeAt(u) || (0 === p.length ? p += ".." : p += "/..");
-        return p.length > 0 ? p + r3.slice(h + f2) : (h += f2, 47 === r3.charCodeAt(h) && ++h, r3.slice(h));
+          u !== i && t3.charCodeAt(u) !== 47 || (p.length === 0 ? p += ".." : p += "/..");
+        return p.length > 0 ? p + r3.slice(h + f2) : (h += f2, r3.charCodeAt(h) === 47 && ++h, r3.slice(h));
       }, _makeLong: function(t3) {
         return t3;
       }, dirname: function(t3) {
-        if (e2(t3), 0 === t3.length)
+        if (e2(t3), t3.length === 0)
           return ".";
-        for (var r3 = t3.charCodeAt(0), n2 = 47 === r3, o = -1, i = true, a2 = t3.length - 1; a2 >= 1; --a2)
-          if (47 === (r3 = t3.charCodeAt(a2))) {
+        for (var r3 = t3.charCodeAt(0), n2 = r3 === 47, o = -1, i = true, a2 = t3.length - 1; a2 >= 1; --a2)
+          if ((r3 = t3.charCodeAt(a2)) === 47) {
             if (!i) {
               o = a2;
               break;
             }
           } else
             i = false;
-        return -1 === o ? n2 ? "/" : "." : n2 && 1 === o ? "//" : t3.slice(0, o);
+        return o === -1 ? n2 ? "/" : "." : n2 && o === 1 ? "//" : t3.slice(0, o);
       }, basename: function(t3, r3) {
-        if (void 0 !== r3 && "string" != typeof r3)
+        if (r3 !== void 0 && typeof r3 != "string")
           throw new TypeError('"ext" argument must be a string');
         e2(t3);
         var n2, o = 0, i = -1, a2 = true;
-        if (void 0 !== r3 && r3.length > 0 && r3.length <= t3.length) {
+        if (r3 !== void 0 && r3.length > 0 && r3.length <= t3.length) {
           if (r3.length === t3.length && r3 === t3)
             return "";
           var h = r3.length - 1, s = -1;
           for (n2 = t3.length - 1; n2 >= 0; --n2) {
             var c = t3.charCodeAt(n2);
-            if (47 === c) {
+            if (c === 47) {
               if (!a2) {
                 o = n2 + 1;
                 break;
               }
             } else
-              -1 === s && (a2 = false, s = n2 + 1), h >= 0 && (c === r3.charCodeAt(h) ? -1 == --h && (i = n2) : (h = -1, i = s));
+              s === -1 && (a2 = false, s = n2 + 1), h >= 0 && (c === r3.charCodeAt(h) ? --h == -1 && (i = n2) : (h = -1, i = s));
           }
-          return o === i ? i = s : -1 === i && (i = t3.length), t3.slice(o, i);
+          return o === i ? i = s : i === -1 && (i = t3.length), t3.slice(o, i);
         }
         for (n2 = t3.length - 1; n2 >= 0; --n2)
-          if (47 === t3.charCodeAt(n2)) {
+          if (t3.charCodeAt(n2) === 47) {
             if (!a2) {
               o = n2 + 1;
               break;
             }
           } else
-            -1 === i && (a2 = false, i = n2 + 1);
-        return -1 === i ? "" : t3.slice(o, i);
+            i === -1 && (a2 = false, i = n2 + 1);
+        return i === -1 ? "" : t3.slice(o, i);
       }, extname: function(t3) {
         e2(t3);
         for (var r3 = -1, n2 = 0, o = -1, i = true, a2 = 0, h = t3.length - 1; h >= 0; --h) {
           var s = t3.charCodeAt(h);
-          if (47 !== s)
-            -1 === o && (i = false, o = h + 1), 46 === s ? -1 === r3 ? r3 = h : 1 !== a2 && (a2 = 1) : -1 !== r3 && (a2 = -1);
+          if (s !== 47)
+            o === -1 && (i = false, o = h + 1), s === 46 ? r3 === -1 ? r3 = h : a2 !== 1 && (a2 = 1) : r3 !== -1 && (a2 = -1);
           else if (!i) {
             n2 = h + 1;
             break;
           }
         }
-        return -1 === r3 || -1 === o || 0 === a2 || 1 === a2 && r3 === o - 1 && r3 === n2 + 1 ? "" : t3.slice(r3, o);
+        return r3 === -1 || o === -1 || a2 === 0 || a2 === 1 && r3 === o - 1 && r3 === n2 + 1 ? "" : t3.slice(r3, o);
       }, format: function(t3) {
-        if (null === t3 || "object" != typeof t3)
+        if (t3 === null || typeof t3 != "object")
           throw new TypeError('The "pathObject" argument must be of type Object. Received type ' + typeof t3);
         return function(t4, e3) {
           var r3 = e3.dir || e3.root, n2 = e3.base || (e3.name || "") + (e3.ext || "");
@@ -5984,25 +5982,25 @@ var moduleExports = (() => {
       }, parse: function(t3) {
         e2(t3);
         var r3 = { root: "", dir: "", base: "", ext: "", name: "" };
-        if (0 === t3.length)
+        if (t3.length === 0)
           return r3;
-        var n2, o = t3.charCodeAt(0), i = 47 === o;
+        var n2, o = t3.charCodeAt(0), i = o === 47;
         i ? (r3.root = "/", n2 = 1) : n2 = 0;
         for (var a2 = -1, h = 0, s = -1, c = true, f2 = t3.length - 1, u = 0; f2 >= n2; --f2)
-          if (47 !== (o = t3.charCodeAt(f2)))
-            -1 === s && (c = false, s = f2 + 1), 46 === o ? -1 === a2 ? a2 = f2 : 1 !== u && (u = 1) : -1 !== a2 && (u = -1);
+          if ((o = t3.charCodeAt(f2)) !== 47)
+            s === -1 && (c = false, s = f2 + 1), o === 46 ? a2 === -1 ? a2 = f2 : u !== 1 && (u = 1) : a2 !== -1 && (u = -1);
           else if (!c) {
             h = f2 + 1;
             break;
           }
-        return -1 === a2 || -1 === s || 0 === u || 1 === u && a2 === s - 1 && a2 === h + 1 ? -1 !== s && (r3.base = r3.name = 0 === h && i ? t3.slice(1, s) : t3.slice(h, s)) : (0 === h && i ? (r3.name = t3.slice(1, a2), r3.base = t3.slice(1, s)) : (r3.name = t3.slice(h, a2), r3.base = t3.slice(h, s)), r3.ext = t3.slice(a2, s)), h > 0 ? r3.dir = t3.slice(0, h - 1) : i && (r3.dir = "/"), r3;
+        return a2 === -1 || s === -1 || u === 0 || u === 1 && a2 === s - 1 && a2 === h + 1 ? s !== -1 && (r3.base = r3.name = h === 0 && i ? t3.slice(1, s) : t3.slice(h, s)) : (h === 0 && i ? (r3.name = t3.slice(1, a2), r3.base = t3.slice(1, s)) : (r3.name = t3.slice(h, a2), r3.base = t3.slice(h, s)), r3.ext = t3.slice(a2, s)), h > 0 ? r3.dir = t3.slice(0, h - 1) : i && (r3.dir = "/"), r3;
       }, sep: "/", delimiter: ":", win32: null, posix: null };
       n.posix = n, t2.exports = n;
     }, 447: (t2, e2, r2) => {
       var n;
-      if (r2.r(e2), r2.d(e2, { URI: () => d, Utils: () => P }), "object" == typeof process)
-        n = "win32" === process.platform;
-      else if ("object" == typeof navigator) {
+      if (r2.r(e2), r2.d(e2, { URI: () => d, Utils: () => P }), typeof process == "object")
+        n = process.platform === "win32";
+      else if (typeof navigator == "object") {
         var o = navigator.userAgent;
         n = o.indexOf("Windows") >= 0;
       }
@@ -6014,12 +6012,12 @@ var moduleExports = (() => {
             Object.prototype.hasOwnProperty.call(e4, r3) && (t4[r3] = e4[r3]);
         })(t3, e3);
       }, function(t3, e3) {
-        if ("function" != typeof e3 && null !== e3)
+        if (typeof e3 != "function" && e3 !== null)
           throw new TypeError("Class extends value " + String(e3) + " is not a constructor or null");
         function r3() {
           this.constructor = t3;
         }
-        i(t3, e3), t3.prototype = null === e3 ? Object.create(e3) : (r3.prototype = e3.prototype, new r3());
+        i(t3, e3), t3.prototype = e3 === null ? Object.create(e3) : (r3.prototype = e3.prototype, new r3());
       }), s = /^\w[\w\d+.-]*$/, c = /^\//, f2 = /^\/\//;
       function u(t3, e3) {
         if (!t3.scheme && e3)
@@ -6036,7 +6034,7 @@ var moduleExports = (() => {
       }
       var l = "", p = "/", g = /^(([^:/?#]+?):)?(\/\/([^/?#]*))?([^?#]*)(\?([^#]*))?(#(.*))?/, d = function() {
         function t3(t4, e3, r3, n2, o2, i2) {
-          void 0 === i2 && (i2 = false), "object" == typeof t4 ? (this.scheme = t4.scheme || l, this.authority = t4.authority || l, this.path = t4.path || l, this.query = t4.query || l, this.fragment = t4.fragment || l) : (this.scheme = function(t5, e4) {
+          i2 === void 0 && (i2 = false), typeof t4 == "object" ? (this.scheme = t4.scheme || l, this.authority = t4.authority || l, this.path = t4.path || l, this.query = t4.query || l, this.fragment = t4.fragment || l) : (this.scheme = function(t5, e4) {
             return t5 || e4 ? t5 : "file";
           }(t4, i2), this.authority = e3 || l, this.path = function(t5, e4) {
             switch (t5) {
@@ -6049,30 +6047,30 @@ var moduleExports = (() => {
           }(this.scheme, r3 || l), this.query = n2 || l, this.fragment = o2 || l, u(this, i2));
         }
         return t3.isUri = function(e3) {
-          return e3 instanceof t3 || !!e3 && "string" == typeof e3.authority && "string" == typeof e3.fragment && "string" == typeof e3.path && "string" == typeof e3.query && "string" == typeof e3.scheme && "string" == typeof e3.fsPath && "function" == typeof e3.with && "function" == typeof e3.toString;
+          return e3 instanceof t3 || !!e3 && typeof e3.authority == "string" && typeof e3.fragment == "string" && typeof e3.path == "string" && typeof e3.query == "string" && typeof e3.scheme == "string" && typeof e3.fsPath == "string" && typeof e3.with == "function" && typeof e3.toString == "function";
         }, Object.defineProperty(t3.prototype, "fsPath", { get: function() {
           return A2(this, false);
         }, enumerable: false, configurable: true }), t3.prototype.with = function(t4) {
           if (!t4)
             return this;
           var e3 = t4.scheme, r3 = t4.authority, n2 = t4.path, o2 = t4.query, i2 = t4.fragment;
-          return void 0 === e3 ? e3 = this.scheme : null === e3 && (e3 = l), void 0 === r3 ? r3 = this.authority : null === r3 && (r3 = l), void 0 === n2 ? n2 = this.path : null === n2 && (n2 = l), void 0 === o2 ? o2 = this.query : null === o2 && (o2 = l), void 0 === i2 ? i2 = this.fragment : null === i2 && (i2 = l), e3 === this.scheme && r3 === this.authority && n2 === this.path && o2 === this.query && i2 === this.fragment ? this : new y(e3, r3, n2, o2, i2);
+          return e3 === void 0 ? e3 = this.scheme : e3 === null && (e3 = l), r3 === void 0 ? r3 = this.authority : r3 === null && (r3 = l), n2 === void 0 ? n2 = this.path : n2 === null && (n2 = l), o2 === void 0 ? o2 = this.query : o2 === null && (o2 = l), i2 === void 0 ? i2 = this.fragment : i2 === null && (i2 = l), e3 === this.scheme && r3 === this.authority && n2 === this.path && o2 === this.query && i2 === this.fragment ? this : new y(e3, r3, n2, o2, i2);
         }, t3.parse = function(t4, e3) {
-          void 0 === e3 && (e3 = false);
+          e3 === void 0 && (e3 = false);
           var r3 = g.exec(t4);
           return r3 ? new y(r3[2] || l, O(r3[4] || l), O(r3[5] || l), O(r3[7] || l), O(r3[9] || l), e3) : new y(l, l, l, l, l);
         }, t3.file = function(t4) {
           var e3 = l;
           if (n && (t4 = t4.replace(/\\/g, p)), t4[0] === p && t4[1] === p) {
             var r3 = t4.indexOf(p, 2);
-            -1 === r3 ? (e3 = t4.substring(2), t4 = p) : (e3 = t4.substring(2, r3), t4 = t4.substring(r3) || p);
+            r3 === -1 ? (e3 = t4.substring(2), t4 = p) : (e3 = t4.substring(2, r3), t4 = t4.substring(r3) || p);
           }
           return new y("file", e3, t4, l, l);
         }, t3.from = function(t4) {
           var e3 = new y(t4.scheme, t4.authority, t4.path, t4.query, t4.fragment);
           return u(e3, true), e3;
         }, t3.prototype.toString = function(t4) {
-          return void 0 === t4 && (t4 = false), w(this, t4);
+          return t4 === void 0 && (t4 = false), w(this, t4);
         }, t3.prototype.toJSON = function() {
           return this;
         }, t3.revive = function(e3) {
@@ -6086,13 +6084,13 @@ var moduleExports = (() => {
         }, t3;
       }(), v = n ? 1 : void 0, y = function(t3) {
         function e3() {
-          var e4 = null !== t3 && t3.apply(this, arguments) || this;
+          var e4 = t3 !== null && t3.apply(this, arguments) || this;
           return e4._formatted = null, e4._fsPath = null, e4;
         }
         return h(e3, t3), Object.defineProperty(e3.prototype, "fsPath", { get: function() {
           return this._fsPath || (this._fsPath = A2(this, false)), this._fsPath;
         }, enumerable: false, configurable: true }), e3.prototype.toString = function(t4) {
-          return void 0 === t4 && (t4 = false), t4 ? w(this, true) : (this._formatted || (this._formatted = w(this, false)), this._formatted);
+          return t4 === void 0 && (t4 = false), t4 ? w(this, true) : (this._formatted || (this._formatted = w(this, false)), this._formatted);
         }, e3.prototype.toJSON = function() {
           var t4 = { $mid: 1 };
           return this._fsPath && (t4.fsPath = this._fsPath, t4._sep = v), this._formatted && (t4.external = this._formatted), this.path && (t4.path = this.path), this.scheme && (t4.scheme = this.scheme), this.authority && (t4.authority = this.authority), this.query && (t4.query = this.query), this.fragment && (t4.fragment = this.fragment), t4;
@@ -6101,41 +6099,41 @@ var moduleExports = (() => {
       function b(t3, e3) {
         for (var r3 = void 0, n2 = -1, o2 = 0; o2 < t3.length; o2++) {
           var i2 = t3.charCodeAt(o2);
-          if (i2 >= 97 && i2 <= 122 || i2 >= 65 && i2 <= 90 || i2 >= 48 && i2 <= 57 || 45 === i2 || 46 === i2 || 95 === i2 || 126 === i2 || e3 && 47 === i2)
-            -1 !== n2 && (r3 += encodeURIComponent(t3.substring(n2, o2)), n2 = -1), void 0 !== r3 && (r3 += t3.charAt(o2));
+          if (i2 >= 97 && i2 <= 122 || i2 >= 65 && i2 <= 90 || i2 >= 48 && i2 <= 57 || i2 === 45 || i2 === 46 || i2 === 95 || i2 === 126 || e3 && i2 === 47)
+            n2 !== -1 && (r3 += encodeURIComponent(t3.substring(n2, o2)), n2 = -1), r3 !== void 0 && (r3 += t3.charAt(o2));
           else {
-            void 0 === r3 && (r3 = t3.substr(0, o2));
+            r3 === void 0 && (r3 = t3.substr(0, o2));
             var a3 = m[i2];
-            void 0 !== a3 ? (-1 !== n2 && (r3 += encodeURIComponent(t3.substring(n2, o2)), n2 = -1), r3 += a3) : -1 === n2 && (n2 = o2);
+            a3 !== void 0 ? (n2 !== -1 && (r3 += encodeURIComponent(t3.substring(n2, o2)), n2 = -1), r3 += a3) : n2 === -1 && (n2 = o2);
           }
         }
-        return -1 !== n2 && (r3 += encodeURIComponent(t3.substring(n2))), void 0 !== r3 ? r3 : t3;
+        return n2 !== -1 && (r3 += encodeURIComponent(t3.substring(n2))), r3 !== void 0 ? r3 : t3;
       }
       function C(t3) {
         for (var e3 = void 0, r3 = 0; r3 < t3.length; r3++) {
           var n2 = t3.charCodeAt(r3);
-          35 === n2 || 63 === n2 ? (void 0 === e3 && (e3 = t3.substr(0, r3)), e3 += m[n2]) : void 0 !== e3 && (e3 += t3[r3]);
+          n2 === 35 || n2 === 63 ? (e3 === void 0 && (e3 = t3.substr(0, r3)), e3 += m[n2]) : e3 !== void 0 && (e3 += t3[r3]);
         }
-        return void 0 !== e3 ? e3 : t3;
+        return e3 !== void 0 ? e3 : t3;
       }
       function A2(t3, e3) {
         var r3;
-        return r3 = t3.authority && t3.path.length > 1 && "file" === t3.scheme ? "//".concat(t3.authority).concat(t3.path) : 47 === t3.path.charCodeAt(0) && (t3.path.charCodeAt(1) >= 65 && t3.path.charCodeAt(1) <= 90 || t3.path.charCodeAt(1) >= 97 && t3.path.charCodeAt(1) <= 122) && 58 === t3.path.charCodeAt(2) ? e3 ? t3.path.substr(1) : t3.path[1].toLowerCase() + t3.path.substr(2) : t3.path, n && (r3 = r3.replace(/\//g, "\\")), r3;
+        return r3 = t3.authority && t3.path.length > 1 && t3.scheme === "file" ? "//".concat(t3.authority).concat(t3.path) : t3.path.charCodeAt(0) === 47 && (t3.path.charCodeAt(1) >= 65 && t3.path.charCodeAt(1) <= 90 || t3.path.charCodeAt(1) >= 97 && t3.path.charCodeAt(1) <= 122) && t3.path.charCodeAt(2) === 58 ? e3 ? t3.path.substr(1) : t3.path[1].toLowerCase() + t3.path.substr(2) : t3.path, n && (r3 = r3.replace(/\//g, "\\")), r3;
       }
       function w(t3, e3) {
         var r3 = e3 ? C : b, n2 = "", o2 = t3.scheme, i2 = t3.authority, a3 = t3.path, h2 = t3.query, s2 = t3.fragment;
-        if (o2 && (n2 += o2, n2 += ":"), (i2 || "file" === o2) && (n2 += p, n2 += p), i2) {
+        if (o2 && (n2 += o2, n2 += ":"), (i2 || o2 === "file") && (n2 += p, n2 += p), i2) {
           var c2 = i2.indexOf("@");
-          if (-1 !== c2) {
+          if (c2 !== -1) {
             var f3 = i2.substr(0, c2);
-            i2 = i2.substr(c2 + 1), -1 === (c2 = f3.indexOf(":")) ? n2 += r3(f3, false) : (n2 += r3(f3.substr(0, c2), false), n2 += ":", n2 += r3(f3.substr(c2 + 1), false)), n2 += "@";
+            i2 = i2.substr(c2 + 1), (c2 = f3.indexOf(":")) === -1 ? n2 += r3(f3, false) : (n2 += r3(f3.substr(0, c2), false), n2 += ":", n2 += r3(f3.substr(c2 + 1), false)), n2 += "@";
           }
-          -1 === (c2 = (i2 = i2.toLowerCase()).indexOf(":")) ? n2 += r3(i2, false) : (n2 += r3(i2.substr(0, c2), false), n2 += i2.substr(c2));
+          (c2 = (i2 = i2.toLowerCase()).indexOf(":")) === -1 ? n2 += r3(i2, false) : (n2 += r3(i2.substr(0, c2), false), n2 += i2.substr(c2));
         }
         if (a3) {
-          if (a3.length >= 3 && 47 === a3.charCodeAt(0) && 58 === a3.charCodeAt(2))
+          if (a3.length >= 3 && a3.charCodeAt(0) === 47 && a3.charCodeAt(2) === 58)
             (u2 = a3.charCodeAt(1)) >= 65 && u2 <= 90 && (a3 = "/".concat(String.fromCharCode(u2 + 32), ":").concat(a3.substr(3)));
-          else if (a3.length >= 2 && 58 === a3.charCodeAt(1)) {
+          else if (a3.length >= 2 && a3.charCodeAt(1) === 58) {
             var u2;
             (u2 = a3.charCodeAt(0)) >= 65 && u2 <= 90 && (a3 = "".concat(String.fromCharCode(u2 + 32), ":").concat(a3.substr(2)));
           }
@@ -6157,7 +6155,7 @@ var moduleExports = (() => {
         }) : t3;
       }
       var P, j = r2(470), U = function(t3, e3, r3) {
-        if (r3 || 2 === arguments.length)
+        if (r3 || arguments.length === 2)
           for (var n2, o2 = 0, i2 = e3.length; o2 < i2; o2++)
             !n2 && o2 in e3 || (n2 || (n2 = Array.prototype.slice.call(e3, 0, o2)), n2[o2] = e3[o2]);
         return t3.concat(n2 || Array.prototype.slice.call(e3));
@@ -6174,7 +6172,7 @@ var moduleExports = (() => {
           return t4.with({ path: I.resolve.apply(I, U([n2], e3, false)) });
         }, t3.dirname = function(t4) {
           var e3 = I.dirname(t4.path);
-          return 1 === e3.length && 46 === e3.charCodeAt(0) ? t4 : t4.with({ path: e3 });
+          return e3.length === 1 && e3.charCodeAt(0) === 46 ? t4 : t4.with({ path: e3 });
         }, t3.basename = function(t4) {
           return I.basename(t4.path);
         }, t3.extname = function(t4) {
@@ -6192,7 +6190,7 @@ var moduleExports = (() => {
       for (var n in e2)
         r.o(e2, n) && !r.o(t2, n) && Object.defineProperty(t2, n, { enumerable: true, get: e2[n] });
     }, r.o = (t2, e2) => Object.prototype.hasOwnProperty.call(t2, e2), r.r = (t2) => {
-      "undefined" != typeof Symbol && Symbol.toStringTag && Object.defineProperty(t2, Symbol.toStringTag, { value: "Module" }), Object.defineProperty(t2, "__esModule", { value: true });
+      typeof Symbol != "undefined" && Symbol.toStringTag && Object.defineProperty(t2, Symbol.toStringTag, { value: "Module" }), Object.defineProperty(t2, "__esModule", { value: true });
     }, r(447);
   })();
   var { URI, Utils } = LIB;
@@ -6338,7 +6336,7 @@ var moduleExports = (() => {
     function SchemaHandle2(service, uri, unresolvedSchemaContent) {
       this.service = service;
       this.uri = uri;
-      this.dependencies = /* @__PURE__ */ new Set();
+      this.dependencies = new Set();
       this.anchors = void 0;
       if (unresolvedSchemaContent) {
         this.unresolvedSchema = this.service.promise.resolve(new UnresolvedSchema(unresolvedSchemaContent));
@@ -6645,7 +6643,7 @@ var moduleExports = (() => {
       var resolveRefs = function(node, parentSchema, parentHandle) {
         var openPromises = [];
         _this.traverseNodes(node, function(next) {
-          var seenRefs = /* @__PURE__ */ new Set();
+          var seenRefs = new Set();
           while (next.$ref) {
             var ref = next.$ref;
             var segments = ref.split("#", 2);
@@ -6665,7 +6663,7 @@ var moduleExports = (() => {
         return _this.promise.all(openPromises);
       };
       var collectAnchors = function(root) {
-        var result = /* @__PURE__ */ new Map();
+        var result = new Map();
         _this.traverseNodes(root, function(next) {
           var id2 = next.$id || next.id;
           if (typeof id2 === "string" && id2.charAt(0) === "#") {
@@ -6687,7 +6685,7 @@ var moduleExports = (() => {
       if (!root || typeof root !== "object") {
         return Promise.resolve(null);
       }
-      var seen = /* @__PURE__ */ new Set();
+      var seen = new Set();
       var collectEntries = function() {
         var entries = [];
         for (var _i = 0; _i < arguments.length; _i++) {
@@ -6766,7 +6764,7 @@ var moduleExports = (() => {
       return void 0;
     };
     JSONSchemaService2.prototype.getAssociatedSchemas = function(resource) {
-      var seen = /* @__PURE__ */ Object.create(null);
+      var seen = Object.create(null);
       var schemas = [];
       var normalizedResource = normalizeResourceForMatching(resource);
       for (var _i = 0, _a = this.filePatternAssociations; _i < _a.length; _i++) {
@@ -6843,14 +6841,14 @@ var moduleExports = (() => {
   var idCounter2 = 0;
   function normalizeId(id) {
     try {
-      return URI.parse(id).toString(true);
+      return URI.parse(id).toString();
     } catch (e) {
       return id;
     }
   }
   function normalizeResourceForMatching(resource) {
     try {
-      return URI.parse(resource).with({ fragment: null, query: null }).toString(true);
+      return URI.parse(resource).with({ fragment: null, query: null }).toString();
     } catch (e) {
       return resource;
     }
@@ -6872,8 +6870,8 @@ var moduleExports = (() => {
     var nestingLevels = [];
     var stack = [];
     var prevStart = -1;
-    var scanner = createScanner2(document.getText(), false);
-    var token = scanner.scan();
+    var scanner2 = createScanner2(document.getText(), false);
+    var token = scanner2.scan();
     function addRange(range2) {
       ranges.push(range2);
       nestingLevels.push(stack.length);
@@ -6882,7 +6880,7 @@ var moduleExports = (() => {
       switch (token) {
         case 1:
         case 3: {
-          var startLine = document.positionAt(scanner.getTokenOffset()).line;
+          var startLine = document.positionAt(scanner2.getTokenOffset()).line;
           var range = { startLine, endLine: startLine, kind: token === 1 ? "object" : "array" };
           stack.push(range);
           break;
@@ -6892,7 +6890,7 @@ var moduleExports = (() => {
           var kind = token === 2 ? "object" : "array";
           if (stack.length > 0 && stack[stack.length - 1].kind === kind) {
             var range = stack.pop();
-            var line = document.positionAt(scanner.getTokenOffset()).line;
+            var line = document.positionAt(scanner2.getTokenOffset()).line;
             if (range && line > range.startLine + 1 && prevStart !== range.startLine) {
               range.endLine = line - 1;
               addRange(range);
@@ -6902,10 +6900,10 @@ var moduleExports = (() => {
           break;
         }
         case 13: {
-          var startLine = document.positionAt(scanner.getTokenOffset()).line;
-          var endLine = document.positionAt(scanner.getTokenOffset() + scanner.getTokenLength()).line;
-          if (scanner.getTokenError() === 1 && startLine + 1 < document.lineCount) {
-            scanner.setPosition(document.offsetAt(Position.create(startLine + 1, 0)));
+          var startLine = document.positionAt(scanner2.getTokenOffset()).line;
+          var endLine = document.positionAt(scanner2.getTokenOffset() + scanner2.getTokenLength()).line;
+          if (scanner2.getTokenError() === 1 && startLine + 1 < document.lineCount) {
+            scanner2.setPosition(document.offsetAt(Position.create(startLine + 1, 0)));
           } else {
             if (startLine < endLine) {
               addRange({ startLine, endLine, kind: FoldingRangeKind.Comment });
@@ -6915,10 +6913,10 @@ var moduleExports = (() => {
           break;
         }
         case 12: {
-          var text = document.getText().substr(scanner.getTokenOffset(), scanner.getTokenLength());
+          var text = document.getText().substr(scanner2.getTokenOffset(), scanner2.getTokenLength());
           var m = text.match(/^\/\/\s*#(region\b)|(endregion\b)/);
           if (m) {
-            var line = document.positionAt(scanner.getTokenOffset()).line;
+            var line = document.positionAt(scanner2.getTokenOffset()).line;
             if (m[1]) {
               var range = { startLine: line, endLine: line, kind: FoldingRangeKind.Region };
               stack.push(range);
@@ -6941,7 +6939,7 @@ var moduleExports = (() => {
           break;
         }
       }
-      token = scanner.scan();
+      token = scanner2.scan();
     }
     var rangeLimit = context && context.rangeLimit;
     if (typeof rangeLimit !== "number" || ranges.length <= rangeLimit) {
@@ -7025,12 +7023,12 @@ var moduleExports = (() => {
     function newRange(start, end) {
       return Range.create(document.positionAt(start), document.positionAt(end));
     }
-    var scanner = createScanner2(document.getText(), true);
+    var scanner2 = createScanner2(document.getText(), true);
     function getOffsetAfterNextToken(offset, expectedToken) {
-      scanner.setPosition(offset);
-      var token = scanner.scan();
+      scanner2.setPosition(offset);
+      var token = scanner2.scan();
       if (token === expectedToken) {
-        return scanner.getTokenOffset() + scanner.getTokenLength();
+        return scanner2.getTokenOffset() + scanner2.getTokenLength();
       }
       return -1;
     }
@@ -7175,10 +7173,6 @@ var moduleExports = (() => {
     };
   }
   var JSONWorker = class {
-    _ctx;
-    _languageService;
-    _languageSettings;
-    _languageId;
     constructor(ctx, createData) {
       this._ctx = ctx;
       this._languageSettings = createData.languageSettings;
@@ -7329,7 +7323,7 @@ var moduleExports = (() => {
   function create(ctx, createData) {
     return new JSONWorker(ctx, createData);
   }
-  return __toCommonJS(jsonWorker_exports);
+  return jsonWorker_exports;
 })();
 return moduleExports;
 });

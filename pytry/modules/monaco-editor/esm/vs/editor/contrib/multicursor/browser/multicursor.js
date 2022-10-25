@@ -2,15 +2,6 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
 import { status } from '../../../../base/browser/ui/aria/aria.js';
 import { RunOnceScheduler } from '../../../../base/common/async.js';
 import { KeyChord } from '../../../../base/common/keyCodes.js';
@@ -22,13 +13,13 @@ import { Selection } from '../../../common/core/selection.js';
 import { EditorContextKeys } from '../../../common/editorContextKeys.js';
 import { OverviewRulerLane, MinimapPosition } from '../../../common/model.js';
 import { ModelDecorationOptions } from '../../../common/model/textModel.js';
+import { DocumentHighlightProviderRegistry } from '../../../common/languages.js';
 import { CommonFindController } from '../../find/browser/findController.js';
 import * as nls from '../../../../nls.js';
 import { MenuId } from '../../../../platform/actions/common/actions.js';
 import { ContextKeyExpr } from '../../../../platform/contextkey/common/contextkey.js';
 import { overviewRulerSelectionHighlightForeground, minimapSelectionOccurrenceHighlight } from '../../../../platform/theme/common/colorRegistry.js';
 import { themeColorFromId } from '../../../../platform/theme/common/themeService.js';
-import { ILanguageFeaturesService } from '../../../common/services/languageFeatures.js';
 function announceCursorChange(previousCursorState, cursorState) {
     const cursorDiff = cursorState.filter(cs => !previousCursorState.find(pcs => pcs.equals(cs)));
     if (cursorDiff.length >= 1) {
@@ -46,12 +37,12 @@ export class InsertCursorAbove extends EditorAction {
             precondition: undefined,
             kbOpts: {
                 kbExpr: EditorContextKeys.editorTextFocus,
-                primary: 2048 /* KeyMod.CtrlCmd */ | 512 /* KeyMod.Alt */ | 16 /* KeyCode.UpArrow */,
+                primary: 2048 /* CtrlCmd */ | 512 /* Alt */ | 16 /* UpArrow */,
                 linux: {
-                    primary: 1024 /* KeyMod.Shift */ | 512 /* KeyMod.Alt */ | 16 /* KeyCode.UpArrow */,
-                    secondary: [2048 /* KeyMod.CtrlCmd */ | 1024 /* KeyMod.Shift */ | 16 /* KeyCode.UpArrow */]
+                    primary: 1024 /* Shift */ | 512 /* Alt */ | 16 /* UpArrow */,
+                    secondary: [2048 /* CtrlCmd */ | 1024 /* Shift */ | 16 /* UpArrow */]
                 },
-                weight: 100 /* KeybindingWeight.EditorContrib */
+                weight: 100 /* EditorContrib */
             },
             menuOpts: {
                 menuId: MenuId.MenubarSelectionMenu,
@@ -73,9 +64,9 @@ export class InsertCursorAbove extends EditorAction {
         if (viewModel.cursorConfig.readOnly) {
             return;
         }
-        viewModel.model.pushStackElement();
+        viewModel.pushStackElement();
         const previousCursorState = viewModel.getCursorStates();
-        viewModel.setCursorStates(args.source, 3 /* CursorChangeReason.Explicit */, CursorMoveCommands.addCursorUp(viewModel, previousCursorState, useLogicalLine));
+        viewModel.setCursorStates(args.source, 3 /* Explicit */, CursorMoveCommands.addCursorUp(viewModel, previousCursorState, useLogicalLine));
         viewModel.revealTopMostCursor(args.source);
         announceCursorChange(previousCursorState, viewModel.getCursorStates());
     }
@@ -89,12 +80,12 @@ export class InsertCursorBelow extends EditorAction {
             precondition: undefined,
             kbOpts: {
                 kbExpr: EditorContextKeys.editorTextFocus,
-                primary: 2048 /* KeyMod.CtrlCmd */ | 512 /* KeyMod.Alt */ | 18 /* KeyCode.DownArrow */,
+                primary: 2048 /* CtrlCmd */ | 512 /* Alt */ | 18 /* DownArrow */,
                 linux: {
-                    primary: 1024 /* KeyMod.Shift */ | 512 /* KeyMod.Alt */ | 18 /* KeyCode.DownArrow */,
-                    secondary: [2048 /* KeyMod.CtrlCmd */ | 1024 /* KeyMod.Shift */ | 18 /* KeyCode.DownArrow */]
+                    primary: 1024 /* Shift */ | 512 /* Alt */ | 18 /* DownArrow */,
+                    secondary: [2048 /* CtrlCmd */ | 1024 /* Shift */ | 18 /* DownArrow */]
                 },
-                weight: 100 /* KeybindingWeight.EditorContrib */
+                weight: 100 /* EditorContrib */
             },
             menuOpts: {
                 menuId: MenuId.MenubarSelectionMenu,
@@ -116,9 +107,9 @@ export class InsertCursorBelow extends EditorAction {
         if (viewModel.cursorConfig.readOnly) {
             return;
         }
-        viewModel.model.pushStackElement();
+        viewModel.pushStackElement();
         const previousCursorState = viewModel.getCursorStates();
-        viewModel.setCursorStates(args.source, 3 /* CursorChangeReason.Explicit */, CursorMoveCommands.addCursorDown(viewModel, previousCursorState, useLogicalLine));
+        viewModel.setCursorStates(args.source, 3 /* Explicit */, CursorMoveCommands.addCursorDown(viewModel, previousCursorState, useLogicalLine));
         viewModel.revealBottomMostCursor(args.source);
         announceCursorChange(previousCursorState, viewModel.getCursorStates());
     }
@@ -132,8 +123,8 @@ class InsertCursorAtEndOfEachLineSelected extends EditorAction {
             precondition: undefined,
             kbOpts: {
                 kbExpr: EditorContextKeys.editorTextFocus,
-                primary: 1024 /* KeyMod.Shift */ | 512 /* KeyMod.Alt */ | 39 /* KeyCode.KeyI */,
-                weight: 100 /* KeybindingWeight.EditorContrib */
+                primary: 1024 /* Shift */ | 512 /* Alt */ | 39 /* KeyI */,
+                weight: 100 /* EditorContrib */
             },
             menuOpts: {
                 menuId: MenuId.MenubarSelectionMenu,
@@ -148,7 +139,7 @@ class InsertCursorAtEndOfEachLineSelected extends EditorAction {
             return;
         }
         for (let i = selection.startLineNumber; i < selection.endLineNumber; i++) {
-            const currentLineMaxColumn = model.getLineMaxColumn(i);
+            let currentLineMaxColumn = model.getLineMaxColumn(i);
             result.push(new Selection(i, currentLineMaxColumn, i, currentLineMaxColumn));
         }
         if (selection.endColumn > 1) {
@@ -163,7 +154,7 @@ class InsertCursorAtEndOfEachLineSelected extends EditorAction {
         const selections = editor.getSelections();
         const viewModel = editor._getViewModel();
         const previousCursorState = viewModel.getCursorStates();
-        const newSelections = [];
+        let newSelections = [];
         selections.forEach((sel) => this.getCursorsForSelection(sel, model, newSelections));
         if (newSelections.length > 0) {
             editor.setSelections(newSelections);
@@ -186,7 +177,7 @@ class InsertCursorAtEndOfLineSelected extends EditorAction {
         }
         const selections = editor.getSelections();
         const lineCount = editor.getModel().getLineCount();
-        const newSelections = [];
+        let newSelections = [];
         for (let i = selections[0].startLineNumber; i <= lineCount; i++) {
             newSelections.push(new Selection(i, selections[0].startColumn, i, selections[0].endColumn));
         }
@@ -212,7 +203,7 @@ class InsertCursorAtTopOfLineSelected extends EditorAction {
             return;
         }
         const selections = editor.getSelections();
-        const newSelections = [];
+        let newSelections = [];
         for (let i = selections[0].startLineNumber; i >= 1; i--) {
             newSelections.push(new Selection(i, selections[0].startColumn, i, selections[0].endColumn));
         }
@@ -296,7 +287,7 @@ export class MultiCursorSession {
             return null;
         }
         const allSelections = this._editor.getSelections();
-        return new MultiCursorSessionResult(allSelections.concat(nextMatch), nextMatch, 0 /* ScrollType.Smooth */);
+        return new MultiCursorSessionResult(allSelections.concat(nextMatch), nextMatch, 0 /* Smooth */);
     }
     moveSelectionToNextFindMatch() {
         if (!this._editor.hasModel()) {
@@ -307,7 +298,7 @@ export class MultiCursorSession {
             return null;
         }
         const allSelections = this._editor.getSelections();
-        return new MultiCursorSessionResult(allSelections.slice(0, allSelections.length - 1).concat(nextMatch), nextMatch, 0 /* ScrollType.Smooth */);
+        return new MultiCursorSessionResult(allSelections.slice(0, allSelections.length - 1).concat(nextMatch), nextMatch, 0 /* Smooth */);
     }
     _getNextMatch() {
         if (!this._editor.hasModel()) {
@@ -321,7 +312,7 @@ export class MultiCursorSession {
         this.findController.highlightFindOptions();
         const allSelections = this._editor.getSelections();
         const lastAddedSelection = allSelections[allSelections.length - 1];
-        const nextMatch = this._editor.getModel().findNextMatch(this.searchText, lastAddedSelection.getEndPosition(), false, this.matchCase, this.wholeWord ? this._editor.getOption(119 /* EditorOption.wordSeparators */) : null, false);
+        const nextMatch = this._editor.getModel().findNextMatch(this.searchText, lastAddedSelection.getEndPosition(), false, this.matchCase, this.wholeWord ? this._editor.getOption(117 /* wordSeparators */) : null, false);
         if (!nextMatch) {
             return null;
         }
@@ -336,7 +327,7 @@ export class MultiCursorSession {
             return null;
         }
         const allSelections = this._editor.getSelections();
-        return new MultiCursorSessionResult(allSelections.concat(previousMatch), previousMatch, 0 /* ScrollType.Smooth */);
+        return new MultiCursorSessionResult(allSelections.concat(previousMatch), previousMatch, 0 /* Smooth */);
     }
     moveSelectionToPreviousFindMatch() {
         if (!this._editor.hasModel()) {
@@ -347,7 +338,7 @@ export class MultiCursorSession {
             return null;
         }
         const allSelections = this._editor.getSelections();
-        return new MultiCursorSessionResult(allSelections.slice(0, allSelections.length - 1).concat(previousMatch), previousMatch, 0 /* ScrollType.Smooth */);
+        return new MultiCursorSessionResult(allSelections.slice(0, allSelections.length - 1).concat(previousMatch), previousMatch, 0 /* Smooth */);
     }
     _getPreviousMatch() {
         if (!this._editor.hasModel()) {
@@ -361,22 +352,18 @@ export class MultiCursorSession {
         this.findController.highlightFindOptions();
         const allSelections = this._editor.getSelections();
         const lastAddedSelection = allSelections[allSelections.length - 1];
-        const previousMatch = this._editor.getModel().findPreviousMatch(this.searchText, lastAddedSelection.getStartPosition(), false, this.matchCase, this.wholeWord ? this._editor.getOption(119 /* EditorOption.wordSeparators */) : null, false);
+        const previousMatch = this._editor.getModel().findPreviousMatch(this.searchText, lastAddedSelection.getStartPosition(), false, this.matchCase, this.wholeWord ? this._editor.getOption(117 /* wordSeparators */) : null, false);
         if (!previousMatch) {
             return null;
         }
         return new Selection(previousMatch.range.startLineNumber, previousMatch.range.startColumn, previousMatch.range.endLineNumber, previousMatch.range.endColumn);
     }
-    selectAll(searchScope) {
+    selectAll() {
         if (!this._editor.hasModel()) {
             return [];
         }
         this.findController.highlightFindOptions();
-        const editorModel = this._editor.getModel();
-        if (searchScope) {
-            return editorModel.findMatches(this.searchText, searchScope, false, this.matchCase, this.wholeWord ? this._editor.getOption(119 /* EditorOption.wordSeparators */) : null, false, 1073741824 /* Constants.MAX_SAFE_SMALL_INTEGER */);
-        }
-        return editorModel.findMatches(this.searchText, true, false, this.matchCase, this.wholeWord ? this._editor.getOption(119 /* EditorOption.wordSeparators */) : null, false, 1073741824 /* Constants.MAX_SAFE_SMALL_INTEGER */);
+        return this._editor.getModel().findMatches(this.searchText, true, false, this.matchCase, this.wholeWord ? this._editor.getOption(117 /* wordSeparators */) : null, false, 1073741824 /* MAX_SAFE_SMALL_INTEGER */);
     }
 }
 export class MultiCursorSelectionController extends Disposable {
@@ -404,9 +391,9 @@ export class MultiCursorSelectionController extends Disposable {
             this._session = session;
             const newState = { searchString: this._session.searchText };
             if (this._session.isDisconnectedFromFindController) {
-                newState.wholeWordOverride = 1 /* FindOptionOverride.True */;
-                newState.matchCaseOverride = 1 /* FindOptionOverride.True */;
-                newState.isRegexOverride = 2 /* FindOptionOverride.False */;
+                newState.wholeWordOverride = 1 /* True */;
+                newState.matchCaseOverride = 1 /* True */;
+                newState.isRegexOverride = 2 /* False */;
             }
             findController.getState().change(newState, false);
             this._sessionDispose.add(this._editor.onDidChangeCursorSelection((e) => {
@@ -429,9 +416,9 @@ export class MultiCursorSelectionController extends Disposable {
         this._sessionDispose.clear();
         if (this._session && this._session.isDisconnectedFromFindController) {
             const newState = {
-                wholeWordOverride: 0 /* FindOptionOverride.NotSet */,
-                matchCaseOverride: 0 /* FindOptionOverride.NotSet */,
-                isRegexOverride: 0 /* FindOptionOverride.NotSet */,
+                wholeWordOverride: 0 /* NotSet */,
+                matchCaseOverride: 0 /* NotSet */,
+                isRegexOverride: 0 /* NotSet */,
             };
             this._session.findController.getState().change(newState, false);
         }
@@ -477,7 +464,7 @@ export class MultiCursorSelectionController extends Disposable {
                 const selectionsContainSameText = modelRangesContainSameText(this._editor.getModel(), allSelections, matchCase);
                 if (!selectionsContainSameText) {
                     const model = this._editor.getModel();
-                    const resultingSelections = [];
+                    let resultingSelections = [];
                     for (let i = 0, len = allSelections.length; i < len; i++) {
                         resultingSelections[i] = this._expandEmptyToWord(model, allSelections[i]);
                     }
@@ -521,20 +508,26 @@ export class MultiCursorSelectionController extends Disposable {
         // - and the search string is non-empty
         // - and we're searching for a regex
         if (findState.isRevealed && findState.searchString.length > 0 && findState.isRegex) {
-            const editorModel = this._editor.getModel();
-            if (findState.searchScope) {
-                matches = editorModel.findMatches(findState.searchString, findState.searchScope, findState.isRegex, findState.matchCase, findState.wholeWord ? this._editor.getOption(119 /* EditorOption.wordSeparators */) : null, false, 1073741824 /* Constants.MAX_SAFE_SMALL_INTEGER */);
-            }
-            else {
-                matches = editorModel.findMatches(findState.searchString, true, findState.isRegex, findState.matchCase, findState.wholeWord ? this._editor.getOption(119 /* EditorOption.wordSeparators */) : null, false, 1073741824 /* Constants.MAX_SAFE_SMALL_INTEGER */);
-            }
+            matches = this._editor.getModel().findMatches(findState.searchString, true, findState.isRegex, findState.matchCase, findState.wholeWord ? this._editor.getOption(117 /* wordSeparators */) : null, false, 1073741824 /* MAX_SAFE_SMALL_INTEGER */);
         }
         else {
             this._beginSessionIfNeeded(findController);
             if (!this._session) {
                 return;
             }
-            matches = this._session.selectAll(findState.searchScope);
+            matches = this._session.selectAll();
+        }
+        if (findState.searchScope) {
+            const states = findState.searchScope;
+            let inSelection = [];
+            matches.forEach((match) => {
+                states.forEach((state) => {
+                    if (match.range.endLineNumber <= state.endLineNumber && match.range.startLineNumber >= state.startLineNumber) {
+                        inSelection.push(match);
+                    }
+                });
+            });
+            matches = inSelection;
         }
         if (matches.length > 0) {
             const editorSelection = this._editor.getSelection();
@@ -581,8 +574,8 @@ export class AddSelectionToNextFindMatchAction extends MultiCursorSelectionContr
             precondition: undefined,
             kbOpts: {
                 kbExpr: EditorContextKeys.focus,
-                primary: 2048 /* KeyMod.CtrlCmd */ | 34 /* KeyCode.KeyD */,
-                weight: 100 /* KeybindingWeight.EditorContrib */
+                primary: 2048 /* CtrlCmd */ | 34 /* KeyD */,
+                weight: 100 /* EditorContrib */
             },
             menuOpts: {
                 menuId: MenuId.MenubarSelectionMenu,
@@ -624,8 +617,8 @@ export class MoveSelectionToNextFindMatchAction extends MultiCursorSelectionCont
             precondition: undefined,
             kbOpts: {
                 kbExpr: EditorContextKeys.focus,
-                primary: KeyChord(2048 /* KeyMod.CtrlCmd */ | 41 /* KeyCode.KeyK */, 2048 /* KeyMod.CtrlCmd */ | 34 /* KeyCode.KeyD */),
-                weight: 100 /* KeybindingWeight.EditorContrib */
+                primary: KeyChord(2048 /* CtrlCmd */ | 41 /* KeyK */, 2048 /* CtrlCmd */ | 34 /* KeyD */),
+                weight: 100 /* EditorContrib */
             }
         });
     }
@@ -655,8 +648,8 @@ export class SelectHighlightsAction extends MultiCursorSelectionControllerAction
             precondition: undefined,
             kbOpts: {
                 kbExpr: EditorContextKeys.focus,
-                primary: 2048 /* KeyMod.CtrlCmd */ | 1024 /* KeyMod.Shift */ | 42 /* KeyCode.KeyL */,
-                weight: 100 /* KeybindingWeight.EditorContrib */
+                primary: 2048 /* CtrlCmd */ | 1024 /* Shift */ | 42 /* KeyL */,
+                weight: 100 /* EditorContrib */
             },
             menuOpts: {
                 menuId: MenuId.MenubarSelectionMenu,
@@ -679,8 +672,8 @@ export class CompatChangeAll extends MultiCursorSelectionControllerAction {
             precondition: ContextKeyExpr.and(EditorContextKeys.writable, EditorContextKeys.editorTextFocus),
             kbOpts: {
                 kbExpr: EditorContextKeys.editorTextFocus,
-                primary: 2048 /* KeyMod.CtrlCmd */ | 60 /* KeyCode.F2 */,
-                weight: 100 /* KeybindingWeight.EditorContrib */
+                primary: 2048 /* CtrlCmd */ | 60 /* F2 */,
+                weight: 100 /* EditorContrib */
             },
             contextMenuOpts: {
                 group: '1_modification',
@@ -717,17 +710,16 @@ class SelectionHighlighterState {
         return this._cachedFindMatches;
     }
 }
-let SelectionHighlighter = class SelectionHighlighter extends Disposable {
-    constructor(editor, _languageFeaturesService) {
+export class SelectionHighlighter extends Disposable {
+    constructor(editor) {
         super();
-        this._languageFeaturesService = _languageFeaturesService;
         this.editor = editor;
-        this._isEnabled = editor.getOption(99 /* EditorOption.selectionHighlight */);
-        this._decorations = editor.createDecorationsCollection();
+        this._isEnabled = editor.getOption(97 /* selectionHighlight */);
+        this.decorations = [];
         this.updateSoon = this._register(new RunOnceScheduler(() => this._update(), 300));
         this.state = null;
         this._register(editor.onDidChangeConfiguration((e) => {
-            this._isEnabled = editor.getOption(99 /* EditorOption.selectionHighlight */);
+            this._isEnabled = editor.getOption(97 /* selectionHighlight */);
         }));
         this._register(editor.onDidChangeCursorSelection((e) => {
             if (!this._isEnabled) {
@@ -736,7 +728,7 @@ let SelectionHighlighter = class SelectionHighlighter extends Disposable {
                 return;
             }
             if (e.selection.isEmpty()) {
-                if (e.reason === 3 /* CursorChangeReason.Explicit */) {
+                if (e.reason === 3 /* Explicit */) {
                     if (this.state) {
                         // no longer valid
                         this._setState(null);
@@ -835,12 +827,12 @@ let SelectionHighlighter = class SelectionHighlighter extends Disposable {
                 return null;
             }
         }
-        return new SelectionHighlighterState(editor.getModel(), r.searchText, r.matchCase, r.wholeWord ? editor.getOption(119 /* EditorOption.wordSeparators */) : null, oldState);
+        return new SelectionHighlighterState(editor.getModel(), r.searchText, r.matchCase, r.wholeWord ? editor.getOption(117 /* wordSeparators */) : null, oldState);
     }
     _setState(newState) {
         this.state = newState;
         if (!this.state) {
-            this._decorations.clear();
+            this.decorations = this.editor.deltaDecorations(this.decorations, []);
             return;
         }
         if (!this.editor.hasModel()) {
@@ -883,7 +875,7 @@ let SelectionHighlighter = class SelectionHighlighter extends Disposable {
                 }
             }
         }
-        const hasFindOccurrences = this._languageFeaturesService.documentHighlightProvider.has(model) && this.editor.getOption(74 /* EditorOption.occurrencesHighlight */);
+        const hasFindOccurrences = DocumentHighlightProviderRegistry.has(model) && this.editor.getOption(72 /* occurrencesHighlight */);
         const decorations = matches.map(r => {
             return {
                 range: r,
@@ -891,17 +883,17 @@ let SelectionHighlighter = class SelectionHighlighter extends Disposable {
                 options: (hasFindOccurrences ? SelectionHighlighter._SELECTION_HIGHLIGHT : SelectionHighlighter._SELECTION_HIGHLIGHT_OVERVIEW)
             };
         });
-        this._decorations.set(decorations);
+        this.decorations = this.editor.deltaDecorations(this.decorations, decorations);
     }
     dispose() {
         this._setState(null);
         super.dispose();
     }
-};
+}
 SelectionHighlighter.ID = 'editor.contrib.selectionHighlighter';
 SelectionHighlighter._SELECTION_HIGHLIGHT_OVERVIEW = ModelDecorationOptions.register({
     description: 'selection-highlight-overview',
-    stickiness: 1 /* TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges */,
+    stickiness: 1 /* NeverGrowsWhenTypingAtEdges */,
     className: 'selectionHighlight',
     minimap: {
         color: themeColorFromId(minimapSelectionOccurrenceHighlight),
@@ -914,13 +906,9 @@ SelectionHighlighter._SELECTION_HIGHLIGHT_OVERVIEW = ModelDecorationOptions.regi
 });
 SelectionHighlighter._SELECTION_HIGHLIGHT = ModelDecorationOptions.register({
     description: 'selection-highlight',
-    stickiness: 1 /* TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges */,
+    stickiness: 1 /* NeverGrowsWhenTypingAtEdges */,
     className: 'selectionHighlight',
 });
-SelectionHighlighter = __decorate([
-    __param(1, ILanguageFeaturesService)
-], SelectionHighlighter);
-export { SelectionHighlighter };
 function modelRangesContainSameText(model, ranges, matchCase) {
     const selectedText = getValueInRange(model, ranges[0], !matchCase);
     for (let i = 1, len = ranges.length; i < len; i++) {
@@ -939,72 +927,6 @@ function getValueInRange(model, range, toLowerCase) {
     const text = model.getValueInRange(range);
     return (toLowerCase ? text.toLowerCase() : text);
 }
-export class FocusNextCursor extends EditorAction {
-    constructor() {
-        super({
-            id: 'editor.action.focusNextCursor',
-            label: nls.localize('mutlicursor.focusNextCursor', "Focus Next Cursor"),
-            description: {
-                description: nls.localize('mutlicursor.focusNextCursor.description', "Focuses the next cursor"),
-                args: [],
-            },
-            alias: 'Focus Next Cursor',
-            precondition: undefined
-        });
-    }
-    run(accessor, editor, args) {
-        if (!editor.hasModel()) {
-            return;
-        }
-        const viewModel = editor._getViewModel();
-        if (viewModel.cursorConfig.readOnly) {
-            return;
-        }
-        viewModel.model.pushStackElement();
-        const previousCursorState = Array.from(viewModel.getCursorStates());
-        const firstCursor = previousCursorState.shift();
-        if (!firstCursor) {
-            return;
-        }
-        previousCursorState.push(firstCursor);
-        viewModel.setCursorStates(args.source, 3 /* CursorChangeReason.Explicit */, previousCursorState);
-        viewModel.revealPrimaryCursor(args.source, true);
-        announceCursorChange(previousCursorState, viewModel.getCursorStates());
-    }
-}
-export class FocusPreviousCursor extends EditorAction {
-    constructor() {
-        super({
-            id: 'editor.action.focusPreviousCursor',
-            label: nls.localize('mutlicursor.focusPreviousCursor', "Focus Previous Cursor"),
-            description: {
-                description: nls.localize('mutlicursor.focusPreviousCursor.description', "Focuses the previous cursor"),
-                args: [],
-            },
-            alias: 'Focus Previous Cursor',
-            precondition: undefined
-        });
-    }
-    run(accessor, editor, args) {
-        if (!editor.hasModel()) {
-            return;
-        }
-        const viewModel = editor._getViewModel();
-        if (viewModel.cursorConfig.readOnly) {
-            return;
-        }
-        viewModel.model.pushStackElement();
-        const previousCursorState = Array.from(viewModel.getCursorStates());
-        const firstCursor = previousCursorState.pop();
-        if (!firstCursor) {
-            return;
-        }
-        previousCursorState.unshift(firstCursor);
-        viewModel.setCursorStates(args.source, 3 /* CursorChangeReason.Explicit */, previousCursorState);
-        viewModel.revealPrimaryCursor(args.source, true);
-        announceCursorChange(previousCursorState, viewModel.getCursorStates());
-    }
-}
 registerEditorContribution(MultiCursorSelectionController.ID, MultiCursorSelectionController);
 registerEditorContribution(SelectionHighlighter.ID, SelectionHighlighter);
 registerEditorAction(InsertCursorAbove);
@@ -1018,5 +940,3 @@ registerEditorAction(SelectHighlightsAction);
 registerEditorAction(CompatChangeAll);
 registerEditorAction(InsertCursorAtEndOfLineSelected);
 registerEditorAction(InsertCursorAtTopOfLineSelected);
-registerEditorAction(FocusNextCursor);
-registerEditorAction(FocusPreviousCursor);

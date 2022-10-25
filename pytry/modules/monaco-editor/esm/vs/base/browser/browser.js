@@ -3,7 +3,7 @@
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
 import { Emitter } from '../common/event.js';
-import { Disposable, markAsSingleton } from '../common/lifecycle.js';
+import { Disposable } from '../common/lifecycle.js';
 class WindowManager {
     constructor() {
         // --- Zoom Factor
@@ -14,42 +14,34 @@ class WindowManager {
     }
 }
 WindowManager.INSTANCE = new WindowManager();
-/**
- * See https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio#monitoring_screen_resolution_or_zoom_level_changes
- */
-class DevicePixelRatioMonitor extends Disposable {
-    constructor() {
-        super();
-        this._onDidChange = this._register(new Emitter());
-        this.onDidChange = this._onDidChange.event;
-        this._listener = () => this._handleChange(true);
-        this._mediaQueryList = null;
-        this._handleChange(false);
-    }
-    _handleChange(fireEvent) {
-        var _a;
-        (_a = this._mediaQueryList) === null || _a === void 0 ? void 0 : _a.removeEventListener('change', this._listener);
-        this._mediaQueryList = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
-        this._mediaQueryList.addEventListener('change', this._listener);
-        if (fireEvent) {
-            this._onDidChange.fire();
-        }
-    }
-}
 class PixelRatioImpl extends Disposable {
     constructor() {
         super();
         this._onDidChange = this._register(new Emitter());
         this.onDidChange = this._onDidChange.event;
         this._value = this._getPixelRatio();
-        const dprMonitor = this._register(new DevicePixelRatioMonitor());
-        this._register(dprMonitor.onDidChange(() => {
-            this._value = this._getPixelRatio();
-            this._onDidChange.fire(this._value);
-        }));
+        this._removeListener = this._installResolutionListener();
     }
     get value() {
         return this._value;
+    }
+    dispose() {
+        this._removeListener();
+        super.dispose();
+    }
+    _installResolutionListener() {
+        // See https://developer.mozilla.org/en-US/docs/Web/API/Window/devicePixelRatio#monitoring_screen_resolution_or_zoom_level_changes
+        const mediaQueryList = matchMedia(`(resolution: ${window.devicePixelRatio}dppx)`);
+        const listener = () => this._updateValue();
+        mediaQueryList.addEventListener('change', listener);
+        return () => {
+            mediaQueryList.removeEventListener('change', listener);
+        };
+    }
+    _updateValue() {
+        this._value = this._getPixelRatio();
+        this._onDidChange.fire(this._value);
+        this._removeListener = this._installResolutionListener();
     }
     _getPixelRatio() {
         const ctx = document.createElement('canvas').getContext('2d');
@@ -68,7 +60,7 @@ class PixelRatioFacade {
     }
     _getOrCreatePixelRatioMonitor() {
         if (!this._pixelRatioMonitor) {
-            this._pixelRatioMonitor = markAsSingleton(new PixelRatioImpl());
+            this._pixelRatioMonitor = new PixelRatioImpl();
         }
         return this._pixelRatioMonitor;
     }
@@ -84,12 +76,6 @@ class PixelRatioFacade {
     get onDidChange() {
         return this._getOrCreatePixelRatioMonitor().onDidChange;
     }
-}
-export function addMatchMediaChangeListener(query, callback) {
-    if (typeof query === 'string') {
-        query = window.matchMedia(query);
-    }
-    query.addEventListener('change', callback);
 }
 /**
  * Returns the pixel ratio.
@@ -109,16 +95,7 @@ export const isWebKit = (userAgent.indexOf('AppleWebKit') >= 0);
 export const isChrome = (userAgent.indexOf('Chrome') >= 0);
 export const isSafari = (!isChrome && (userAgent.indexOf('Safari') >= 0));
 export const isWebkitWebView = (!isChrome && !isSafari && isWebKit);
+export const isEdgeLegacyWebView = (userAgent.indexOf('Edge/') >= 0) && (userAgent.indexOf('WebView/') >= 0);
 export const isElectron = (userAgent.indexOf('Electron/') >= 0);
 export const isAndroid = (userAgent.indexOf('Android') >= 0);
-let standalone = false;
-if (window.matchMedia) {
-    const matchMedia = window.matchMedia('(display-mode: standalone)');
-    standalone = matchMedia.matches;
-    addMatchMediaChangeListener(matchMedia, ({ matches }) => {
-        standalone = matches;
-    });
-}
-export function isStandalone() {
-    return standalone;
-}
+export const isStandalone = (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);

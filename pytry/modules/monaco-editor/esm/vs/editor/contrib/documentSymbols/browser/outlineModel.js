@@ -27,16 +27,17 @@ import { Iterable } from '../../../../base/common/iterator.js';
 import { LRUCache } from '../../../../base/common/map.js';
 import { Position } from '../../../common/core/position.js';
 import { Range } from '../../../common/core/range.js';
+import { DocumentSymbolProviderRegistry } from '../../../common/languages.js';
 import { ILanguageFeatureDebounceService } from '../../../common/services/languageFeatureDebounce.js';
 import { createDecorator } from '../../../../platform/instantiation/common/instantiation.js';
 import { registerSingleton } from '../../../../platform/instantiation/common/extensions.js';
 import { IModelService } from '../../../common/services/model.js';
 import { DisposableStore } from '../../../../base/common/lifecycle.js';
-import { ILanguageFeaturesService } from '../../../common/services/languageFeatures.js';
 export class TreeElement {
     remove() {
-        var _a;
-        (_a = this.parent) === null || _a === void 0 ? void 0 : _a.children.delete(this.id);
+        if (this.parent) {
+            this.parent.children.delete(this.id);
+        }
     }
     static findId(candidate, container) {
         // complex id-computation which contains the origin/extension,
@@ -91,14 +92,14 @@ export class OutlineModel extends TreeElement {
         this.id = 'root';
         this.parent = undefined;
     }
-    static create(registry, textModel, token) {
+    static create(textModel, token) {
         const cts = new CancellationTokenSource(token);
         const result = new OutlineModel(textModel.uri);
-        const provider = registry.ordered(textModel);
+        const provider = DocumentSymbolProviderRegistry.ordered(textModel);
         const promises = provider.map((provider, index) => {
             var _a;
-            const id = TreeElement.findId(`provider_${index}`, result);
-            const group = new OutlineGroup(id, result, (_a = provider.displayName) !== null && _a !== void 0 ? _a : 'Unknown Outline Provider', index);
+            let id = TreeElement.findId(`provider_${index}`, result);
+            let group = new OutlineGroup(id, result, (_a = provider.displayName) !== null && _a !== void 0 ? _a : 'Unknown Outline Provider', index);
             return Promise.resolve(provider.provideDocumentSymbols(textModel, cts.token)).then(result => {
                 for (const info of result || []) {
                     OutlineModel._makeOutlineElement(info, group);
@@ -116,15 +117,15 @@ export class OutlineModel extends TreeElement {
                 }
             });
         });
-        const listener = registry.onDidChange(() => {
-            const newProvider = registry.ordered(textModel);
+        const listener = DocumentSymbolProviderRegistry.onDidChange(() => {
+            const newProvider = DocumentSymbolProviderRegistry.ordered(textModel);
             if (!equals(newProvider, provider)) {
                 cts.cancel();
             }
         });
         return Promise.all(promises).then(() => {
             if (cts.token.isCancellationRequested && !token.isCancellationRequested) {
-                return OutlineModel.create(registry, textModel, token);
+                return OutlineModel.create(textModel, token);
             }
             else {
                 return result._compact();
@@ -134,8 +135,8 @@ export class OutlineModel extends TreeElement {
         });
     }
     static _makeOutlineElement(info, container) {
-        const id = TreeElement.findId(info, container);
-        const res = new OutlineElement(id, container, info);
+        let id = TreeElement.findId(info, container);
+        let res = new OutlineElement(id, container, info);
         if (info.children) {
             for (const childInfo of info.children) {
                 OutlineModel._makeOutlineElement(childInfo, res);
@@ -159,8 +160,8 @@ export class OutlineModel extends TreeElement {
         }
         else {
             // adopt all elements of the first group
-            const group = Iterable.first(this._groups.values());
-            for (const [, child] of group.children) {
+            let group = Iterable.first(this._groups.values());
+            for (let [, child] of group.children) {
                 child.parent = this;
                 this.children.set(child.id, child);
             }
@@ -206,11 +207,10 @@ export class OutlineModel extends TreeElement {
 }
 export const IOutlineModelService = createDecorator('IOutlineModelService');
 let OutlineModelService = class OutlineModelService {
-    constructor(_languageFeaturesService, debounces, modelService) {
-        this._languageFeaturesService = _languageFeaturesService;
+    constructor(debounces, modelService) {
         this._disposables = new DisposableStore();
         this._cache = new LRUCache(10, 0.7);
-        this._debounceInformation = debounces.for(_languageFeaturesService.documentSymbolProvider, 'DocumentSymbols', { min: 350 });
+        this._debounceInformation = debounces.for(DocumentSymbolProviderRegistry, 'DocumentSymbols', { min: 350 });
         // don't cache outline models longer than their text model
         this._disposables.add(modelService.onModelRemoved(textModel => {
             this._cache.delete(textModel.id);
@@ -221,17 +221,16 @@ let OutlineModelService = class OutlineModelService {
     }
     getOrCreate(textModel, token) {
         return __awaiter(this, void 0, void 0, function* () {
-            const registry = this._languageFeaturesService.documentSymbolProvider;
-            const provider = registry.ordered(textModel);
+            const provider = DocumentSymbolProviderRegistry.ordered(textModel);
             let data = this._cache.get(textModel.id);
             if (!data || data.versionId !== textModel.getVersionId() || !equals(data.provider, provider)) {
-                const source = new CancellationTokenSource();
+                let source = new CancellationTokenSource();
                 data = {
                     versionId: textModel.getVersionId(),
                     provider,
                     promiseCnt: 0,
                     source,
-                    promise: OutlineModel.create(registry, textModel, source.token),
+                    promise: OutlineModel.create(textModel, source.token),
                     model: undefined,
                 };
                 this._cache.set(textModel.id, data);
@@ -266,9 +265,8 @@ let OutlineModelService = class OutlineModelService {
     }
 };
 OutlineModelService = __decorate([
-    __param(0, ILanguageFeaturesService),
-    __param(1, ILanguageFeatureDebounceService),
-    __param(2, IModelService)
+    __param(0, ILanguageFeatureDebounceService),
+    __param(1, IModelService)
 ], OutlineModelService);
 export { OutlineModelService };
 registerSingleton(IOutlineModelService, OutlineModelService, true);

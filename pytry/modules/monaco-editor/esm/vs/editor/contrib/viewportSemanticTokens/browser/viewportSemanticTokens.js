@@ -14,6 +14,7 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
 import { createCancelablePromise, RunOnceScheduler } from '../../../../base/common/async.js';
 import { Disposable } from '../../../../base/common/lifecycle.js';
 import { registerEditorContribution } from '../../../browser/editorExtensions.js';
+import { DocumentRangeSemanticTokensProviderRegistry } from '../../../common/languages.js';
 import { getDocumentRangeSemanticTokens, hasDocumentRangeSemanticTokensProvider } from '../../../common/services/getSemanticTokens.js';
 import { IModelService } from '../../../common/services/model.js';
 import { isSemanticColoringEnabled, SEMANTIC_HIGHLIGHTING_SETTING_ID } from '../../../common/services/modelService.js';
@@ -22,17 +23,15 @@ import { IConfigurationService } from '../../../../platform/configuration/common
 import { IThemeService } from '../../../../platform/theme/common/themeService.js';
 import { ILanguageFeatureDebounceService } from '../../../common/services/languageFeatureDebounce.js';
 import { StopWatch } from '../../../../base/common/stopwatch.js';
-import { ILanguageFeaturesService } from '../../../common/services/languageFeatures.js';
 let ViewportSemanticTokensContribution = class ViewportSemanticTokensContribution extends Disposable {
-    constructor(editor, _modelService, _themeService, _configurationService, languageFeatureDebounceService, languageFeaturesService) {
+    constructor(editor, _modelService, _themeService, _configurationService, languageFeatureDebounceService) {
         super();
         this._modelService = _modelService;
         this._themeService = _themeService;
         this._configurationService = _configurationService;
         this._editor = editor;
-        this._provider = languageFeaturesService.documentRangeSemanticTokensProvider;
-        this._debounceInformation = languageFeatureDebounceService.for(this._provider, 'DocumentRangeSemanticTokens', { min: 100, max: 500 });
-        this._tokenizeViewport = this._register(new RunOnceScheduler(() => this._tokenizeViewportNow(), 100));
+        this._debounceInformation = languageFeatureDebounceService.for(DocumentRangeSemanticTokensProviderRegistry, 'DocumentRangeSemanticTokens', { min: 100, max: 500 });
+        this._tokenizeViewport = new RunOnceScheduler(() => this._tokenizeViewportNow(), 100);
         this._outstandingRequests = [];
         const scheduleTokenizeViewport = () => {
             if (this._editor.hasModel()) {
@@ -50,7 +49,7 @@ let ViewportSemanticTokensContribution = class ViewportSemanticTokensContributio
             this._cancelAll();
             scheduleTokenizeViewport();
         }));
-        this._register(this._provider.onDidChange(() => {
+        this._register(DocumentRangeSemanticTokensProviderRegistry.onDidChange(() => {
             this._cancelAll();
             scheduleTokenizeViewport();
         }));
@@ -84,18 +83,18 @@ let ViewportSemanticTokensContribution = class ViewportSemanticTokensContributio
             return;
         }
         const model = this._editor.getModel();
-        if (model.tokenization.hasCompleteSemanticTokens()) {
+        if (model.hasCompleteSemanticTokens()) {
             return;
         }
         if (!isSemanticColoringEnabled(model, this._themeService, this._configurationService)) {
-            if (model.tokenization.hasSomeSemanticTokens()) {
-                model.tokenization.setSemanticTokens(null, false);
+            if (model.hasSomeSemanticTokens()) {
+                model.setSemanticTokens(null, false);
             }
             return;
         }
-        if (!hasDocumentRangeSemanticTokensProvider(this._provider, model)) {
-            if (model.tokenization.hasSomeSemanticTokens()) {
-                model.tokenization.setSemanticTokens(null, false);
+        if (!hasDocumentRangeSemanticTokensProvider(model)) {
+            if (model.hasSomeSemanticTokens()) {
+                model.setSemanticTokens(null, false);
             }
             return;
         }
@@ -104,7 +103,7 @@ let ViewportSemanticTokensContribution = class ViewportSemanticTokensContributio
     }
     _requestRange(model, range) {
         const requestVersionId = model.getVersionId();
-        const request = createCancelablePromise(token => Promise.resolve(getDocumentRangeSemanticTokens(this._provider, model, range, token)));
+        const request = createCancelablePromise(token => Promise.resolve(getDocumentRangeSemanticTokens(model, range, token)));
         const sw = new StopWatch(false);
         request.then((r) => {
             this._debounceInformation.update(model, sw.elapsed());
@@ -113,7 +112,7 @@ let ViewportSemanticTokensContribution = class ViewportSemanticTokensContributio
             }
             const { provider, tokens: result } = r;
             const styling = this._modelService.getSemanticTokensProviderStyling(provider);
-            model.tokenization.setPartialSemanticTokens(range, toMultilineTokens2(result, styling, model.getLanguageId()));
+            model.setPartialSemanticTokens(range, toMultilineTokens2(result, styling, model.getLanguageId()));
         }).then(() => this._removeOutstandingRequest(request), () => this._removeOutstandingRequest(request));
         return request;
     }
@@ -123,7 +122,6 @@ ViewportSemanticTokensContribution = __decorate([
     __param(1, IModelService),
     __param(2, IThemeService),
     __param(3, IConfigurationService),
-    __param(4, ILanguageFeatureDebounceService),
-    __param(5, ILanguageFeaturesService)
+    __param(4, ILanguageFeatureDebounceService)
 ], ViewportSemanticTokensContribution);
 registerEditorContribution(ViewportSemanticTokensContribution.ID, ViewportSemanticTokensContribution);

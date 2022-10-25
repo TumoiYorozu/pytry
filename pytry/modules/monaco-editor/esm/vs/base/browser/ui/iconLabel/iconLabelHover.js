@@ -37,7 +37,7 @@ class UpdatableHoverWidget {
         this.target = target;
         this.fadeInAnimation = fadeInAnimation;
     }
-    update(content, focus, options) {
+    update(markdownTooltip, focus) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
             if (this._cancellationTokenSource) {
@@ -49,11 +49,11 @@ class UpdatableHoverWidget {
                 return;
             }
             let resolvedContent;
-            if (content === undefined || isString(content) || content instanceof HTMLElement) {
-                resolvedContent = content;
+            if (markdownTooltip === undefined || isString(markdownTooltip) || markdownTooltip instanceof HTMLElement) {
+                resolvedContent = markdownTooltip;
             }
-            else if (!isFunction(content.markdown)) {
-                resolvedContent = (_a = content.markdown) !== null && _a !== void 0 ? _a : content.markdownNotSupportedFallback;
+            else if (!isFunction(markdownTooltip.markdown)) {
+                resolvedContent = (_a = markdownTooltip.markdown) !== null && _a !== void 0 ? _a : markdownTooltip.markdownNotSupportedFallback;
             }
             else {
                 // compute the content, potentially long-running
@@ -64,23 +64,26 @@ class UpdatableHoverWidget {
                 // compute the content
                 this._cancellationTokenSource = new CancellationTokenSource();
                 const token = this._cancellationTokenSource.token;
-                resolvedContent = yield content.markdown(token);
-                if (resolvedContent === undefined) {
-                    resolvedContent = content.markdownNotSupportedFallback;
-                }
+                resolvedContent = yield markdownTooltip.markdown(token);
                 if (this.isDisposed || token.isCancellationRequested) {
                     // either the widget has been closed in the meantime
                     // or there has been a new call to `update`
                     return;
                 }
             }
-            this.show(resolvedContent, focus, options);
+            this.show(resolvedContent, focus);
         });
     }
-    show(content, focus, options) {
+    show(content, focus) {
         const oldHoverWidget = this._hoverWidget;
         if (this.hasContent(content)) {
-            const hoverOptions = Object.assign({ content, target: this.target, showPointer: this.hoverDelegate.placement === 'element', hoverPosition: 2 /* HoverPosition.BELOW */, skipFadeInAnimation: !this.fadeInAnimation || !!oldHoverWidget }, options);
+            const hoverOptions = {
+                content,
+                target: this.target,
+                showPointer: this.hoverDelegate.placement === 'element',
+                hoverPosition: 2 /* BELOW */,
+                skipFadeInAnimation: !this.fadeInAnimation || !!oldHoverWidget // do not fade in if the hover is already showing
+            };
             this._hoverWidget = this.hoverDelegate.showHover(hoverOptions, focus);
         }
         oldHoverWidget === null || oldHoverWidget === void 0 ? void 0 : oldHoverWidget.dispose();
@@ -105,7 +108,7 @@ class UpdatableHoverWidget {
         this._cancellationTokenSource = undefined;
     }
 }
-export function setupCustomHover(hoverDelegate, htmlElement, content, options) {
+export function setupCustomHover(hoverDelegate, htmlElement, markdownTooltip) {
     let hoverPreparation;
     let hoverWidget;
     const hideHover = (disposeWidget, disposePreparation) => {
@@ -124,7 +127,7 @@ export function setupCustomHover(hoverDelegate, htmlElement, content, options) {
         return new TimeoutTimer(() => __awaiter(this, void 0, void 0, function* () {
             if (!hoverWidget || hoverWidget.isDisposed) {
                 hoverWidget = new UpdatableHoverWidget(hoverDelegate, target || htmlElement, delay > 0);
-                yield hoverWidget.update(content, focus, options);
+                yield hoverWidget.update(markdownTooltip, focus);
             }
         }), delay);
     };
@@ -143,12 +146,7 @@ export function setupCustomHover(hoverDelegate, htmlElement, content, options) {
         };
         if (hoverDelegate.placement === undefined || hoverDelegate.placement === 'mouse') {
             // track the mouse position
-            const onMouseMove = (e) => {
-                target.x = e.x + 10;
-                if ((e.target instanceof HTMLElement) && e.target.classList.contains('action-label')) {
-                    hideHover(true, true);
-                }
-            };
+            const onMouseMove = (e) => target.x = e.x + 10;
             toDispose.add(dom.addDisposableListener(htmlElement, dom.EventType.MOUSE_MOVE, onMouseMove, true));
         }
         toDispose.add(triggerShowHover(hoverDelegate.delay, false, target));
@@ -163,9 +161,9 @@ export function setupCustomHover(hoverDelegate, htmlElement, content, options) {
         hide: () => {
             hideHover(true, true);
         },
-        update: (newContent, hoverOptions) => __awaiter(this, void 0, void 0, function* () {
-            content = newContent;
-            yield (hoverWidget === null || hoverWidget === void 0 ? void 0 : hoverWidget.update(content, undefined, hoverOptions));
+        update: (newTooltip) => __awaiter(this, void 0, void 0, function* () {
+            markdownTooltip = newTooltip;
+            yield (hoverWidget === null || hoverWidget === void 0 ? void 0 : hoverWidget.update(markdownTooltip));
         }),
         dispose: () => {
             mouseOverDomEmitter.dispose();

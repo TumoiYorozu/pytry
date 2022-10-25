@@ -30,8 +30,8 @@ import { ICodeEditorService } from '../../../browser/services/codeEditorService.
 import { CharacterSet } from '../../../common/core/characterClassifier.js';
 import { Range } from '../../../common/core/range.js';
 import { EditorContextKeys } from '../../../common/editorContextKeys.js';
+import { DocumentRangeFormattingEditProviderRegistry, OnTypeFormattingEditProviderRegistry } from '../../../common/languages.js';
 import { IEditorWorkerService } from '../../../common/services/editorWorker.js';
-import { ILanguageFeaturesService } from '../../../common/services/languageFeatures.js';
 import { alertFormattingEdits, formatDocumentRangesWithSelectedProvider, formatDocumentWithSelectedProvider, getOnTypeFormattingEdits } from './format.js';
 import { FormattingEdit } from './formattingEdit.js';
 import * as nls from '../../../../nls.js';
@@ -40,17 +40,16 @@ import { ContextKeyExpr } from '../../../../platform/contextkey/common/contextke
 import { IInstantiationService } from '../../../../platform/instantiation/common/instantiation.js';
 import { IEditorProgressService, Progress } from '../../../../platform/progress/common/progress.js';
 let FormatOnType = class FormatOnType {
-    constructor(_editor, _languageFeaturesService, _workerService) {
+    constructor(_editor, _workerService) {
         this._editor = _editor;
-        this._languageFeaturesService = _languageFeaturesService;
         this._workerService = _workerService;
         this._disposables = new DisposableStore();
         this._sessionDisposables = new DisposableStore();
-        this._disposables.add(_languageFeaturesService.onTypeFormattingEditProvider.onDidChange(this._update, this));
+        this._disposables.add(OnTypeFormattingEditProviderRegistry.onDidChange(this._update, this));
         this._disposables.add(_editor.onDidChangeModel(() => this._update()));
         this._disposables.add(_editor.onDidChangeModelLanguage(() => this._update()));
         this._disposables.add(_editor.onDidChangeConfiguration(e => {
-            if (e.hasChanged(51 /* EditorOption.formatOnType */)) {
+            if (e.hasChanged(49 /* formatOnType */)) {
                 this._update();
             }
         }));
@@ -63,7 +62,7 @@ let FormatOnType = class FormatOnType {
         // clean up
         this._sessionDisposables.clear();
         // we are disabled
-        if (!this._editor.getOption(51 /* EditorOption.formatOnType */)) {
+        if (!this._editor.getOption(49 /* formatOnType */)) {
             return;
         }
         // no model
@@ -72,17 +71,17 @@ let FormatOnType = class FormatOnType {
         }
         const model = this._editor.getModel();
         // no support
-        const [support] = this._languageFeaturesService.onTypeFormattingEditProvider.ordered(model);
+        const [support] = OnTypeFormattingEditProviderRegistry.ordered(model);
         if (!support || !support.autoFormatTriggerCharacters) {
             return;
         }
         // register typing listeners that will trigger the format
-        const triggerChars = new CharacterSet();
-        for (const ch of support.autoFormatTriggerCharacters) {
+        let triggerChars = new CharacterSet();
+        for (let ch of support.autoFormatTriggerCharacters) {
             triggerChars.add(ch.charCodeAt(0));
         }
         this._sessionDisposables.add(this._editor.onDidType((text) => {
-            const lastCharCode = text.charCodeAt(text.length - 1);
+            let lastCharCode = text.charCodeAt(text.length - 1);
             if (triggerChars.has(lastCharCode)) {
                 this._trigger(String.fromCharCode(lastCharCode));
             }
@@ -119,7 +118,7 @@ let FormatOnType = class FormatOnType {
                 }
             }
         });
-        getOnTypeFormattingEdits(this._workerService, this._languageFeaturesService, model, position, ch, model.getFormattingOptions(), cts.token).then(edits => {
+        getOnTypeFormattingEdits(this._workerService, model, position, ch, model.getFormattingOptions(), cts.token).then(edits => {
             if (cts.token.isCancellationRequested) {
                 return;
             }
@@ -134,20 +133,18 @@ let FormatOnType = class FormatOnType {
 };
 FormatOnType.ID = 'editor.contrib.autoFormat';
 FormatOnType = __decorate([
-    __param(1, ILanguageFeaturesService),
-    __param(2, IEditorWorkerService)
+    __param(1, IEditorWorkerService)
 ], FormatOnType);
 let FormatOnPaste = class FormatOnPaste {
-    constructor(editor, _languageFeaturesService, _instantiationService) {
+    constructor(editor, _instantiationService) {
         this.editor = editor;
-        this._languageFeaturesService = _languageFeaturesService;
         this._instantiationService = _instantiationService;
         this._callOnDispose = new DisposableStore();
         this._callOnModel = new DisposableStore();
         this._callOnDispose.add(editor.onDidChangeConfiguration(() => this._update()));
         this._callOnDispose.add(editor.onDidChangeModel(() => this._update()));
         this._callOnDispose.add(editor.onDidChangeModelLanguage(() => this._update()));
-        this._callOnDispose.add(_languageFeaturesService.documentRangeFormattingEditProvider.onDidChange(this._update, this));
+        this._callOnDispose.add(DocumentRangeFormattingEditProviderRegistry.onDidChange(this._update, this));
     }
     dispose() {
         this._callOnDispose.dispose();
@@ -157,7 +154,7 @@ let FormatOnPaste = class FormatOnPaste {
         // clean up
         this._callOnModel.clear();
         // we are disabled
-        if (!this.editor.getOption(50 /* EditorOption.formatOnPaste */)) {
+        if (!this.editor.getOption(48 /* formatOnPaste */)) {
             return;
         }
         // no model
@@ -165,7 +162,7 @@ let FormatOnPaste = class FormatOnPaste {
             return;
         }
         // no formatter
-        if (!this._languageFeaturesService.documentRangeFormattingEditProvider.has(this.editor.getModel())) {
+        if (!DocumentRangeFormattingEditProviderRegistry.has(this.editor.getModel())) {
             return;
         }
         this._callOnModel.add(this.editor.onDidPaste(({ range }) => this._trigger(range)));
@@ -177,13 +174,12 @@ let FormatOnPaste = class FormatOnPaste {
         if (this.editor.getSelections().length > 1) {
             return;
         }
-        this._instantiationService.invokeFunction(formatDocumentRangesWithSelectedProvider, this.editor, range, 2 /* FormattingMode.Silent */, Progress.None, CancellationToken.None).catch(onUnexpectedError);
+        this._instantiationService.invokeFunction(formatDocumentRangesWithSelectedProvider, this.editor, range, 2 /* Silent */, Progress.None, CancellationToken.None).catch(onUnexpectedError);
     }
 };
 FormatOnPaste.ID = 'editor.contrib.formatOnPaste';
 FormatOnPaste = __decorate([
-    __param(1, ILanguageFeaturesService),
-    __param(2, IInstantiationService)
+    __param(1, IInstantiationService)
 ], FormatOnPaste);
 class FormatDocumentAction extends EditorAction {
     constructor() {
@@ -194,9 +190,9 @@ class FormatDocumentAction extends EditorAction {
             precondition: ContextKeyExpr.and(EditorContextKeys.notInCompositeEditor, EditorContextKeys.writable, EditorContextKeys.hasDocumentFormattingProvider),
             kbOpts: {
                 kbExpr: EditorContextKeys.editorTextFocus,
-                primary: 1024 /* KeyMod.Shift */ | 512 /* KeyMod.Alt */ | 36 /* KeyCode.KeyF */,
-                linux: { primary: 2048 /* KeyMod.CtrlCmd */ | 1024 /* KeyMod.Shift */ | 39 /* KeyCode.KeyI */ },
-                weight: 100 /* KeybindingWeight.EditorContrib */
+                primary: 1024 /* Shift */ | 512 /* Alt */ | 36 /* KeyF */,
+                linux: { primary: 2048 /* CtrlCmd */ | 1024 /* Shift */ | 39 /* KeyI */ },
+                weight: 100 /* EditorContrib */
             },
             contextMenuOpts: {
                 group: '1_modification',
@@ -209,7 +205,7 @@ class FormatDocumentAction extends EditorAction {
             if (editor.hasModel()) {
                 const instaService = accessor.get(IInstantiationService);
                 const progressService = accessor.get(IEditorProgressService);
-                yield progressService.showWhile(instaService.invokeFunction(formatDocumentWithSelectedProvider, editor, 1 /* FormattingMode.Explicit */, Progress.None, CancellationToken.None), 250);
+                yield progressService.showWhile(instaService.invokeFunction(formatDocumentWithSelectedProvider, editor, 1 /* Explicit */, Progress.None, CancellationToken.None), 250);
             }
         });
     }
@@ -223,8 +219,8 @@ class FormatSelectionAction extends EditorAction {
             precondition: ContextKeyExpr.and(EditorContextKeys.writable, EditorContextKeys.hasDocumentSelectionFormattingProvider),
             kbOpts: {
                 kbExpr: EditorContextKeys.editorTextFocus,
-                primary: KeyChord(2048 /* KeyMod.CtrlCmd */ | 41 /* KeyCode.KeyK */, 2048 /* KeyMod.CtrlCmd */ | 36 /* KeyCode.KeyF */),
-                weight: 100 /* KeybindingWeight.EditorContrib */
+                primary: KeyChord(2048 /* CtrlCmd */ | 41 /* KeyK */, 2048 /* CtrlCmd */ | 36 /* KeyF */),
+                weight: 100 /* EditorContrib */
             },
             contextMenuOpts: {
                 when: EditorContextKeys.hasNonEmptySelection,
@@ -246,7 +242,7 @@ class FormatSelectionAction extends EditorAction {
                     : range;
             });
             const progressService = accessor.get(IEditorProgressService);
-            yield progressService.showWhile(instaService.invokeFunction(formatDocumentRangesWithSelectedProvider, editor, ranges, 1 /* FormattingMode.Explicit */, Progress.None, CancellationToken.None), 250);
+            yield progressService.showWhile(instaService.invokeFunction(formatDocumentRangesWithSelectedProvider, editor, ranges, 1 /* Explicit */, Progress.None, CancellationToken.None), 250);
         });
     }
 }

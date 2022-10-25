@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { coalesce, equals, isNonEmptyArray } from '../../../../base/common/arrays.js';
+import { coalesce, equals, flatten, isNonEmptyArray } from '../../../../base/common/arrays.js';
 import { CancellationToken } from '../../../../base/common/cancellation.js';
 import { illegalArgument, isCancellationError, onUnexpectedExternalError } from '../../../../base/common/errors.js';
 import { Disposable, DisposableStore } from '../../../../base/common/lifecycle.js';
@@ -19,14 +19,13 @@ import { URI } from '../../../../base/common/uri.js';
 import { TextModelCancellationTokenSource } from '../../editorState/browser/editorState.js';
 import { Range } from '../../../common/core/range.js';
 import { Selection } from '../../../common/core/selection.js';
+import * as modes from '../../../common/languages.js';
 import { IModelService } from '../../../common/services/model.js';
 import { CommandsRegistry } from '../../../../platform/commands/common/commands.js';
 import { Progress } from '../../../../platform/progress/common/progress.js';
-import { CodeActionKind, CodeActionTriggerSource, filtersAction, mayIncludeActionsOfKind } from './types.js';
-import { ILanguageFeaturesService } from '../../../common/services/languageFeatures.js';
+import { CodeActionKind, filtersAction, mayIncludeActionsOfKind } from './types.js';
 export const codeActionCommandId = 'editor.action.codeAction';
 export const refactorCommandId = 'editor.action.refactor';
-export const refactorPreviewCommandId = 'editor.action.refactor.preview';
 export const sourceActionCommandId = 'editor.action.sourceAction';
 export const organizeImportsCommandId = 'editor.action.organizeImports';
 export const fixAllCommandId = 'editor.action.fixAll';
@@ -89,7 +88,7 @@ class ManagedCodeActionSet extends Disposable {
     }
 }
 const emptyCodeActionsResponse = { actions: [], documentation: undefined };
-export function getCodeActions(registry, model, rangeOrSelection, trigger, progress, token) {
+export function getCodeActions(model, rangeOrSelection, trigger, progress, token) {
     var _a;
     const filter = trigger.filter || {};
     const codeActionContext = {
@@ -97,7 +96,7 @@ export function getCodeActions(registry, model, rangeOrSelection, trigger, progr
         trigger: trigger.type,
     };
     const cts = new TextModelCancellationTokenSource(model, token);
-    const providers = getCodeActionProviders(registry, model, filter);
+    const providers = getCodeActionProviders(model, filter);
     const disposables = new DisposableStore();
     const promises = providers.map((provider) => __awaiter(this, void 0, void 0, function* () {
         try {
@@ -124,14 +123,14 @@ export function getCodeActions(registry, model, rangeOrSelection, trigger, progr
             return emptyCodeActionsResponse;
         }
     }));
-    const listener = registry.onDidChange(() => {
-        const newProviders = registry.all(model);
+    const listener = modes.CodeActionProviderRegistry.onDidChange(() => {
+        const newProviders = modes.CodeActionProviderRegistry.all(model);
         if (!equals(newProviders, providers)) {
             cts.cancel();
         }
     });
     return Promise.all(promises).then(actions => {
-        const allActions = actions.map(x => x.actions).flat();
+        const allActions = flatten(actions.map(x => x.actions));
         const allDocumentation = coalesce(actions.map(x => x.documentation));
         return new ManagedCodeActionSet(allActions, allDocumentation, disposables);
     })
@@ -140,8 +139,8 @@ export function getCodeActions(registry, model, rangeOrSelection, trigger, progr
         cts.dispose();
     });
 }
-function getCodeActionProviders(registry, model, filter) {
-    return registry.all(model)
+function getCodeActionProviders(model, filter) {
+    return modes.CodeActionProviderRegistry.all(model)
         // Don't include providers that we know will not return code actions of interest
         .filter(provider => {
         if (!provider.providedCodeActionKinds) {
@@ -193,7 +192,6 @@ CommandsRegistry.registerCommand('_executeCodeActionProvider', function (accesso
         if (!(resource instanceof URI)) {
             throw illegalArgument();
         }
-        const { codeActionProvider } = accessor.get(ILanguageFeaturesService);
         const model = accessor.get(IModelService).getModel(resource);
         if (!model) {
             throw illegalArgument();
@@ -207,7 +205,7 @@ CommandsRegistry.registerCommand('_executeCodeActionProvider', function (accesso
             throw illegalArgument();
         }
         const include = typeof kind === 'string' ? new CodeActionKind(kind) : undefined;
-        const codeActionSet = yield getCodeActions(codeActionProvider, model, validatedRangeOrSelection, { type: 1 /* languages.CodeActionTriggerType.Invoke */, triggerAction: CodeActionTriggerSource.Default, filter: { includeSourceActions: true, include } }, Progress.None, CancellationToken.None);
+        const codeActionSet = yield getCodeActions(model, validatedRangeOrSelection, { type: 1 /* Invoke */, filter: { includeSourceActions: true, include } }, Progress.None, CancellationToken.None);
         const resolving = [];
         const resolveCount = Math.min(codeActionSet.validActions.length, typeof itemResolveCount === 'number' ? itemResolveCount : 0);
         for (let i = 0; i < resolveCount; i++) {

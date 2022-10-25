@@ -24,6 +24,7 @@ import { isCodeEditor } from '../../../browser/editorBrowser.js';
 import { Position } from '../../../common/core/position.js';
 import { Range } from '../../../common/core/range.js';
 import { Selection } from '../../../common/core/selection.js';
+import { DocumentFormattingEditProviderRegistry, DocumentRangeFormattingEditProviderRegistry, OnTypeFormattingEditProviderRegistry } from '../../../common/languages.js';
 import { IEditorWorkerService } from '../../../common/services/editorWorker.js';
 import { ITextModelService } from '../../../common/services/resolverService.js';
 import { FormattingEdit } from './formattingEdit.js';
@@ -31,7 +32,6 @@ import * as nls from '../../../../nls.js';
 import { CommandsRegistry } from '../../../../platform/commands/common/commands.js';
 import { ExtensionIdentifier } from '../../../../platform/extensions/common/extensions.js';
 import { IInstantiationService } from '../../../../platform/instantiation/common/instantiation.js';
-import { ILanguageFeaturesService } from '../../../common/services/languageFeatures.js';
 export function alertFormattingEdits(edits) {
     edits = edits.filter(edit => edit.range);
     if (!edits.length) {
@@ -59,11 +59,11 @@ export function alertFormattingEdits(edits) {
         }
     }
 }
-export function getRealAndSyntheticDocumentFormattersOrdered(documentFormattingEditProvider, documentRangeFormattingEditProvider, model) {
+export function getRealAndSyntheticDocumentFormattersOrdered(model) {
     const result = [];
     const seen = new Set();
     // (1) add all document formatter
-    const docFormatter = documentFormattingEditProvider.ordered(model);
+    const docFormatter = DocumentFormattingEditProviderRegistry.ordered(model);
     for (const formatter of docFormatter) {
         result.push(formatter);
         if (formatter.extensionId) {
@@ -71,7 +71,7 @@ export function getRealAndSyntheticDocumentFormattersOrdered(documentFormattingE
         }
     }
     // (2) add all range formatter as document formatter (unless the same extension already did that)
-    const rangeFormatter = documentRangeFormattingEditProvider.ordered(model);
+    const rangeFormatter = DocumentRangeFormattingEditProviderRegistry.ordered(model);
     for (const formatter of rangeFormatter) {
         if (formatter.extensionId) {
             if (seen.has(ExtensionIdentifier.toKey(formatter.extensionId))) {
@@ -111,9 +111,8 @@ FormattingConflicts._selectors = new LinkedList();
 export function formatDocumentRangesWithSelectedProvider(accessor, editorOrModel, rangeOrRanges, mode, progress, token) {
     return __awaiter(this, void 0, void 0, function* () {
         const instaService = accessor.get(IInstantiationService);
-        const { documentRangeFormattingEditProvider: documentRangeFormattingEditProviderRegistry } = accessor.get(ILanguageFeaturesService);
         const model = isCodeEditor(editorOrModel) ? editorOrModel.getModel() : editorOrModel;
-        const provider = documentRangeFormattingEditProviderRegistry.ordered(model);
+        const provider = DocumentRangeFormattingEditProviderRegistry.ordered(model);
         const selected = yield FormattingConflicts.select(provider, model, mode);
         if (selected) {
             progress.report(selected);
@@ -128,16 +127,16 @@ export function formatDocumentRangesWithProvider(accessor, provider, editorOrMod
         let cts;
         if (isCodeEditor(editorOrModel)) {
             model = editorOrModel.getModel();
-            cts = new EditorStateCancellationTokenSource(editorOrModel, 1 /* CodeEditorStateFlag.Value */ | 4 /* CodeEditorStateFlag.Position */, undefined, token);
+            cts = new EditorStateCancellationTokenSource(editorOrModel, 1 /* Value */ | 4 /* Position */, undefined, token);
         }
         else {
             model = editorOrModel;
             cts = new TextModelCancellationTokenSource(editorOrModel, token);
         }
         // make sure that ranges don't overlap nor touch each other
-        const ranges = [];
+        let ranges = [];
         let len = 0;
-        for (const range of asArray(rangeOrRanges).sort(Range.compareRangesUsingStarts)) {
+        for (let range of asArray(rangeOrRanges).sort(Range.compareRangesUsingStarts)) {
             if (len > 0 && Range.areIntersectingOrTouching(ranges[len - 1], range)) {
                 ranges[len - 1] = Range.fromPositions(ranges[len - 1].getStartPosition(), range.getEndPosition());
             }
@@ -158,8 +157,8 @@ export function formatDocumentRangesWithProvider(accessor, provider, editorOrMod
                 return false;
             }
             // fallback to a complete check [O(n^2)]
-            for (const edit of a) {
-                for (const otherEdit of b) {
+            for (let edit of a) {
+                for (let otherEdit of b) {
                     if (Range.intersectRanges(edit.range, otherEdit.range)) {
                         return true;
                     }
@@ -170,7 +169,7 @@ export function formatDocumentRangesWithProvider(accessor, provider, editorOrMod
         const allEdits = [];
         const rawEditsList = [];
         try {
-            for (const range of ranges) {
+            for (let range of ranges) {
                 if (cts.token.isCancellationRequested) {
                     return true;
                 }
@@ -197,7 +196,7 @@ export function formatDocumentRangesWithProvider(accessor, provider, editorOrMod
                     }
                 }
             }
-            for (const rawEdits of rawEditsList) {
+            for (let rawEdits of rawEditsList) {
                 if (cts.token.isCancellationRequested) {
                     return true;
                 }
@@ -217,7 +216,7 @@ export function formatDocumentRangesWithProvider(accessor, provider, editorOrMod
             // use editor to apply edits
             FormattingEdit.execute(editorOrModel, allEdits, true);
             alertFormattingEdits(allEdits);
-            editorOrModel.revealPositionInCenterIfOutsideViewport(editorOrModel.getPosition(), 1 /* ScrollType.Immediate */);
+            editorOrModel.revealPositionInCenterIfOutsideViewport(editorOrModel.getPosition(), 1 /* Immediate */);
         }
         else {
             // use model to apply edits
@@ -244,9 +243,8 @@ export function formatDocumentRangesWithProvider(accessor, provider, editorOrMod
 export function formatDocumentWithSelectedProvider(accessor, editorOrModel, mode, progress, token) {
     return __awaiter(this, void 0, void 0, function* () {
         const instaService = accessor.get(IInstantiationService);
-        const languageFeaturesService = accessor.get(ILanguageFeaturesService);
         const model = isCodeEditor(editorOrModel) ? editorOrModel.getModel() : editorOrModel;
-        const provider = getRealAndSyntheticDocumentFormattersOrdered(languageFeaturesService.documentFormattingEditProvider, languageFeaturesService.documentRangeFormattingEditProvider, model);
+        const provider = getRealAndSyntheticDocumentFormattersOrdered(model);
         const selected = yield FormattingConflicts.select(provider, model, mode);
         if (selected) {
             progress.report(selected);
@@ -261,7 +259,7 @@ export function formatDocumentWithProvider(accessor, provider, editorOrModel, mo
         let cts;
         if (isCodeEditor(editorOrModel)) {
             model = editorOrModel.getModel();
-            cts = new EditorStateCancellationTokenSource(editorOrModel, 1 /* CodeEditorStateFlag.Value */ | 4 /* CodeEditorStateFlag.Position */, undefined, token);
+            cts = new EditorStateCancellationTokenSource(editorOrModel, 1 /* Value */ | 4 /* Position */, undefined, token);
         }
         else {
             model = editorOrModel;
@@ -283,10 +281,10 @@ export function formatDocumentWithProvider(accessor, provider, editorOrModel, mo
         }
         if (isCodeEditor(editorOrModel)) {
             // use editor to apply edits
-            FormattingEdit.execute(editorOrModel, edits, mode !== 2 /* FormattingMode.Silent */);
-            if (mode !== 2 /* FormattingMode.Silent */) {
+            FormattingEdit.execute(editorOrModel, edits, mode !== 2 /* Silent */);
+            if (mode !== 2 /* Silent */) {
                 alertFormattingEdits(edits);
-                editorOrModel.revealPositionInCenterIfOutsideViewport(editorOrModel.getPosition(), 1 /* ScrollType.Immediate */);
+                editorOrModel.revealPositionInCenterIfOutsideViewport(editorOrModel.getPosition(), 1 /* Immediate */);
             }
         }
         else {
@@ -311,11 +309,11 @@ export function formatDocumentWithProvider(accessor, provider, editorOrModel, mo
         return true;
     });
 }
-export function getDocumentRangeFormattingEditsUntilResult(workerService, languageFeaturesService, model, range, options, token) {
+export function getDocumentRangeFormattingEditsUntilResult(workerService, model, range, options, token) {
     return __awaiter(this, void 0, void 0, function* () {
-        const providers = languageFeaturesService.documentRangeFormattingEditProvider.ordered(model);
+        const providers = DocumentRangeFormattingEditProviderRegistry.ordered(model);
         for (const provider of providers) {
-            const rawEdits = yield Promise.resolve(provider.provideDocumentRangeFormattingEdits(model, range, options, token)).catch(onUnexpectedExternalError);
+            let rawEdits = yield Promise.resolve(provider.provideDocumentRangeFormattingEdits(model, range, options, token)).catch(onUnexpectedExternalError);
             if (isNonEmptyArray(rawEdits)) {
                 return yield workerService.computeMoreMinimalEdits(model.uri, rawEdits);
             }
@@ -323,11 +321,11 @@ export function getDocumentRangeFormattingEditsUntilResult(workerService, langua
         return undefined;
     });
 }
-export function getDocumentFormattingEditsUntilResult(workerService, languageFeaturesService, model, options, token) {
+export function getDocumentFormattingEditsUntilResult(workerService, model, options, token) {
     return __awaiter(this, void 0, void 0, function* () {
-        const providers = getRealAndSyntheticDocumentFormattersOrdered(languageFeaturesService.documentFormattingEditProvider, languageFeaturesService.documentRangeFormattingEditProvider, model);
+        const providers = getRealAndSyntheticDocumentFormattersOrdered(model);
         for (const provider of providers) {
-            const rawEdits = yield Promise.resolve(provider.provideDocumentFormattingEdits(model, options, token)).catch(onUnexpectedExternalError);
+            let rawEdits = yield Promise.resolve(provider.provideDocumentFormattingEdits(model, options, token)).catch(onUnexpectedExternalError);
             if (isNonEmptyArray(rawEdits)) {
                 return yield workerService.computeMoreMinimalEdits(model.uri, rawEdits);
             }
@@ -335,8 +333,8 @@ export function getDocumentFormattingEditsUntilResult(workerService, languageFea
         return undefined;
     });
 }
-export function getOnTypeFormattingEdits(workerService, languageFeaturesService, model, position, ch, options, token) {
-    const providers = languageFeaturesService.onTypeFormattingEditProvider.ordered(model);
+export function getOnTypeFormattingEdits(workerService, model, position, ch, options, token) {
+    const providers = OnTypeFormattingEditProviderRegistry.ordered(model);
     if (providers.length === 0) {
         return Promise.resolve(undefined);
     }
@@ -354,10 +352,9 @@ CommandsRegistry.registerCommand('_executeFormatRangeProvider', function (access
         assertType(Range.isIRange(range));
         const resolverService = accessor.get(ITextModelService);
         const workerService = accessor.get(IEditorWorkerService);
-        const languageFeaturesService = accessor.get(ILanguageFeaturesService);
         const reference = yield resolverService.createModelReference(resource);
         try {
-            return getDocumentRangeFormattingEditsUntilResult(workerService, languageFeaturesService, reference.object.textEditorModel, Range.lift(range), options, CancellationToken.None);
+            return getDocumentRangeFormattingEditsUntilResult(workerService, reference.object.textEditorModel, Range.lift(range), options, CancellationToken.None);
         }
         finally {
             reference.dispose();
@@ -370,10 +367,9 @@ CommandsRegistry.registerCommand('_executeFormatDocumentProvider', function (acc
         assertType(URI.isUri(resource));
         const resolverService = accessor.get(ITextModelService);
         const workerService = accessor.get(IEditorWorkerService);
-        const languageFeaturesService = accessor.get(ILanguageFeaturesService);
         const reference = yield resolverService.createModelReference(resource);
         try {
-            return getDocumentFormattingEditsUntilResult(workerService, languageFeaturesService, reference.object.textEditorModel, options, CancellationToken.None);
+            return getDocumentFormattingEditsUntilResult(workerService, reference.object.textEditorModel, options, CancellationToken.None);
         }
         finally {
             reference.dispose();
@@ -388,10 +384,9 @@ CommandsRegistry.registerCommand('_executeFormatOnTypeProvider', function (acces
         assertType(typeof ch === 'string');
         const resolverService = accessor.get(ITextModelService);
         const workerService = accessor.get(IEditorWorkerService);
-        const languageFeaturesService = accessor.get(ILanguageFeaturesService);
         const reference = yield resolverService.createModelReference(resource);
         try {
-            return getOnTypeFormattingEdits(workerService, languageFeaturesService, reference.object.textEditorModel, Position.lift(position), ch, options, CancellationToken.None);
+            return getOnTypeFormattingEdits(workerService, reference.object.textEditorModel, Position.lift(position), ch, options, CancellationToken.None);
         }
         finally {
             reference.dispose();

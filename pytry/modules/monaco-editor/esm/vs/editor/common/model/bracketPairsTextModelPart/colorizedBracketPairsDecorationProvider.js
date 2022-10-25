@@ -15,15 +15,13 @@ export class ColorizedBracketPairsDecorationProvider extends Disposable {
         this.onDidChangeEmitter = new Emitter();
         this.onDidChange = this.onDidChangeEmitter.event;
         this.colorizationOptions = textModel.getOptions().bracketPairColorizationOptions;
+        this._register(textModel.onDidChangeOptions(e => {
+            this.colorizationOptions = textModel.getOptions().bracketPairColorizationOptions;
+        }));
         this._register(textModel.bracketPairs.onDidChange(e => {
             this.onDidChangeEmitter.fire();
         }));
     }
-    //#region TextModel events
-    handleDidChangeOptions(e) {
-        this.colorizationOptions = this.textModel.getOptions().bracketPairColorizationOptions;
-    }
-    //#endregion
     getDecorationsInRange(range, ownerId, filterOutValidation) {
         if (ownerId === undefined) {
             return [];
@@ -36,12 +34,9 @@ export class ColorizedBracketPairsDecorationProvider extends Disposable {
         for (const bracket of bracketsInRange) {
             result.push({
                 id: `bracket${bracket.range.toString()}-${bracket.nestingLevel}`,
-                options: {
-                    description: 'BracketPairColorization',
-                    inlineClassName: this.colorProvider.getInlineClassName(bracket, this.colorizationOptions.independentColorPoolPerBracketType),
-                },
+                options: { description: 'BracketPairColorization', inlineClassName: this.colorProvider.getInlineClassName(bracket) },
                 ownerId: 0,
-                range: bracket.range,
+                range: bracket.range
             });
         }
         return result;
@@ -60,11 +55,11 @@ class ColorProvider {
     constructor() {
         this.unexpectedClosingBracketClassName = 'unexpected-closing-bracket';
     }
-    getInlineClassName(bracket, independentColorPoolPerBracketType) {
+    getInlineClassName(bracket) {
         if (bracket.isInvalid) {
             return this.unexpectedClosingBracketClassName;
         }
-        return this.getInlineClassNameOfLevel(independentColorPoolPerBracketType ? bracket.nestingLevelOfEqualBracketType : bracket.nestingLevel);
+        return this.getInlineClassNameOfLevel(bracket.nestingLevel);
     }
     getInlineClassNameOfLevel(level) {
         // To support a dynamic amount of colors up to 6 colors,

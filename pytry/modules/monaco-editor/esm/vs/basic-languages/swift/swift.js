@@ -1,6 +1,6 @@
 /*!-----------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
- * Version: 0.34.1(547870b6881302c5b4ff32173c16d06009e3588f)
+ * Version: 0.32.0(e1570658ecca35c72429e624c18df24ae4286ef8)
  * Released under the MIT license
  * https://github.com/microsoft/monaco-editor/blob/main/LICENSE.txt
  *-----------------------------------------------------------------------------*/
@@ -65,7 +65,6 @@ var language = {
     "@inlinable",
     "@inline",
     "@main",
-    "@noDerivative",
     "@nonobjc",
     "@noreturn",
     "@objc",

@@ -2,7 +2,7 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-import { CursorState, SingleCursorState } from '../cursorCommon.js';
+import { CursorState, SingleCursorState } from './cursorCommon.js';
 import { Position } from '../core/position.js';
 import { Range } from '../core/range.js';
 import { Selection } from '../core/selection.js';
@@ -31,10 +31,10 @@ export class Cursor {
             // don't track the selection
             return;
         }
-        this._selTrackedRange = context.model._setTrackedRange(this._selTrackedRange, this.modelState.selection, 0 /* TrackedRangeStickiness.AlwaysGrowsWhenTypingAtEdges */);
+        this._selTrackedRange = context.model._setTrackedRange(this._selTrackedRange, this.modelState.selection, 0 /* AlwaysGrowsWhenTypingAtEdges */);
     }
     _removeTrackedRange(context) {
-        this._selTrackedRange = context.model._setTrackedRange(this._selTrackedRange, null, 0 /* TrackedRangeStickiness.AlwaysGrowsWhenTypingAtEdges */);
+        this._selTrackedRange = context.model._setTrackedRange(this._selTrackedRange, null, 0 /* AlwaysGrowsWhenTypingAtEdges */);
     }
     asCursorState() {
         return new CursorState(this.modelState, this.viewState);
@@ -53,13 +53,13 @@ export class Cursor {
         if (position.equals(cacheInput)) {
             return cacheOutput;
         }
-        return viewModel.normalizePosition(position, 2 /* PositionAffinity.None */);
+        return viewModel.normalizePosition(position, 2 /* None */);
     }
     static _validateViewState(viewModel, viewState) {
         const position = viewState.position;
         const sStartPosition = viewState.selectionStart.getStartPosition();
         const sEndPosition = viewState.selectionStart.getEndPosition();
-        const validPosition = viewModel.normalizePosition(position, 2 /* PositionAffinity.None */);
+        const validPosition = viewModel.normalizePosition(position, 2 /* None */);
         const validSStartPosition = this._validatePositionWithCache(viewModel, sStartPosition, position, validPosition);
         const validSEndPosition = this._validatePositionWithCache(viewModel, sEndPosition, sStartPosition, validSStartPosition);
         if (position.equals(validPosition) && sStartPosition.equals(validSStartPosition) && sEndPosition.equals(validSEndPosition)) {

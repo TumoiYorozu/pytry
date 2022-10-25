@@ -2,15 +2,6 @@
  *  Copyright (c) Microsoft Corporation. All rights reserved.
  *  Licensed under the MIT License. See License.txt in the project root for license information.
  *--------------------------------------------------------------------------------------------*/
-var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
-    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
-    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
-    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
-    return c > 3 && r && Object.defineProperty(target, key, r), r;
-};
-var __param = (this && this.__param) || function (paramIndex, decorator) {
-    return function (target, key) { decorator(target, key, paramIndex); }
-};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -23,27 +14,24 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import * as arrays from '../../../../base/common/arrays.js';
 import { CancellationToken } from '../../../../base/common/cancellation.js';
 import { onUnexpectedExternalError } from '../../../../base/common/errors.js';
-import { EditorAction, registerEditorAction, registerEditorContribution } from '../../../browser/editorExtensions.js';
+import { EditorAction, registerEditorAction, registerEditorContribution, registerModelCommand } from '../../../browser/editorExtensions.js';
 import { Position } from '../../../common/core/position.js';
 import { Range } from '../../../common/core/range.js';
 import { Selection } from '../../../common/core/selection.js';
 import { EditorContextKeys } from '../../../common/editorContextKeys.js';
+import * as modes from '../../../common/languages.js';
 import { BracketSelectionRangeProvider } from './bracketSelections.js';
 import { WordSelectionRangeProvider } from './wordSelections.js';
 import * as nls from '../../../../nls.js';
 import { MenuId } from '../../../../platform/actions/common/actions.js';
 import { CommandsRegistry } from '../../../../platform/commands/common/commands.js';
-import { ILanguageFeaturesService } from '../../../common/services/languageFeatures.js';
-import { ITextModelService } from '../../../common/services/resolverService.js';
-import { assertType } from '../../../../base/common/types.js';
-import { URI } from '../../../../base/common/uri.js';
 class SelectionRanges {
     constructor(index, ranges) {
         this.index = index;
         this.ranges = ranges;
     }
     mov(fwd) {
-        const index = this.index + (fwd ? 1 : -1);
+        let index = this.index + (fwd ? 1 : -1);
         if (index < 0 || index >= this.ranges.length) {
             return this;
         }
@@ -55,10 +43,9 @@ class SelectionRanges {
         return res;
     }
 }
-let SmartSelectController = class SmartSelectController {
-    constructor(_editor, _languageFeaturesService) {
+class SmartSelectController {
+    constructor(_editor) {
         this._editor = _editor;
-        this._languageFeaturesService = _languageFeaturesService;
         this._ignoreSelection = false;
     }
     static get(editor) {
@@ -75,8 +62,11 @@ let SmartSelectController = class SmartSelectController {
             }
             const selections = this._editor.getSelections();
             const model = this._editor.getModel();
+            if (!modes.SelectionRangeRegistry.has(model)) {
+                return;
+            }
             if (!this._state) {
-                yield provideSelectionRanges(this._languageFeaturesService.selectionRangeProvider, model, selections.map(s => s.getPosition()), this._editor.getOption(104 /* EditorOption.smartSelect */), CancellationToken.None).then(ranges => {
+                yield provideSelectionRanges(model, selections.map(s => s.getPosition()), this._editor.getOption(102 /* smartSelect */), CancellationToken.None).then(ranges => {
                     var _a;
                     if (!arrays.isNonEmptyArray(ranges) || ranges.length !== selections.length) {
                         // invalid result
@@ -121,11 +111,8 @@ let SmartSelectController = class SmartSelectController {
             }
         });
     }
-};
+}
 SmartSelectController.ID = 'editor.contrib.smartSelectController';
-SmartSelectController = __decorate([
-    __param(1, ILanguageFeaturesService)
-], SmartSelectController);
 class AbstractSmartSelect extends EditorAction {
     constructor(forward, opts) {
         super(opts);
@@ -133,7 +120,7 @@ class AbstractSmartSelect extends EditorAction {
     }
     run(_accessor, editor) {
         return __awaiter(this, void 0, void 0, function* () {
-            const controller = SmartSelectController.get(editor);
+            let controller = SmartSelectController.get(editor);
             if (controller) {
                 yield controller.run(this._forward);
             }
@@ -149,12 +136,12 @@ class GrowSelectionAction extends AbstractSmartSelect {
             precondition: undefined,
             kbOpts: {
                 kbExpr: EditorContextKeys.editorTextFocus,
-                primary: 1024 /* KeyMod.Shift */ | 512 /* KeyMod.Alt */ | 17 /* KeyCode.RightArrow */,
+                primary: 1024 /* Shift */ | 512 /* Alt */ | 17 /* RightArrow */,
                 mac: {
-                    primary: 2048 /* KeyMod.CtrlCmd */ | 256 /* KeyMod.WinCtrl */ | 1024 /* KeyMod.Shift */ | 17 /* KeyCode.RightArrow */,
-                    secondary: [256 /* KeyMod.WinCtrl */ | 1024 /* KeyMod.Shift */ | 17 /* KeyCode.RightArrow */],
+                    primary: 2048 /* CtrlCmd */ | 256 /* WinCtrl */ | 1024 /* Shift */ | 17 /* RightArrow */,
+                    secondary: [256 /* WinCtrl */ | 1024 /* Shift */ | 17 /* RightArrow */],
                 },
-                weight: 100 /* KeybindingWeight.EditorContrib */
+                weight: 100 /* EditorContrib */
             },
             menuOpts: {
                 menuId: MenuId.MenubarSelectionMenu,
@@ -176,12 +163,12 @@ class ShrinkSelectionAction extends AbstractSmartSelect {
             precondition: undefined,
             kbOpts: {
                 kbExpr: EditorContextKeys.editorTextFocus,
-                primary: 1024 /* KeyMod.Shift */ | 512 /* KeyMod.Alt */ | 15 /* KeyCode.LeftArrow */,
+                primary: 1024 /* Shift */ | 512 /* Alt */ | 15 /* LeftArrow */,
                 mac: {
-                    primary: 2048 /* KeyMod.CtrlCmd */ | 256 /* KeyMod.WinCtrl */ | 1024 /* KeyMod.Shift */ | 15 /* KeyCode.LeftArrow */,
-                    secondary: [256 /* KeyMod.WinCtrl */ | 1024 /* KeyMod.Shift */ | 15 /* KeyCode.LeftArrow */],
+                    primary: 2048 /* CtrlCmd */ | 256 /* WinCtrl */ | 1024 /* Shift */ | 15 /* LeftArrow */,
+                    secondary: [256 /* WinCtrl */ | 1024 /* Shift */ | 15 /* LeftArrow */],
                 },
-                weight: 100 /* KeybindingWeight.EditorContrib */
+                weight: 100 /* EditorContrib */
             },
             menuOpts: {
                 menuId: MenuId.MenubarSelectionMenu,
@@ -195,16 +182,17 @@ class ShrinkSelectionAction extends AbstractSmartSelect {
 registerEditorContribution(SmartSelectController.ID, SmartSelectController);
 registerEditorAction(GrowSelectionAction);
 registerEditorAction(ShrinkSelectionAction);
-export function provideSelectionRanges(registry, model, positions, options, token) {
+// word selection
+modes.SelectionRangeRegistry.register('*', new WordSelectionRangeProvider());
+export function provideSelectionRanges(model, positions, options, token) {
     return __awaiter(this, void 0, void 0, function* () {
-        const providers = registry.all(model)
-            .concat(new WordSelectionRangeProvider()); // ALWAYS have word based selection range
+        const providers = modes.SelectionRangeRegistry.all(model);
         if (providers.length === 1) {
             // add word selection and bracket selection when no provider exists
             providers.unshift(new BracketSelectionRangeProvider());
         }
-        const work = [];
-        const allRawRanges = [];
+        let work = [];
+        let allRawRanges = [];
         for (const provider of providers) {
             work.push(Promise.resolve(provider.provideSelectionRanges(model, positions, token)).then(allProviderRanges => {
                 if (arrays.isNonEmptyArray(allProviderRanges) && allProviderRanges.length === positions.length) {
@@ -246,7 +234,7 @@ export function provideSelectionRanges(registry, model, positions, options, toke
             });
             // remove ranges that don't contain the former range or that are equal to the
             // former range
-            const oneRanges = [];
+            let oneRanges = [];
             let last;
             for (const range of oneRawRanges) {
                 if (!last || (Range.containsRange(range, last) && !Range.equalsRange(range, last))) {
@@ -259,7 +247,7 @@ export function provideSelectionRanges(registry, model, positions, options, toke
             }
             // add ranges that expand trivia at line starts and ends whenever a range
             // wraps onto the a new line
-            const oneRangesWithTrivia = [oneRanges[0]];
+            let oneRangesWithTrivia = [oneRanges[0]];
             for (let i = 1; i < oneRanges.length; i++) {
                 const prev = oneRanges[i - 1];
                 const cur = oneRanges[i];
@@ -281,17 +269,7 @@ export function provideSelectionRanges(registry, model, positions, options, toke
         });
     });
 }
-CommandsRegistry.registerCommand('_executeSelectionRangeProvider', function (accessor, ...args) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const [resource, positions] = args;
-        assertType(URI.isUri(resource));
-        const registry = accessor.get(ILanguageFeaturesService).selectionRangeProvider;
-        const reference = yield accessor.get(ITextModelService).createModelReference(resource);
-        try {
-            return provideSelectionRanges(registry, reference.object.textEditorModel, positions, { selectLeadingAndTrailingWhitespace: true }, CancellationToken.None);
-        }
-        finally {
-            reference.dispose();
-        }
-    });
+registerModelCommand('_executeSelectionRangeProvider', function (model, ...args) {
+    const [positions] = args;
+    return provideSelectionRanges(model, positions, { selectLeadingAndTrailingWhitespace: true }, CancellationToken.None);
 });

@@ -41,7 +41,6 @@ import { IInstantiationService } from '../../../../platform/instantiation/common
 import { INotificationService } from '../../../../platform/notification/common/notification.js';
 import { IEditorProgressService } from '../../../../platform/progress/common/progress.js';
 import { getDeclarationsAtPosition, getDefinitionsAtPosition, getImplementationsAtPosition, getReferencesAtPosition, getTypeDefinitionsAtPosition } from './goToSymbol.js';
-import { ILanguageFeaturesService } from '../../../common/services/languageFeatures.js';
 MenuRegistry.appendMenuItem(MenuId.EditorContext, {
     submenu: MenuId.EditorContextPeek,
     title: nls.localize('peek.submenu', "Peek"),
@@ -86,12 +85,11 @@ export class SymbolNavigationAction extends EditorAction {
         const editorService = accessor.get(ICodeEditorService);
         const progressService = accessor.get(IEditorProgressService);
         const symbolNavService = accessor.get(ISymbolNavigationService);
-        const languageFeaturesService = accessor.get(ILanguageFeaturesService);
         const model = editor.getModel();
         const position = editor.getPosition();
         const anchor = SymbolNavigationAnchor.is(arg) ? arg : new SymbolNavigationAnchor(model, position);
-        const cts = new EditorStateCancellationTokenSource(editor, 1 /* CodeEditorStateFlag.Value */ | 4 /* CodeEditorStateFlag.Position */);
-        const promise = raceCancellation(this._getLocationModel(languageFeaturesService, anchor.model, anchor.position, cts.token), cts.token).then((references) => __awaiter(this, void 0, void 0, function* () {
+        const cts = new EditorStateCancellationTokenSource(editor, 1 /* Value */ | 4 /* Position */);
+        const promise = raceCancellation(this._getLocationModel(anchor.model, anchor.position, cts.token), cts.token).then((references) => __awaiter(this, void 0, void 0, function* () {
             var _a;
             if (!references || cts.token.isCancellationRequested) {
                 return;
@@ -100,7 +98,7 @@ export class SymbolNavigationAction extends EditorAction {
             let altAction;
             if (references.referenceAt(model.uri, position)) {
                 const altActionId = this._getAlternativeCommand(editor);
-                if (!SymbolNavigationAction._activeAlternativeCommands.has(altActionId) && _goToActionIds.has(altActionId)) {
+                if (altActionId !== this.id && _goToActionIds.has(altActionId)) {
                     altAction = editor.getAction(altActionId);
                 }
             }
@@ -114,10 +112,7 @@ export class SymbolNavigationAction extends EditorAction {
             }
             else if (referenceCount === 1 && altAction) {
                 // already at the only result, run alternative
-                SymbolNavigationAction._activeAlternativeCommands.add(this.id);
-                altAction.run().finally(() => {
-                    SymbolNavigationAction._activeAlternativeCommands.delete(this.id);
-                });
+                altAction.run();
             }
             else {
                 // normal results handling
@@ -174,8 +169,7 @@ export class SymbolNavigationAction extends EditorAction {
                 resource: reference.uri,
                 options: {
                     selection: Range.collapseToStart(range),
-                    selectionRevealType: 3 /* TextEditorSelectionRevealType.NearTopIfOutsideViewport */,
-                    selectionSource: "code.jump" /* TextEditorSelectionSource.JUMP */
+                    selectionRevealType: 3 /* NearTopIfOutsideViewport */
                 }
             }, editor, sideBySide);
             if (!targetEditor) {
@@ -183,10 +177,10 @@ export class SymbolNavigationAction extends EditorAction {
             }
             if (highlight) {
                 const modelNow = targetEditor.getModel();
-                const decorations = targetEditor.createDecorationsCollection([{ range, options: { description: 'symbol-navigate-action-highlight', className: 'symbolHighlight' } }]);
+                const ids = targetEditor.deltaDecorations([], [{ range, options: { description: 'symbol-navigate-action-highlight', className: 'symbolHighlight' } }]);
                 setTimeout(() => {
                     if (targetEditor.getModel() === modelNow) {
-                        decorations.clear();
+                        targetEditor.deltaDecorations(ids, []);
                     }
                 }, 350);
             }
@@ -203,12 +197,11 @@ export class SymbolNavigationAction extends EditorAction {
         }
     }
 }
-SymbolNavigationAction._activeAlternativeCommands = new Set();
 //#region --- DEFINITION
 export class DefinitionAction extends SymbolNavigationAction {
-    _getLocationModel(languageFeaturesService, model, position, token) {
+    _getLocationModel(model, position, token) {
         return __awaiter(this, void 0, void 0, function* () {
-            return new ReferencesModel(yield getDefinitionsAtPosition(languageFeaturesService.definitionProvider, model, position, token), nls.localize('def.title', 'Definitions'));
+            return new ReferencesModel(yield getDefinitionsAtPosition(model, position, token), nls.localize('def.title', 'Definitions'));
         });
     }
     _getNoResultFoundMessage(info) {
@@ -217,15 +210,15 @@ export class DefinitionAction extends SymbolNavigationAction {
             : nls.localize('generic.noResults', "No definition found");
     }
     _getAlternativeCommand(editor) {
-        return editor.getOption(53 /* EditorOption.gotoLocation */).alternativeDefinitionCommand;
+        return editor.getOption(51 /* gotoLocation */).alternativeDefinitionCommand;
     }
     _getGoToPreference(editor) {
-        return editor.getOption(53 /* EditorOption.gotoLocation */).multipleDefinitions;
+        return editor.getOption(51 /* gotoLocation */).multipleDefinitions;
     }
 }
-const goToDefinitionKb = isWeb && !isStandalone()
-    ? 2048 /* KeyMod.CtrlCmd */ | 70 /* KeyCode.F12 */
-    : 70 /* KeyCode.F12 */;
+const goToDefinitionKb = isWeb && !isStandalone
+    ? 2048 /* CtrlCmd */ | 70 /* F12 */
+    : 70 /* F12 */;
 registerGoToAction((_a = class GoToDefinitionAction extends DefinitionAction {
         constructor() {
             super({
@@ -240,7 +233,7 @@ registerGoToAction((_a = class GoToDefinitionAction extends DefinitionAction {
                 kbOpts: {
                     kbExpr: EditorContextKeys.editorTextFocus,
                     primary: goToDefinitionKb,
-                    weight: 100 /* KeybindingWeight.EditorContrib */
+                    weight: 100 /* EditorContrib */
                 },
                 contextMenuOpts: {
                     group: 'navigation',
@@ -265,8 +258,8 @@ registerGoToAction((_b = class OpenDefinitionToSideAction extends DefinitionActi
                 precondition: ContextKeyExpr.and(EditorContextKeys.hasDefinitionProvider, EditorContextKeys.isInWalkThroughSnippet.toNegated()),
                 kbOpts: {
                     kbExpr: EditorContextKeys.editorTextFocus,
-                    primary: KeyChord(2048 /* KeyMod.CtrlCmd */ | 41 /* KeyCode.KeyK */, goToDefinitionKb),
-                    weight: 100 /* KeybindingWeight.EditorContrib */
+                    primary: KeyChord(2048 /* CtrlCmd */ | 41 /* KeyK */, goToDefinitionKb),
+                    weight: 100 /* EditorContrib */
                 }
             });
             CommandsRegistry.registerCommandAlias('editor.action.openDeclarationToTheSide', OpenDefinitionToSideAction.id);
@@ -287,9 +280,9 @@ registerGoToAction((_c = class PeekDefinitionAction extends DefinitionAction {
                 precondition: ContextKeyExpr.and(EditorContextKeys.hasDefinitionProvider, PeekContext.notInPeekEditor, EditorContextKeys.isInWalkThroughSnippet.toNegated()),
                 kbOpts: {
                     kbExpr: EditorContextKeys.editorTextFocus,
-                    primary: 512 /* KeyMod.Alt */ | 70 /* KeyCode.F12 */,
-                    linux: { primary: 2048 /* KeyMod.CtrlCmd */ | 1024 /* KeyMod.Shift */ | 68 /* KeyCode.F10 */ },
-                    weight: 100 /* KeybindingWeight.EditorContrib */
+                    primary: 512 /* Alt */ | 70 /* F12 */,
+                    linux: { primary: 2048 /* CtrlCmd */ | 1024 /* Shift */ | 68 /* F10 */ },
+                    weight: 100 /* EditorContrib */
                 },
                 contextMenuOpts: {
                     menuId: MenuId.EditorContextPeek,
@@ -305,9 +298,9 @@ registerGoToAction((_c = class PeekDefinitionAction extends DefinitionAction {
 //#endregion
 //#region --- DECLARATION
 class DeclarationAction extends SymbolNavigationAction {
-    _getLocationModel(languageFeaturesService, model, position, token) {
+    _getLocationModel(model, position, token) {
         return __awaiter(this, void 0, void 0, function* () {
-            return new ReferencesModel(yield getDeclarationsAtPosition(languageFeaturesService.declarationProvider, model, position, token), nls.localize('decl.title', 'Declarations'));
+            return new ReferencesModel(yield getDeclarationsAtPosition(model, position, token), nls.localize('decl.title', 'Declarations'));
         });
     }
     _getNoResultFoundMessage(info) {
@@ -316,10 +309,10 @@ class DeclarationAction extends SymbolNavigationAction {
             : nls.localize('decl.generic.noResults', "No declaration found");
     }
     _getAlternativeCommand(editor) {
-        return editor.getOption(53 /* EditorOption.gotoLocation */).alternativeDeclarationCommand;
+        return editor.getOption(51 /* gotoLocation */).alternativeDeclarationCommand;
     }
     _getGoToPreference(editor) {
-        return editor.getOption(53 /* EditorOption.gotoLocation */).multipleDeclarations;
+        return editor.getOption(51 /* gotoLocation */).multipleDeclarations;
     }
 }
 registerGoToAction((_d = class GoToDeclarationAction extends DeclarationAction {
@@ -369,9 +362,9 @@ registerGoToAction(class PeekDeclarationAction extends DeclarationAction {
 //#endregion
 //#region --- TYPE DEFINITION
 class TypeDefinitionAction extends SymbolNavigationAction {
-    _getLocationModel(languageFeaturesService, model, position, token) {
+    _getLocationModel(model, position, token) {
         return __awaiter(this, void 0, void 0, function* () {
-            return new ReferencesModel(yield getTypeDefinitionsAtPosition(languageFeaturesService.typeDefinitionProvider, model, position, token), nls.localize('typedef.title', 'Type Definitions'));
+            return new ReferencesModel(yield getTypeDefinitionsAtPosition(model, position, token), nls.localize('typedef.title', 'Type Definitions'));
         });
     }
     _getNoResultFoundMessage(info) {
@@ -380,10 +373,10 @@ class TypeDefinitionAction extends SymbolNavigationAction {
             : nls.localize('goToTypeDefinition.generic.noResults', "No type definition found");
     }
     _getAlternativeCommand(editor) {
-        return editor.getOption(53 /* EditorOption.gotoLocation */).alternativeTypeDefinitionCommand;
+        return editor.getOption(51 /* gotoLocation */).alternativeTypeDefinitionCommand;
     }
     _getGoToPreference(editor) {
-        return editor.getOption(53 /* EditorOption.gotoLocation */).multipleTypeDefinitions;
+        return editor.getOption(51 /* gotoLocation */).multipleTypeDefinitions;
     }
 }
 registerGoToAction((_e = class GoToTypeDefinitionAction extends TypeDefinitionAction {
@@ -400,7 +393,7 @@ registerGoToAction((_e = class GoToTypeDefinitionAction extends TypeDefinitionAc
                 kbOpts: {
                     kbExpr: EditorContextKeys.editorTextFocus,
                     primary: 0,
-                    weight: 100 /* KeybindingWeight.EditorContrib */
+                    weight: 100 /* EditorContrib */
                 },
                 contextMenuOpts: {
                     group: 'navigation',
@@ -435,9 +428,9 @@ registerGoToAction((_f = class PeekTypeDefinitionAction extends TypeDefinitionAc
 //#endregion
 //#region --- IMPLEMENTATION
 class ImplementationAction extends SymbolNavigationAction {
-    _getLocationModel(languageFeaturesService, model, position, token) {
+    _getLocationModel(model, position, token) {
         return __awaiter(this, void 0, void 0, function* () {
-            return new ReferencesModel(yield getImplementationsAtPosition(languageFeaturesService.implementationProvider, model, position, token), nls.localize('impl.title', 'Implementations'));
+            return new ReferencesModel(yield getImplementationsAtPosition(model, position, token), nls.localize('impl.title', 'Implementations'));
         });
     }
     _getNoResultFoundMessage(info) {
@@ -446,10 +439,10 @@ class ImplementationAction extends SymbolNavigationAction {
             : nls.localize('goToImplementation.generic.noResults', "No implementation found");
     }
     _getAlternativeCommand(editor) {
-        return editor.getOption(53 /* EditorOption.gotoLocation */).alternativeImplementationCommand;
+        return editor.getOption(51 /* gotoLocation */).alternativeImplementationCommand;
     }
     _getGoToPreference(editor) {
-        return editor.getOption(53 /* EditorOption.gotoLocation */).multipleImplementations;
+        return editor.getOption(51 /* gotoLocation */).multipleImplementations;
     }
 }
 registerGoToAction((_g = class GoToImplementationAction extends ImplementationAction {
@@ -465,8 +458,8 @@ registerGoToAction((_g = class GoToImplementationAction extends ImplementationAc
                 precondition: ContextKeyExpr.and(EditorContextKeys.hasImplementationProvider, EditorContextKeys.isInWalkThroughSnippet.toNegated()),
                 kbOpts: {
                     kbExpr: EditorContextKeys.editorTextFocus,
-                    primary: 2048 /* KeyMod.CtrlCmd */ | 70 /* KeyCode.F12 */,
-                    weight: 100 /* KeybindingWeight.EditorContrib */
+                    primary: 2048 /* CtrlCmd */ | 70 /* F12 */,
+                    weight: 100 /* EditorContrib */
                 },
                 contextMenuOpts: {
                     group: 'navigation',
@@ -490,8 +483,8 @@ registerGoToAction((_h = class PeekImplementationAction extends ImplementationAc
                 precondition: ContextKeyExpr.and(EditorContextKeys.hasImplementationProvider, PeekContext.notInPeekEditor, EditorContextKeys.isInWalkThroughSnippet.toNegated()),
                 kbOpts: {
                     kbExpr: EditorContextKeys.editorTextFocus,
-                    primary: 2048 /* KeyMod.CtrlCmd */ | 1024 /* KeyMod.Shift */ | 70 /* KeyCode.F12 */,
-                    weight: 100 /* KeybindingWeight.EditorContrib */
+                    primary: 2048 /* CtrlCmd */ | 1024 /* Shift */ | 70 /* F12 */,
+                    weight: 100 /* EditorContrib */
                 },
                 contextMenuOpts: {
                     menuId: MenuId.EditorContextPeek,
@@ -512,10 +505,10 @@ class ReferencesAction extends SymbolNavigationAction {
             : nls.localize('references.noGeneric', "No references found");
     }
     _getAlternativeCommand(editor) {
-        return editor.getOption(53 /* EditorOption.gotoLocation */).alternativeReferenceCommand;
+        return editor.getOption(51 /* gotoLocation */).alternativeReferenceCommand;
     }
     _getGoToPreference(editor) {
-        return editor.getOption(53 /* EditorOption.gotoLocation */).multipleReferences;
+        return editor.getOption(51 /* gotoLocation */).multipleReferences;
     }
 }
 registerGoToAction(class GoToReferencesAction extends ReferencesAction {
@@ -531,8 +524,8 @@ registerGoToAction(class GoToReferencesAction extends ReferencesAction {
             precondition: ContextKeyExpr.and(EditorContextKeys.hasReferenceProvider, PeekContext.notInPeekEditor, EditorContextKeys.isInWalkThroughSnippet.toNegated()),
             kbOpts: {
                 kbExpr: EditorContextKeys.editorTextFocus,
-                primary: 1024 /* KeyMod.Shift */ | 70 /* KeyCode.F12 */,
-                weight: 100 /* KeybindingWeight.EditorContrib */
+                primary: 1024 /* Shift */ | 70 /* F12 */,
+                weight: 100 /* EditorContrib */
             },
             contextMenuOpts: {
                 group: 'navigation',
@@ -540,9 +533,9 @@ registerGoToAction(class GoToReferencesAction extends ReferencesAction {
             }
         });
     }
-    _getLocationModel(languageFeaturesService, model, position, token) {
+    _getLocationModel(model, position, token) {
         return __awaiter(this, void 0, void 0, function* () {
-            return new ReferencesModel(yield getReferencesAtPosition(languageFeaturesService.referenceProvider, model, position, true, token), nls.localize('ref.title', 'References'));
+            return new ReferencesModel(yield getReferencesAtPosition(model, position, true, token), nls.localize('ref.title', 'References'));
         });
     }
 });
@@ -564,9 +557,9 @@ registerGoToAction(class PeekReferencesAction extends ReferencesAction {
             }
         });
     }
-    _getLocationModel(languageFeaturesService, model, position, token) {
+    _getLocationModel(model, position, token) {
         return __awaiter(this, void 0, void 0, function* () {
-            return new ReferencesModel(yield getReferencesAtPosition(languageFeaturesService.referenceProvider, model, position, false, token), nls.localize('ref.title', 'References'));
+            return new ReferencesModel(yield getReferencesAtPosition(model, position, false, token), nls.localize('ref.title', 'References'));
         });
     }
 });
@@ -583,7 +576,7 @@ class GenericGoToLocationAction extends SymbolNavigationAction {
         this._references = _references;
         this._gotoMultipleBehaviour = _gotoMultipleBehaviour;
     }
-    _getLocationModel(languageFeaturesService, _model, _position, _token) {
+    _getLocationModel(_model, _position, _token) {
         return __awaiter(this, void 0, void 0, function* () {
             return new ReferencesModel(this._references, nls.localize('generic.title', 'Locations'));
         });
@@ -593,7 +586,7 @@ class GenericGoToLocationAction extends SymbolNavigationAction {
     }
     _getGoToPreference(editor) {
         var _a;
-        return (_a = this._gotoMultipleBehaviour) !== null && _a !== void 0 ? _a : editor.getOption(53 /* EditorOption.gotoLocation */).multipleReferences;
+        return (_a = this._gotoMultipleBehaviour) !== null && _a !== void 0 ? _a : editor.getOption(51 /* gotoLocation */).multipleReferences;
     }
     _getAlternativeCommand() { return ''; }
 }
@@ -619,7 +612,7 @@ CommandsRegistry.registerCommand({
         const editor = yield editorService.openCodeEditor({ resource }, editorService.getFocusedCodeEditor());
         if (isCodeEditor(editor)) {
             editor.setPosition(position);
-            editor.revealPositionInCenterIfOutsideViewport(position, 0 /* ScrollType.Smooth */);
+            editor.revealPositionInCenterIfOutsideViewport(position, 0 /* Smooth */);
             return editor.invokeWithinContext(accessor => {
                 const command = new class extends GenericGoToLocationAction {
                     _getNoResultFoundMessage(info) {
@@ -657,7 +650,6 @@ CommandsRegistry.registerCommand({
     handler: (accessor, resource, position) => {
         assertType(URI.isUri(resource));
         assertType(corePosition.Position.isIPosition(position));
-        const languageFeaturesService = accessor.get(ILanguageFeaturesService);
         const codeEditorService = accessor.get(ICodeEditorService);
         return codeEditorService.openCodeEditor({ resource }, codeEditorService.getFocusedCodeEditor()).then(control => {
             if (!isCodeEditor(control) || !control.hasModel()) {
@@ -667,7 +659,7 @@ CommandsRegistry.registerCommand({
             if (!controller) {
                 return undefined;
             }
-            const references = createCancelablePromise(token => getReferencesAtPosition(languageFeaturesService.referenceProvider, control.getModel(), corePosition.Position.lift(position), false, token).then(references => new ReferencesModel(references, nls.localize('ref.title', 'References'))));
+            const references = createCancelablePromise(token => getReferencesAtPosition(control.getModel(), corePosition.Position.lift(position), false, token).then(references => new ReferencesModel(references, nls.localize('ref.title', 'References'))));
             const range = new Range(position.lineNumber, position.column, position.lineNumber, position.column);
             return Promise.resolve(controller.toggleWidget(range, references, false));
         });

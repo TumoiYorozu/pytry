@@ -24,10 +24,11 @@ import { Emitter } from '../../../../base/common/event.js';
 import { Disposable, MutableDisposable } from '../../../../base/common/lifecycle.js';
 import { Position } from '../../../common/core/position.js';
 import { InlineCompletionTriggerKind } from '../../../common/languages.js';
+import { ILanguageConfigurationService } from '../../../common/languages/languageConfigurationRegistry.js';
 import { InlineCompletionsModel, SynchronizedInlineCompletionsCache } from './inlineCompletionsModel.js';
 import { SuggestWidgetPreviewModel } from './suggestWidgetPreviewModel.js';
 import { createDisposableRef } from './utils.js';
-import { IInstantiationService } from '../../../../platform/instantiation/common/instantiation.js';
+import { ICommandService } from '../../../../platform/commands/common/commands.js';
 export class DelegatingModel extends Disposable {
     constructor() {
         super(...arguments);
@@ -73,13 +74,14 @@ export class DelegatingModel extends Disposable {
  * A ghost text model that is both driven by inline completions and the suggest widget.
 */
 let GhostTextModel = class GhostTextModel extends DelegatingModel {
-    constructor(editor, instantiationService) {
+    constructor(editor, commandService, languageConfigurationService) {
         super();
         this.editor = editor;
-        this.instantiationService = instantiationService;
+        this.commandService = commandService;
+        this.languageConfigurationService = languageConfigurationService;
         this.sharedCache = this._register(new SharedInlineCompletionCache());
-        this.suggestWidgetAdapterModel = this._register(this.instantiationService.createInstance(SuggestWidgetPreviewModel, this.editor, this.sharedCache));
-        this.inlineCompletionsModel = this._register(this.instantiationService.createInstance(InlineCompletionsModel, this.editor, this.sharedCache));
+        this.suggestWidgetAdapterModel = this._register(new SuggestWidgetPreviewModel(this.editor, this.sharedCache));
+        this.inlineCompletionsModel = this._register(new InlineCompletionsModel(this.editor, this.sharedCache, this.commandService, this.languageConfigurationService));
         this._register(this.suggestWidgetAdapterModel.onDidChange(() => {
             this.updateModel();
         }));
@@ -134,7 +136,8 @@ let GhostTextModel = class GhostTextModel extends DelegatingModel {
     }
 };
 GhostTextModel = __decorate([
-    __param(1, IInstantiationService)
+    __param(1, ICommandService),
+    __param(2, ILanguageConfigurationService)
 ], GhostTextModel);
 export { GhostTextModel };
 export class SharedInlineCompletionCache extends Disposable {
@@ -148,7 +151,7 @@ export class SharedInlineCompletionCache extends Disposable {
         return this.cache.value;
     }
     setValue(editor, completionsSource, triggerKind) {
-        this.cache.value = new SynchronizedInlineCompletionsCache(completionsSource, editor, () => this.onDidChangeEmitter.fire(), triggerKind);
+        this.cache.value = new SynchronizedInlineCompletionsCache(editor, completionsSource, () => this.onDidChangeEmitter.fire(), triggerKind);
     }
     clearAndLeak() {
         return this.cache.clearAndLeak();

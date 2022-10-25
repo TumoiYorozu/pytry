@@ -25,6 +25,7 @@ import { Disposable, dispose, toDisposable, DisposableStore } from '../../../bas
 import { SimpleWorkerClient, logOnceWebWorkerWarning } from '../../../base/common/worker/simpleWorker.js';
 import { DefaultWorkerFactory } from '../../../base/browser/defaultWorkerFactory.js';
 import { Range } from '../../common/core/range.js';
+import * as modes from '../../common/languages.js';
 import { ILanguageConfigurationService } from '../../common/languages/languageConfigurationRegistry.js';
 import { EditorSimpleWorker } from '../../common/services/editorSimpleWorker.js';
 import { IModelService } from '../../common/services/model.js';
@@ -34,7 +35,6 @@ import { isNonEmptyArray } from '../../../base/common/arrays.js';
 import { ILogService } from '../../../platform/log/common/log.js';
 import { StopWatch } from '../../../base/common/stopwatch.js';
 import { canceled } from '../../../base/common/errors.js';
-import { ILanguageFeaturesService } from '../../common/services/languageFeatures.js';
 /**
  * Stop syncing a model to the worker if it was not needed for 1 min.
  */
@@ -54,13 +54,13 @@ function canSyncModel(modelService, resource) {
     return true;
 }
 let EditorWorkerService = class EditorWorkerService extends Disposable {
-    constructor(modelService, configurationService, logService, languageConfigurationService, languageFeaturesService) {
+    constructor(modelService, configurationService, logService, languageConfigurationService) {
         super();
         this._modelService = modelService;
         this._workerManager = this._register(new WorkerManager(this._modelService, languageConfigurationService));
         this._logService = logService;
         // register default link-provider and default completions-provider
-        this._register(languageFeaturesService.linkProvider.register({ language: '*', hasAccessToAllModels: true }, {
+        this._register(modes.LinkProviderRegistry.register({ language: '*', hasAccessToAllModels: true }, {
             provideLinks: (model, token) => {
                 if (!canSyncModel(this._modelService, model.uri)) {
                     return Promise.resolve({ links: [] }); // File too large
@@ -70,7 +70,7 @@ let EditorWorkerService = class EditorWorkerService extends Disposable {
                 });
             }
         }));
-        this._register(languageFeaturesService.completionProvider.register('*', new WordBasedCompletionItemProvider(this._workerManager, configurationService, this._modelService, languageConfigurationService)));
+        this._register(modes.CompletionProviderRegistry.register('*', new WordBasedCompletionItemProvider(this._workerManager, configurationService, this._modelService, languageConfigurationService)));
     }
     dispose() {
         super.dispose();
@@ -115,8 +115,7 @@ EditorWorkerService = __decorate([
     __param(0, IModelService),
     __param(1, ITextResourceConfigurationService),
     __param(2, ILogService),
-    __param(3, ILanguageConfigurationService),
-    __param(4, ILanguageFeaturesService)
+    __param(3, ILanguageConfigurationService)
 ], EditorWorkerService);
 export { EditorWorkerService };
 class WordBasedCompletionItemProvider {
@@ -170,7 +169,7 @@ class WordBasedCompletionItemProvider {
                 duration: data.duration,
                 suggestions: data.words.map((word) => {
                     return {
-                        kind: 18 /* languages.CompletionItemKind.Text */,
+                        kind: 18 /* Text */,
                         label: word,
                         insertText: word,
                         range: { insert, replace }
@@ -247,7 +246,7 @@ class EditorModelManager extends Disposable {
         }
     }
     dispose() {
-        for (const modelUrl in this._syncedModels) {
+        for (let modelUrl in this._syncedModels) {
             dispose(this._syncedModels[modelUrl]);
         }
         this._syncedModels = Object.create(null);
@@ -268,7 +267,7 @@ class EditorModelManager extends Disposable {
     _checkStopModelSync() {
         const currentTime = (new Date()).getTime();
         const toRemove = [];
-        for (const modelUrl in this._syncedModelsLastUsedTime) {
+        for (let modelUrl in this._syncedModelsLastUsedTime) {
             const elapsedTime = currentTime - this._syncedModelsLastUsedTime[modelUrl];
             if (elapsedTime > STOP_SYNC_MODEL_DELTA_TIME_MS) {
                 toRemove.push(modelUrl);

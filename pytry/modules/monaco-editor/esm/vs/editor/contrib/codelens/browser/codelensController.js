@@ -29,6 +29,7 @@ import { StableEditorScrollState } from '../../../browser/stableEditorScroll.js'
 import { EditorAction, registerEditorAction, registerEditorContribution } from '../../../browser/editorExtensions.js';
 import { EDITOR_FONT_DEFAULTS } from '../../../common/config/editorOptions.js';
 import { EditorContextKeys } from '../../../common/editorContextKeys.js';
+import { CodeLensProviderRegistry } from '../../../common/languages.js';
 import { getCodeLensModel } from './codelens.js';
 import { ICodeLensCache } from './codeLensCache.js';
 import { CodeLensHelper, CodeLensWidget } from './codelensWidget.js';
@@ -37,11 +38,9 @@ import { ICommandService } from '../../../../platform/commands/common/commands.j
 import { INotificationService } from '../../../../platform/notification/common/notification.js';
 import { IQuickInputService } from '../../../../platform/quickinput/common/quickInput.js';
 import { ILanguageFeatureDebounceService } from '../../../common/services/languageFeatureDebounce.js';
-import { ILanguageFeaturesService } from '../../../common/services/languageFeatures.js';
 let CodeLensContribution = class CodeLensContribution {
-    constructor(_editor, _languageFeaturesService, debounceService, _commandService, _notificationService, _codeLensCache) {
+    constructor(_editor, debounceService, _commandService, _notificationService, _codeLensCache) {
         this._editor = _editor;
-        this._languageFeaturesService = _languageFeaturesService;
         this._commandService = _commandService;
         this._notificationService = _notificationService;
         this._codeLensCache = _codeLensCache;
@@ -49,20 +48,20 @@ let CodeLensContribution = class CodeLensContribution {
         this._localToDispose = new DisposableStore();
         this._lenses = [];
         this._oldCodeLensModels = new DisposableStore();
-        this._provideCodeLensDebounce = debounceService.for(_languageFeaturesService.codeLensProvider, 'CodeLensProvide', { min: 250 });
-        this._resolveCodeLensesDebounce = debounceService.for(_languageFeaturesService.codeLensProvider, 'CodeLensResolve', { min: 250, salt: 'resolve' });
+        this._provideCodeLensDebounce = debounceService.for(CodeLensProviderRegistry, 'CodeLensProvide', { min: 250 });
+        this._resolveCodeLensesDebounce = debounceService.for(CodeLensProviderRegistry, 'CodeLensResolve', { min: 250, salt: 'resolve' });
         this._resolveCodeLensesScheduler = new RunOnceScheduler(() => this._resolveCodeLensesInViewport(), this._resolveCodeLensesDebounce.default());
         this._disposables.add(this._editor.onDidChangeModel(() => this._onModelChange()));
         this._disposables.add(this._editor.onDidChangeModelLanguage(() => this._onModelChange()));
         this._disposables.add(this._editor.onDidChangeConfiguration((e) => {
-            if (e.hasChanged(46 /* EditorOption.fontInfo */) || e.hasChanged(16 /* EditorOption.codeLensFontSize */) || e.hasChanged(15 /* EditorOption.codeLensFontFamily */)) {
+            if (e.hasChanged(44 /* fontInfo */) || e.hasChanged(16 /* codeLensFontSize */) || e.hasChanged(15 /* codeLensFontFamily */)) {
                 this._updateLensStyle();
             }
-            if (e.hasChanged(14 /* EditorOption.codeLens */)) {
+            if (e.hasChanged(14 /* codeLens */)) {
                 this._onModelChange();
             }
         }));
-        this._disposables.add(_languageFeaturesService.codeLensProvider.onDidChange(this._onModelChange, this));
+        this._disposables.add(CodeLensProviderRegistry.onDidChange(this._onModelChange, this));
         this._onModelChange();
         this._styleClassName = '_' + hash(this._editor.getId()).toString(16);
         this._styleElement = dom.createStyleSheet(dom.isInShadowDOM(this._editor.getContainerDomNode())
@@ -79,20 +78,21 @@ let CodeLensContribution = class CodeLensContribution {
         this._styleElement.remove();
     }
     _getLayoutInfo() {
-        const lineHeightFactor = Math.max(1.3, this._editor.getOption(61 /* EditorOption.lineHeight */) / this._editor.getOption(48 /* EditorOption.fontSize */));
-        let fontSize = this._editor.getOption(16 /* EditorOption.codeLensFontSize */);
+        let fontSize = this._editor.getOption(16 /* codeLensFontSize */);
+        let codeLensHeight;
         if (!fontSize || fontSize < 5) {
-            fontSize = (this._editor.getOption(48 /* EditorOption.fontSize */) * .9) | 0;
+            fontSize = (this._editor.getOption(46 /* fontSize */) * .9) | 0;
+            codeLensHeight = this._editor.getOption(59 /* lineHeight */);
         }
-        return {
-            fontSize,
-            codeLensHeight: (fontSize * lineHeightFactor) | 0,
-        };
+        else {
+            codeLensHeight = (fontSize * Math.max(1.3, this._editor.getOption(59 /* lineHeight */) / this._editor.getOption(46 /* fontSize */))) | 0;
+        }
+        return { codeLensHeight, fontSize };
     }
     _updateLensStyle() {
         const { codeLensHeight, fontSize } = this._getLayoutInfo();
-        const fontFamily = this._editor.getOption(15 /* EditorOption.codeLensFontFamily */);
-        const editorFontInfo = this._editor.getOption(46 /* EditorOption.fontInfo */);
+        const fontFamily = this._editor.getOption(15 /* codeLensFontFamily */);
+        const editorFontInfo = this._editor.getOption(44 /* fontInfo */);
         const fontFamilyVar = `--codelens-font-family${this._styleClassName}`;
         const fontFeaturesVar = `--codelens-font-features${this._styleClassName}`;
         let newStyle = `
@@ -107,7 +107,7 @@ let CodeLensContribution = class CodeLensContribution {
         this._editor.getContainerDomNode().style.setProperty(fontFeaturesVar, editorFontInfo.fontFeatureSettings);
         //
         this._editor.changeViewZones(accessor => {
-            for (const lens of this._lenses) {
+            for (let lens of this._lenses) {
                 lens.updateHeight(codeLensHeight, accessor);
             }
         });
@@ -128,14 +128,14 @@ let CodeLensContribution = class CodeLensContribution {
         if (!model) {
             return;
         }
-        if (!this._editor.getOption(14 /* EditorOption.codeLens */)) {
+        if (!this._editor.getOption(14 /* codeLens */)) {
             return;
         }
         const cachedLenses = this._codeLensCache.get(model);
         if (cachedLenses) {
             this._renderCodeLensSymbols(cachedLenses);
         }
-        if (!this._languageFeaturesService.codeLensProvider.has(model)) {
+        if (!CodeLensProviderRegistry.has(model)) {
             // no provider -> return but check with
             // cached lenses. they expire after 30 seconds
             if (cachedLenses) {
@@ -149,9 +149,9 @@ let CodeLensContribution = class CodeLensContribution {
             }
             return;
         }
-        for (const provider of this._languageFeaturesService.codeLensProvider.all(model)) {
+        for (const provider of CodeLensProviderRegistry.all(model)) {
             if (typeof provider.onDidChange === 'function') {
-                const registration = provider.onDidChange(() => scheduler.schedule());
+                let registration = provider.onDidChange(() => scheduler.schedule());
                 this._localToDispose.add(registration);
             }
         }
@@ -159,7 +159,7 @@ let CodeLensContribution = class CodeLensContribution {
             var _a;
             const t1 = Date.now();
             (_a = this._getCodeLensModelPromise) === null || _a === void 0 ? void 0 : _a.cancel();
-            this._getCodeLensModelPromise = createCancelablePromise(token => getCodeLensModel(this._languageFeaturesService.codeLensProvider, model, token));
+            this._getCodeLensModelPromise = createCancelablePromise(token => getCodeLensModel(model, token));
             this._getCodeLensModelPromise.then(result => {
                 if (this._currentCodeLensModel) {
                     this._oldCodeLensModels.add(this._currentCodeLensModel);
@@ -181,7 +181,7 @@ let CodeLensContribution = class CodeLensContribution {
         this._localToDispose.add(this._editor.onDidChangeModelContent(() => {
             this._editor.changeDecorations(decorationsAccessor => {
                 this._editor.changeViewZones(viewZonesAccessor => {
-                    const toDispose = [];
+                    let toDispose = [];
                     let lastLensLineNumber = -1;
                     this._lenses.forEach((lens) => {
                         if (!lens.isValid() || lastLensLineNumber === lens.getLineNumber()) {
@@ -194,7 +194,7 @@ let CodeLensContribution = class CodeLensContribution {
                             lastLensLineNumber = lens.getLineNumber();
                         }
                     });
-                    const helper = new CodeLensHelper();
+                    let helper = new CodeLensHelper();
                     toDispose.forEach((l) => {
                         l.dispose(helper, viewZonesAccessor);
                         this._lenses.splice(this._lenses.indexOf(l), 1);
@@ -232,7 +232,7 @@ let CodeLensContribution = class CodeLensContribution {
             }
         }));
         this._localToDispose.add(this._editor.onMouseDown(e => {
-            if (e.target.type !== 9 /* MouseTargetType.CONTENT_WIDGET */) {
+            if (e.target.type !== 9 /* CONTENT_WIDGET */) {
                 return;
             }
             let target = e.target.element;
@@ -241,7 +241,7 @@ let CodeLensContribution = class CodeLensContribution {
             }
             if ((target === null || target === void 0 ? void 0 : target.tagName) === 'A') {
                 for (const lens of this._lenses) {
-                    const command = lens.getCommand(target);
+                    let command = lens.getCommand(target);
                     if (command) {
                         this._commandService.executeCommand(command.id, ...(command.arguments || [])).catch(err => this._notificationService.error(err));
                         break;
@@ -265,11 +265,11 @@ let CodeLensContribution = class CodeLensContribution {
         if (!this._editor.hasModel()) {
             return;
         }
-        const maxLineNumber = this._editor.getModel().getLineCount();
-        const groups = [];
+        let maxLineNumber = this._editor.getModel().getLineCount();
+        let groups = [];
         let lastGroup;
-        for (const symbol of symbols.lenses) {
-            const line = symbol.symbol.range.startLineNumber;
+        for (let symbol of symbols.lenses) {
+            let line = symbol.symbol.range.startLineNumber;
             if (line < 1 || line > maxLineNumber) {
                 // invalid code lens
                 continue;
@@ -292,8 +292,8 @@ let CodeLensContribution = class CodeLensContribution {
                 let codeLensIndex = 0;
                 let groupsIndex = 0;
                 while (groupsIndex < groups.length && codeLensIndex < this._lenses.length) {
-                    const symbolsLineNumber = groups[groupsIndex][0].symbol.range.startLineNumber;
-                    const codeLensLineNumber = this._lenses[codeLensIndex].getLineNumber();
+                    let symbolsLineNumber = groups[groupsIndex][0].symbol.range.startLineNumber;
+                    let codeLensLineNumber = this._lenses[codeLensIndex].getLineNumber();
                     if (codeLensLineNumber < symbolsLineNumber) {
                         this._lenses[codeLensIndex].dispose(helper, viewZoneAccessor);
                         this._lenses.splice(codeLensIndex, 1);
@@ -398,11 +398,10 @@ let CodeLensContribution = class CodeLensContribution {
 };
 CodeLensContribution.ID = 'css.editor.codeLens';
 CodeLensContribution = __decorate([
-    __param(1, ILanguageFeaturesService),
-    __param(2, ILanguageFeatureDebounceService),
-    __param(3, ICommandService),
-    __param(4, INotificationService),
-    __param(5, ICodeLensCache)
+    __param(1, ILanguageFeatureDebounceService),
+    __param(2, ICommandService),
+    __param(3, INotificationService),
+    __param(4, ICodeLensCache)
 ], CodeLensContribution);
 export { CodeLensContribution };
 registerEditorContribution(CodeLensContribution.ID, CodeLensContribution);

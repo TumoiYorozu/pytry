@@ -19,12 +19,12 @@ import { DisposableStore } from '../../../../base/common/lifecycle.js';
 import { MarkdownRenderer } from '../../markdownRenderer/browser/markdownRenderer.js';
 import { Position } from '../../../common/core/position.js';
 import { Range } from '../../../common/core/range.js';
-import { ILanguageService } from '../../../common/languages/language.js';
+import { HoverProviderRegistry } from '../../../common/languages.js';
+import { ILanguageService } from '../../../common/services/language.js';
 import { getHover } from './getHover.js';
 import * as nls from '../../../../nls.js';
 import { IConfigurationService } from '../../../../platform/configuration/common/configuration.js';
 import { IOpenerService } from '../../../../platform/opener/common/opener.js';
-import { ILanguageFeaturesService } from '../../../common/services/languageFeatures.js';
 const $ = dom.$;
 export class MarkdownHover {
     constructor(owner, range, contents, ordinal) {
@@ -34,25 +34,23 @@ export class MarkdownHover {
         this.ordinal = ordinal;
     }
     isValidForHoverAnchor(anchor) {
-        return (anchor.type === 1 /* HoverAnchorType.Range */
+        return (anchor.type === 1 /* Range */
             && this.range.startColumn <= anchor.range.startColumn
             && this.range.endColumn >= anchor.range.endColumn);
     }
 }
 let MarkdownHoverParticipant = class MarkdownHoverParticipant {
-    constructor(_editor, _languageService, _openerService, _configurationService, _languageFeaturesService) {
+    constructor(_editor, _languageService, _openerService, _configurationService) {
         this._editor = _editor;
         this._languageService = _languageService;
         this._openerService = _openerService;
         this._configurationService = _configurationService;
-        this._languageFeaturesService = _languageFeaturesService;
-        this.hoverOrdinal = 2;
     }
     createLoadingMessage(anchor) {
         return new MarkdownHover(this, anchor.range, [new MarkdownString().appendText(nls.localize('modesContentHover.loading', "Loading..."))], 2000);
     }
     computeSync(anchor, lineDecorations) {
-        if (!this._editor.hasModel() || anchor.type !== 1 /* HoverAnchorType.Range */) {
+        if (!this._editor.hasModel() || anchor.type !== 1 /* Range */) {
             return [];
         }
         const model = this._editor.getModel();
@@ -83,15 +81,15 @@ let MarkdownHoverParticipant = class MarkdownHoverParticipant {
         return result;
     }
     computeAsync(anchor, lineDecorations, token) {
-        if (!this._editor.hasModel() || anchor.type !== 1 /* HoverAnchorType.Range */) {
+        if (!this._editor.hasModel() || anchor.type !== 1 /* Range */) {
             return AsyncIterableObject.EMPTY;
         }
         const model = this._editor.getModel();
-        if (!this._languageFeaturesService.hoverProvider.has(model)) {
+        if (!HoverProviderRegistry.has(model)) {
             return AsyncIterableObject.EMPTY;
         }
         const position = new Position(anchor.range.startLineNumber, anchor.range.startColumn);
-        return getHover(this._languageFeaturesService.hoverProvider, model, position, token)
+        return getHover(model, position, token)
             .filter(item => !isEmptyMarkdownString(item.hover.contents))
             .map(item => {
             const rng = item.hover.range ? Range.lift(item.hover.range) : anchor.range;
@@ -105,8 +103,7 @@ let MarkdownHoverParticipant = class MarkdownHoverParticipant {
 MarkdownHoverParticipant = __decorate([
     __param(1, ILanguageService),
     __param(2, IOpenerService),
-    __param(3, IConfigurationService),
-    __param(4, ILanguageFeaturesService)
+    __param(3, IConfigurationService)
 ], MarkdownHoverParticipant);
 export { MarkdownHoverParticipant };
 export function renderMarkdownHovers(context, hoverParts, editor, languageService, openerService) {

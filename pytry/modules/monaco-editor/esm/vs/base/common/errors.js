@@ -1,7 +1,3 @@
-/*---------------------------------------------------------------------------------------------
- *  Copyright (c) Microsoft Corporation. All rights reserved.
- *  Licensed under the MIT License. See License.txt in the project root for license information.
- *--------------------------------------------------------------------------------------------*/
 // Avoid circular dependency on EventEmitter by implementing a subset of the interface.
 export class ErrorHandler {
     constructor() {
@@ -9,9 +5,6 @@ export class ErrorHandler {
         this.unexpectedErrorHandler = function (e) {
             setTimeout(() => {
                 if (e.stack) {
-                    if (ErrorNoTelemetry.isErrorNoTelemetry(e)) {
-                        throw new ErrorNoTelemetry(e.message + '\n\n' + e.stack);
-                    }
                     throw new Error(e.message + '\n\n' + e.stack);
                 }
                 throw e;
@@ -49,14 +42,13 @@ export function onUnexpectedExternalError(e) {
 }
 export function transformErrorForSerialization(error) {
     if (error instanceof Error) {
-        const { name, message } = error;
+        let { name, message } = error;
         const stack = error.stacktrace || error.stack;
         return {
             $isError: true,
             name,
             message,
-            stack,
-            noTelemetry: ErrorNoTelemetry.isErrorNoTelemetry(error)
+            stack
         };
     }
     // return as is
@@ -81,7 +73,7 @@ export class CancellationError extends Error {
     }
 }
 /**
- * @deprecated use {@link CancellationError `new CancellationError()`} instead
+ * @deprecated uses {@link CancellationError}
  */
 export function canceled() {
     const error = new Error(canceledName);
@@ -110,41 +102,5 @@ export class NotSupportedError extends Error {
         if (message) {
             this.message = message;
         }
-    }
-}
-/**
- * Error that when thrown won't be logged in telemetry as an unhandled error.
- */
-export class ErrorNoTelemetry extends Error {
-    constructor(msg) {
-        super(msg);
-        this.name = 'ErrorNoTelemetry';
-    }
-    static fromError(err) {
-        if (err instanceof ErrorNoTelemetry) {
-            return err;
-        }
-        const result = new ErrorNoTelemetry();
-        result.message = err.message;
-        result.stack = err.stack;
-        return result;
-    }
-    static isErrorNoTelemetry(err) {
-        return err.name === 'ErrorNoTelemetry';
-    }
-}
-/**
- * This error indicates a bug.
- * Do not throw this for invalid user input.
- * Only catch this error to recover gracefully from bugs.
- */
-export class BugIndicatingError extends Error {
-    constructor(message) {
-        super(message || 'An unexpected bug occurred.');
-        Object.setPrototypeOf(this, BugIndicatingError.prototype);
-        // Because we know for sure only buggy code throws this,
-        // we definitely want to break here and fix the bug.
-        // eslint-disable-next-line no-debugger
-        debugger;
     }
 }

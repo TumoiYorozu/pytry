@@ -1,7 +1,6 @@
-"use strict";
 /*!-----------------------------------------------------------------------------
  * Copyright (c) Microsoft Corporation. All rights reserved.
- * Version: 0.34.1(547870b6881302c5b4ff32173c16d06009e3588f)
+ * Version: 0.32.0(e1570658ecca35c72429e624c18df24ae4286ef8)
  * Released under the MIT license
  * https://github.com/microsoft/monaco-editor/blob/main/LICENSE.txt
  *-----------------------------------------------------------------------------*/
@@ -13,7 +12,7 @@ var moduleExports = (() => {
   var __getOwnPropNames = Object.getOwnPropertyNames;
   var __getProtoOf = Object.getPrototypeOf;
   var __hasOwnProp = Object.prototype.hasOwnProperty;
-  var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+  var __markAsModule = (target) => __defProp(target, "__esModule", { value: true });
   var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
     get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
   }) : x)(function(x) {
@@ -22,32 +21,29 @@ var moduleExports = (() => {
     throw new Error('Dynamic require of "' + x + '" is not supported');
   });
   var __commonJS = (cb, mod) => function __require2() {
-    return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
+    return mod || (0, cb[Object.keys(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
   };
   var __export = (target, all) => {
+    __markAsModule(target);
     for (var name in all)
       __defProp(target, name, { get: all[name], enumerable: true });
   };
-  var __copyProps = (to, from, except, desc) => {
-    if (from && typeof from === "object" || typeof from === "function") {
-      for (let key of __getOwnPropNames(from))
-        if (!__hasOwnProp.call(to, key) && key !== except)
-          __defProp(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc(from, key)) || desc.enumerable });
+  var __reExport = (target, module, desc) => {
+    if (module && typeof module === "object" || typeof module === "function") {
+      for (let key of __getOwnPropNames(module))
+        if (!__hasOwnProp.call(target, key) && key !== "default")
+          __defProp(target, key, { get: () => module[key], enumerable: !(desc = __getOwnPropDesc(module, key)) || desc.enumerable });
     }
-    return to;
+    return target;
   };
-  var __reExport = (target, mod, secondTarget) => (__copyProps(target, mod, "default"), secondTarget && __copyProps(secondTarget, mod, "default"));
-  var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target, mod));
-  var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
-  var __publicField = (obj, key, value) => {
-    __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
-    return value;
+  var __toModule = (module) => {
+    return __reExport(__markAsModule(__defProp(module != null ? __create(__getProtoOf(module)) : {}, "default", module && module.__esModule && "default" in module ? { get: () => module.default, enumerable: true } : { value: module, enumerable: true })), module);
   };
 
   // src/fillers/monaco-editor-core-amd.ts
   var require_monaco_editor_core_amd = __commonJS({
     "src/fillers/monaco-editor-core-amd.ts"(exports, module) {
-      var api = __toESM(__require("vs/editor/editor.api"));
+      var api = __toModule(__require("vs/editor/editor.api"));
       module.exports = api;
     }
   });
@@ -82,28 +78,19 @@ var moduleExports = (() => {
 
   // src/fillers/monaco-editor-core.ts
   var monaco_editor_core_exports = {};
-  __reExport(monaco_editor_core_exports, __toESM(require_monaco_editor_core_amd()));
+  __markAsModule(monaco_editor_core_exports);
+  __reExport(monaco_editor_core_exports, __toModule(require_monaco_editor_core_amd()));
 
   // src/language/typescript/workerManager.ts
   var WorkerManager = class {
-    constructor(_modeId, _defaults) {
-      this._modeId = _modeId;
-      this._defaults = _defaults;
+    constructor(modeId, defaults) {
+      this._modeId = modeId;
+      this._defaults = defaults;
       this._worker = null;
       this._client = null;
       this._configChangeListener = this._defaults.onDidChange(() => this._stopWorker());
       this._updateExtraLibsToken = 0;
       this._extraLibsChangeListener = this._defaults.onDidExtraLibsChange(() => this._updateExtraLibs());
-    }
-    _configChangeListener;
-    _updateExtraLibsToken;
-    _extraLibsChangeListener;
-    _worker;
-    _client;
-    dispose() {
-      this._configChangeListener.dispose();
-      this._extraLibsChangeListener.dispose();
-      this._stopWorker();
     }
     _stopWorker() {
       if (this._worker) {
@@ -111,6 +98,11 @@ var moduleExports = (() => {
         this._worker = null;
       }
       this._client = null;
+    }
+    dispose() {
+      this._configChangeListener.dispose();
+      this._extraLibsChangeListener.dispose();
+      this._stopWorker();
     }
     async _updateExtraLibs() {
       if (!this._worker) {
@@ -125,37 +117,44 @@ var moduleExports = (() => {
     }
     _getClient() {
       if (!this._client) {
-        this._client = (async () => {
-          this._worker = monaco_editor_core_exports.editor.createWebWorker({
-            moduleId: "vs/language/typescript/tsWorker",
-            label: this._modeId,
-            keepIdleModels: true,
-            createData: {
-              compilerOptions: this._defaults.getCompilerOptions(),
-              extraLibs: this._defaults.getExtraLibs(),
-              customWorkerPath: this._defaults.workerOptions.customWorkerPath,
-              inlayHintsOptions: this._defaults.inlayHintsOptions
-            }
-          });
-          if (this._defaults.getEagerModelSync()) {
-            return await this._worker.withSyncedResources(monaco_editor_core_exports.editor.getModels().filter((model) => model.getLanguageId() === this._modeId).map((model) => model.uri));
+        this._worker = monaco_editor_core_exports.editor.createWebWorker({
+          moduleId: "vs/language/typescript/tsWorker",
+          label: this._modeId,
+          keepIdleModels: true,
+          createData: {
+            compilerOptions: this._defaults.getCompilerOptions(),
+            extraLibs: this._defaults.getExtraLibs(),
+            customWorkerPath: this._defaults.workerOptions.customWorkerPath,
+            inlayHintsOptions: this._defaults.inlayHintsOptions
           }
-          return await this._worker.getProxy();
-        })();
+        });
+        let p = this._worker.getProxy();
+        if (this._defaults.getEagerModelSync()) {
+          p = p.then((worker) => {
+            if (this._worker) {
+              return this._worker.withSyncedResources(monaco_editor_core_exports.editor.getModels().filter((model) => model.getLanguageId() === this._modeId).map((model) => model.uri));
+            }
+            return worker;
+          });
+        }
+        this._client = p;
       }
       return this._client;
     }
-    async getLanguageServiceWorker(...resources) {
-      const client = await this._getClient();
-      if (this._worker) {
-        await this._worker.withSyncedResources(resources);
-      }
-      return client;
+    getLanguageServiceWorker(...resources) {
+      let _client;
+      return this._getClient().then((client) => {
+        _client = client;
+      }).then((_) => {
+        if (this._worker) {
+          return this._worker.withSyncedResources(resources);
+        }
+      }).then((_) => _client);
     }
   };
 
   // src/language/typescript/languageFeatures.ts
-  var import_monaco = __require("./monaco.contribution");
+  var import_monaco = __toModule(__require("./monaco.contribution"));
 
   // src/language/typescript/lib/lib.index.ts
   var libFileSet = {};
@@ -223,6 +222,12 @@ var moduleExports = (() => {
   libFileSet["lib.webworker.iterable.d.ts"] = true;
 
   // src/language/typescript/languageFeatures.ts
+  var IndentStyle;
+  (function(IndentStyle2) {
+    IndentStyle2[IndentStyle2["None"] = 0] = "None";
+    IndentStyle2[IndentStyle2["Block"] = 1] = "Block";
+    IndentStyle2[IndentStyle2["Smart"] = 2] = "Smart";
+  })(IndentStyle || (IndentStyle = {}));
   function flattenDiagnosticMessageText(diag, newLine, indent = 0) {
     if (typeof diag === "string") {
       return diag;
@@ -270,9 +275,6 @@ var moduleExports = (() => {
       this._hasFetchedLibFiles = false;
       this._fetchLibFilesPromise = null;
     }
-    _libFiles;
-    _hasFetchedLibFiles;
-    _fetchLibFilesPromise;
     isLibFile(uri) {
       if (!uri) {
         return false;
@@ -321,12 +323,21 @@ var moduleExports = (() => {
       return this._fetchLibFilesPromise;
     }
   };
+  var DiagnosticCategory;
+  (function(DiagnosticCategory2) {
+    DiagnosticCategory2[DiagnosticCategory2["Warning"] = 0] = "Warning";
+    DiagnosticCategory2[DiagnosticCategory2["Error"] = 1] = "Error";
+    DiagnosticCategory2[DiagnosticCategory2["Suggestion"] = 2] = "Suggestion";
+    DiagnosticCategory2[DiagnosticCategory2["Message"] = 3] = "Message";
+  })(DiagnosticCategory || (DiagnosticCategory = {}));
   var DiagnosticsAdapter = class extends Adapter {
     constructor(_libFiles, _defaults, _selector, worker) {
       super(worker);
       this._libFiles = _libFiles;
       this._defaults = _defaults;
       this._selector = _selector;
+      this._disposables = [];
+      this._listener = Object.create(null);
       const onModelAdd = (model) => {
         if (model.getLanguageId() !== _selector) {
           return;
@@ -396,8 +407,6 @@ var moduleExports = (() => {
       this._disposables.push(this._defaults.onDidExtraLibsChange(recomputeDiagostics));
       monaco_editor_core_exports.editor.getModels().forEach((model) => onModelAdd(model));
     }
-    _disposables = [];
-    _listener = /* @__PURE__ */ Object.create(null);
     dispose() {
       this._disposables.forEach((d) => d && d.dispose());
       this._disposables = [];
@@ -484,13 +493,13 @@ var moduleExports = (() => {
     }
     _tsDiagnosticCategoryToMarkerSeverity(category) {
       switch (category) {
-        case 1 /* Error */:
+        case 1:
           return monaco_editor_core_exports.MarkerSeverity.Error;
-        case 3 /* Message */:
+        case 3:
           return monaco_editor_core_exports.MarkerSeverity.Info;
-        case 0 /* Warning */:
+        case 0:
           return monaco_editor_core_exports.MarkerSeverity.Warning;
-        case 2 /* Suggestion */:
+        case 2:
           return monaco_editor_core_exports.MarkerSeverity.Hint;
       }
       return monaco_editor_core_exports.MarkerSeverity.Info;
@@ -619,7 +628,10 @@ ${tagToString(tag)}`;
     return tagLabel;
   }
   var SignatureHelpAdapter = class extends Adapter {
-    signatureHelpTriggerCharacters = ["(", ","];
+    constructor() {
+      super(...arguments);
+      this.signatureHelpTriggerCharacters = ["(", ","];
+    }
     static _toSignatureHelpTriggerReason(context) {
       switch (context.triggerKind) {
         case monaco_editor_core_exports.languages.SignatureHelpTriggerKind.TriggerCharacter:
@@ -840,35 +852,35 @@ ${tagToString(tag)}`;
   };
   var Kind = class {
   };
-  __publicField(Kind, "unknown", "");
-  __publicField(Kind, "keyword", "keyword");
-  __publicField(Kind, "script", "script");
-  __publicField(Kind, "module", "module");
-  __publicField(Kind, "class", "class");
-  __publicField(Kind, "interface", "interface");
-  __publicField(Kind, "type", "type");
-  __publicField(Kind, "enum", "enum");
-  __publicField(Kind, "variable", "var");
-  __publicField(Kind, "localVariable", "local var");
-  __publicField(Kind, "function", "function");
-  __publicField(Kind, "localFunction", "local function");
-  __publicField(Kind, "memberFunction", "method");
-  __publicField(Kind, "memberGetAccessor", "getter");
-  __publicField(Kind, "memberSetAccessor", "setter");
-  __publicField(Kind, "memberVariable", "property");
-  __publicField(Kind, "constructorImplementation", "constructor");
-  __publicField(Kind, "callSignature", "call");
-  __publicField(Kind, "indexSignature", "index");
-  __publicField(Kind, "constructSignature", "construct");
-  __publicField(Kind, "parameter", "parameter");
-  __publicField(Kind, "typeParameter", "type parameter");
-  __publicField(Kind, "primitiveType", "primitive type");
-  __publicField(Kind, "label", "label");
-  __publicField(Kind, "alias", "alias");
-  __publicField(Kind, "const", "const");
-  __publicField(Kind, "let", "let");
-  __publicField(Kind, "warning", "warning");
-  var outlineTypeTable = /* @__PURE__ */ Object.create(null);
+  Kind.unknown = "";
+  Kind.keyword = "keyword";
+  Kind.script = "script";
+  Kind.module = "module";
+  Kind.class = "class";
+  Kind.interface = "interface";
+  Kind.type = "type";
+  Kind.enum = "enum";
+  Kind.variable = "var";
+  Kind.localVariable = "local var";
+  Kind.function = "function";
+  Kind.localFunction = "local function";
+  Kind.memberFunction = "method";
+  Kind.memberGetAccessor = "getter";
+  Kind.memberSetAccessor = "setter";
+  Kind.memberVariable = "property";
+  Kind.constructorImplementation = "constructor";
+  Kind.callSignature = "call";
+  Kind.indexSignature = "index";
+  Kind.constructSignature = "construct";
+  Kind.parameter = "parameter";
+  Kind.typeParameter = "type parameter";
+  Kind.primitiveType = "primitive type";
+  Kind.label = "label";
+  Kind.alias = "alias";
+  Kind.const = "const";
+  Kind.let = "let";
+  Kind.warning = "warning";
+  var outlineTypeTable = Object.create(null);
   outlineTypeTable[Kind.module] = monaco_editor_core_exports.languages.SymbolKind.Module;
   outlineTypeTable[Kind.class] = monaco_editor_core_exports.languages.SymbolKind.Class;
   outlineTypeTable[Kind.enum] = monaco_editor_core_exports.languages.SymbolKind.Enum;
@@ -889,7 +901,7 @@ ${tagToString(tag)}`;
         ConvertTabsToSpaces: options.insertSpaces,
         TabSize: options.tabSize,
         IndentSize: options.tabSize,
-        IndentStyle: 2 /* Smart */,
+        IndentStyle: 2,
         NewLineCharacter: "\n",
         InsertSpaceAfterCommaDelimiter: true,
         InsertSpaceAfterSemicolonInForStatements: true,
@@ -989,8 +1001,7 @@ ${tagToString(tag)}`;
         for (const textChange of change.textChanges) {
           edits.push({
             resource: model.uri,
-            versionId: void 0,
-            textEdit: {
+            edit: {
               range: this._textSpanToRange(model, textChange.span),
               text: textChange.newText
             }
@@ -1041,8 +1052,7 @@ ${tagToString(tag)}`;
         if (model2) {
           edits.push({
             resource: model2.uri,
-            versionId: void 0,
-            textEdit: {
+            edit: {
               range: this._textSpanToRange(model2, renameLocation.textSpan),
               text: newName
             }
@@ -1089,7 +1099,7 @@ ${tagToString(tag)}`;
         case "Type":
           return monaco_editor_core_exports.languages.InlayHintKind.Type;
         default:
-          return monaco_editor_core_exports.languages.InlayHintKind.Type;
+          return monaco_editor_core_exports.languages.InlayHintKind.Other;
       }
     }
   };
@@ -1140,7 +1150,7 @@ ${tagToString(tag)}`;
     new DiagnosticsAdapter(libFiles, defaults, modeId, worker);
     return worker;
   }
-  return __toCommonJS(tsMode_exports);
+  return tsMode_exports;
 })();
 return moduleExports;
 });
