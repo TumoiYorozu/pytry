@@ -181,7 +181,12 @@ function updateStdinHighlight() {
   highlightElement.style.width = (editorRight - editorLeft) + 'px';
   highlightElement.style.height = (editorBottom - editorTop) + 'px';
 
-  const tags = Array.from(document.getElementsByTagName('span')).filter(tag => tag.childNodes.length == 1 && tag.childNodes[0].nodeType == 3);
+  const parent = document.querySelector("#source-editor > div > div.overflow-guard > div.monaco-scrollable-element.editor-scrollable.vs > div.lines-content.monaco-editor-background > div.view-lines.monaco-mouse-cursor-text");
+  if (parent === null) return;
+  let lines = Array.from(parent.childNodes);
+  lines.sort((a, b) => (parseInt(a.style.top) - parseInt(b.style.top)));
+  const tags = [].concat(...lines.map(line => Array.from(line.childNodes[0].childNodes)));
+
   const patterns = [
     ['list', '(', 'map', '(', 'int', ',', '·', 'input', '(', ')', '.', 'split', '(', ')', ')', ')'],
     ['list', '(', 'map', '(', 'int', ',', '·', 'input', '(', ')', '.split', '(', ')', ')', ')'],
@@ -198,9 +203,9 @@ function updateStdinHighlight() {
         ok &= i + j < tags.length && pattern[j] == tags[i + j].innerHTML;
       }
       if (ok) {
-        const top = window.pageYOffset + tags[i].getBoundingClientRect().top - editorTop + 1;
-        const bottom = window.pageYOffset + tags[i].getBoundingClientRect().bottom - editorTop;
         for (let j = 0; j < pattern.length; j++) {
+          const top = window.pageYOffset + tags[i + j].getBoundingClientRect().top - editorTop + 1;
+          const bottom = window.pageYOffset + tags[i + j].getBoundingClientRect().bottom - editorTop;
           const left = window.pageXOffset + tags[i + j].getBoundingClientRect().left - editorLeft;
           const right = window.pageXOffset + tags[i + j].getBoundingClientRect().right - editorLeft;
           let classes = 'stdin-highlight';
