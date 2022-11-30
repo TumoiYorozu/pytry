@@ -77,6 +77,7 @@ h1 {
   text-align: center;
   color: white;
   background: #d60a34;
+  font-weight: bold;
 }
 
 .run-button:hover span.pushable {
@@ -148,14 +149,14 @@ h3 {
 .tip-button {
   display: inline-block;
   border-radius: 0.2rem;
-  background: #999;
+  background: #244558;
   color: white;
   font-size: 0.7rem;
   line-height: 0.6rem;
   padding: 0.3rem 0.4rem;
   margin: 0.55rem 0.2rem;
   cursor: pointer;
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .tip-button:hover {
@@ -195,6 +196,7 @@ h3 {
   background: #fff67f;
   color: black;
   border: 1px solid #888;
+  margin-left: 0.2rem;
 }
 
 /* monaco エディタ */
