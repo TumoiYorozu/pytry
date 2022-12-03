@@ -1,16 +1,28 @@
 @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@100;300;400;500;700;900&display=swap");
 
+:root {
+  --base-color: #dcf6ce;
+  --key-color: #73d93b;
+  --deep-color: #56a32c;
+  --accent-color: #a13bd9;
+}
+
 html,
 body {
   margin: 0;
   padding: 0;
   font-family: "Noto Sans JP", sans-serif;
+  line-height: 200%;
 }
 
 h2 {
   margin-top: 4rem;
   margin-bottom: 1rem;
-  font-size: 1.6rem;
+  font-size: 2rem;
+  color: var(--deep-color);
+  border-top: 0.2rem var(--deep-color) solid;
+  border-bottom: 0.2rem var(--deep-color) solid;
+  padding: 1.2rem 1.2rem;
 }
 
 li {
@@ -48,7 +60,7 @@ li {
   margin-top: 2rem;
 }
 
-.title a.start-button {
+a.start-button {
   position: relative;
   display: inline-block;
   padding: 1.2rem 1rem;
@@ -60,14 +72,14 @@ li {
   font-size: 1.2rem;
   font-weight: bold;
   z-index: 1;
-  background-color: #73d93b;
+  background-color: var(--accent-color);
   transition: 0.1s;
   -webkit-transition: 0.1s;
   -moz-transition: 0.1s;
   -o-transition: 0.1s;
 }
 
-.title a.start-button::before {
+a.start-button::before {
   position: absolute;
   content: "";
   width: 100%;
@@ -75,19 +87,19 @@ li {
   left: 0;
   top: 0;
   z-index: -1;
-  background-color: #a13bd9;
+  background-color: var(--key-color);
   transform: translateX(-100%);
   transform: scaleX(0);
   transform-origin: 0% 50%;
   transition: transform ease 0.2s;
 }
 
-.title a.start-button:hover::before {
+a.start-button:hover::before {
   transform: translateX(0);
   transform: scaleX(1);
 }
 
-.title a.start-button::after {
+a.start-button::after {
   position: absolute;
   content: "";
   width: 0.4rem;
@@ -100,7 +112,7 @@ li {
 }
 
 .container {
-  max-width: 700px;
+  max-width: 50rem;
   margin: 0 auto;
   padding: 0 1rem;
   padding-top: 3rem;
@@ -117,8 +129,117 @@ li {
 .notice-title {
   font-weight: bold;
   margin-bottom: 0.4rem;
+  font-size: 1.2rem;
 }
 
 .notice-body p {
   margin-bottom: 0;
+}
+
+.features {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  gap: 2rem 1.6rem;
+  margin: 2rem 0;
+}
+
+.feature {
+  display: inline-block;
+  width: 16rem;
+  background: var(--base-color);
+  padding: 1.6rem;
+  border-radius: 0.4rem;
+}
+
+.feature-img {
+  width: fit-content;
+  max-width: 8rem;
+  margin: auto;
+  display: block;
+  filter: invert(0.4);
+}
+
+.feature-title {
+  font-weight: 700;
+  text-align: center;
+  font-size: 1.6rem;
+  margin-top: 2rem;
+  margin-bottom: 1rem;
+}
+
+.feature-description {
+  font-weight: 300;
+}
+
+.joi-text {
+  display: flex;
+  gap: 1rem 2rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.joi-text-img {
+  max-width: 16rem;
+}
+
+.joi-text-description {
+  flex-grow: 1;
+  margin-top: 1rem;
+}
+
+.joi-text-description .copy-joi {
+  display: block;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.joi-text-description .copy-python {
+  display: block;
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.joi-text-description ul {
+  line-height: 150%;
+  margin-left: -1rem;
+  margin-top: 1.6rem;
+}
+
+.center {
+  text-align: center;
+  margin-top: -2rem;
+}
+
+.spec {
+  color: #666;
+  margin: 2rem 0;
+  margin-left: -1rem;
+}
+
+.spec li {
+  padding-left: 1rem;
+}
+
+.spec a {
+  color: #666;
+}
+
+.spec a:hover {
+  color: black;
+}
+
+footer {
+  text-align: center;
+  background: #eee;
+  line-height: 180%;
+  padding: 1rem 0;
+}
+
+footer a {
+  color: black;
+}
+
+footer a:hover {
+  opacity: 0.8;
 }

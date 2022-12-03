@@ -42,58 +42,102 @@
       </div>
       <div class="notice-body">
         <p>
-          2022 年 12 月 31 日に PyTry のアップデートを行いました．上記「今すぐ使う」ボタンからご利用可能な最新版に万一不具合が発生していましたら，代わりに<a href="./stable/">安定版</a>をご利用いただけますと幸いです．
+          2022 年 12 月 31 日に PyTry のアップデートを行いました．上記「今すぐ使う」ボタンからご利用可能な最新版に万一不具合が発生していましたら，代わりに<a href="./stable/">安定版</a>をご利用ください．
         </p>
       </div>
+    </div>
+    <h2>PyTry の特徴</h2>
+    <div class="features">
+      <div class="feature">
+        <img class="feature-img" src="./img/feature-japanese.svg" />
+        <h3 class="feature-title">日本語エラー文</h3>
+        <div class="feature-description">エラーメッセージが日本語で表示されます．一部のヒントにも対応しており，自分でバグを修正できます．</div>
+      </div>
+      <div class="feature">
+        <img class="feature-img" src="./img/feature-autosave.svg" />
+        <h3 class="feature-title">自動保存</h3>
+        <div class="feature-description">ソースコードが自動でブラウザに保存されるので，いつでも実装を中断・再開できます．</div>
+      </div>
+      <div class="feature">
+        <img class="feature-img" src="./img/feature-formatter.svg" />
+        <h3 class="feature-title">オートフォーマット</h3>
+        <div class="feature-description">ソースコードの見た目が自動で調整されるので，誰でも綺麗に実装できます．</div>
+      </div>
+      <div class="feature">
+        <img class="feature-img" src="./img/feature-insert.svg" />
+        <h3 class="feature-title">コード挿入</h3>
+        <div class="feature-description">標準入力を受け取るための複雑なコードは，ワンクリックで挿入できます．</div>
+      </div>
+      <!--<div class="feature">
+        <img class="feature-img" src="./img/feature-speed.svg" />
+        <div class="feature-title">高速実行</div>
+        <div class="feature-description">ソースコードはローカルで実行するので，待ち時間もなく高速で実行でいます．</div>
+      </div>-->
+    </div>
+    <div class="center">
+      <a class="start-button" href="./pytry/">
+        今すぐ使う
+      </a>
     </div>
     <h2>PyTry の使い方</h2>
     <div>
 
     </div>
     <h2>おすすめテキスト</h2>
-    <div>
-
+    <div class="joi-text">
+      <img class="joi-text-img" src="https://pro-ktmr.github.io/joi-text/img/cover.jpg" />
+      <div class="joi-text-description">
+        <span class="copy-joi">JOI 公式テキスト</span>
+        <span class="copy-python">Python で問題解決</span>
+        <ul>
+          <li>Python の基本文法をゼロから解説しています．</li>
+          <li>たくさんの実装例が載っています．</li>
+          <li>標準入力を受け取り，標準出力で答える問題形式です．</li>
+          <li>例題で学んで豊富な類題で演習できます．</li>
+        </ul>
+        <div class="center">
+          <a class="start-button" href="https://amzn.to/3OlwBNF" target="_blank">
+            詳しく見る
+          </a><br />
+          サポートページは<a href="https://pro-ktmr.github.io/joi-text/" target="_blank">こちら</a>
+        </div>
+      </div>
     </div>
-    <h2>PyTry の仕様</h2>
-    <div>
-      <ol>
-        <li>
-          初心者向けのシンプルな UI で，日本語に完全対応しています．
-        </li>
-        <li>
-          エディタ部分は <a href="https://microsoft.github.io/monaco-editor/" target="_blank">Monaco Editor</a> の v0.32.0 です．VS Code と同じ使いやすい環境です．シンタックスハイライト，対応する括弧の色付け，非 ASCII 文字のハイライトなどを設定しています．
-        </li>
-        <li>
-          コード部分に使用しているフォントは <a href="https://github.com/yuru7/udev-gothic" target="_blank">UDEV Gothic</a> です．可読性に優れた等幅フォントとなっています．
-        </li>
-        <li>
-          Python の処理系は <a href="https://pyodide.org/en/stable/" target="_blank">Pyodide</a> の Version 0.21.0 です．Python のバージョンは 3.10.2 です．NumPy に標準で対応しているほか，micropip で各種モジュールを追加インストールすることも可能です．
-        </li>
-        <li>
-          コードは 1 文字入力するたびにブラウザ内のローカルストレージに保存されます．ブラウザを誤って閉じてしまっても再び開けば途中から実装できます．
-        </li>
-        <li>
-          標準入力を受け取るための複雑なコードはワンクリックで挿入できます．ハイライトもされるため，誤って部分的に消してしまってもすぐに気づけます．
-        </li>
-        <li>
-          実行ボタン押下時に black によるオートフォーマットを実行します．初心者でも美しく見やすいコードを書けます．
-        </li>
-        <li>
-          実装中にもリアルタイムでエラーを表示します．実行時のエラーも検出します．
-        </li>
-        <li>
-          実行時の基本的なエラーメッセージは日本語で表示されます．さらに「なぜ間違っているか」だけでなく「どうすれば直せるか」まで提示する場合もあります．
-        </li>
-        <li>
-          無限ループの発生時も 10 秒経てば自動でタイムアウトします．
-        </li>
-      </ol>
-    </div>
-    <h2>利用条件</h2>
-    <div>
-
-    </div>
+    <h2>詳細な仕様</h2>
+    <ol class="spec">
+      <li>
+        エディタは <a href="https://microsoft.github.io/monaco-editor/" target="_blank">Monaco Editor</a> の v0.32.0 です (VS Code と同じ環境です)．シンタックスハイライト，対応する括弧の色付け，非 ASCII 文字のハイライトなどを設定しています．
+      </li>
+      <li>
+        コード部分に使用しているフォントは <a href="https://github.com/yuru7/udev-gothic" target="_blank">UDEV Gothic</a> です．
+      </li>
+      <li>
+        Python の処理系は <a href="https://pyodide.org/en/0.21.0/" target="_blank">Pyodide</a> の Version 0.21.0 です．Python のバージョンは 3.10.2 です．NumPy に標準で対応しているほか，<a href="https://pyodide.org/en/0.21.0/usage/api/micropip-api.html" target="_blank">micropip</a> で各種モジュールを追加インストールすることも可能です．
+      </li>
+      <li>
+        ソースコードは 1 文字入力するたびにブラウザ内のローカルストレージに保存されます．
+      </li>
+      <li>
+        標準入力を受け取るための複雑なコードはワンクリックで挿入できます．削除防止のためハイライトされます．
+      </li>
+      <li>
+        実行ボタン押下時に <a href="https://github.com/psf/black" target="_blank">black</a> によるオートフォーマットを実行します．
+      </li>
+      <li>
+        実装中にもリアルタイムでエラーを表示します．実行時のエラーも検出します．
+      </li>
+      <li>
+        実行時の基本的なエラーメッセージやヒントは日本語で表示されます．
+      </li>
+      <li>
+        無限ループの発生時も 10 秒経てば自動でタイムアウトします．
+      </li>
+    </ol>
   </div>
+  <footer>
+    <a href="terms.html">利用条件</a><br />
+    © Yuki Kitamura 2022 -
+  </footer>
 </body>
 
 </html>
