@@ -1,3 +1,5 @@
+export let lastTranslationSuccess = false;
+
 /**
  * 専門的な英語のエラーメッセージをわかりやすい日本語に変換して返す
  * @param {*} originalErrorMessage Python が出力した元のエラーメッセージ
@@ -11,6 +13,8 @@ export function translate(originalErrorMessage) {
   // 基本
   translated = translated.replaceAll('Traceback (most recent call last):', 'エラー発生:');
   translated = translated.replaceAll(/(.*)File "Main.py", line (\d*)(.*)/g, '$1プログラムの $2 行目');
+
+  const basicTranslated = translated;
 
   // インデント
   translated = translated.replaceAll(/IndentationError: expected an indented block after '(.*)' statement on line (.*)/g, '$2 行目の $1 文の後にインデントされた部分が必要です');
@@ -106,6 +110,8 @@ export function translate(originalErrorMessage) {
   // その他
   translated = translated.replaceAll('MemoryError', 'メモリの使いすぎです (巨大なリストを作成したり無限ループが発生したりしたときに表示されることがあります)');
   translated = translated.replaceAll(/ModuleNotFoundError: No module named '(.*)'/g, '「$1」というモジュールが見つかりません (micropip でインストールできるかもしれません)');
+
+  lastTranslationSuccess = (basicTranslated != translated);
 
   return translated;
 }

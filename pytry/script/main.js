@@ -3,8 +3,11 @@ import * as hintFinder from './hint-finder.js';
 import * as compiler from './compiler.js';
 import * as formatter from './formatter.js';
 import * as runner from './runner.js';
+import * as logger from './logger.js';
 
 window.addEventListener('load', (event) => {
+  logger.initizalize();
+
   editor.initialize('source-editor', 'input-editor', 'output-editor');
   hintFinder.initialize();
   compiler.initialize();

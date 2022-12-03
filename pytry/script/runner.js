@@ -1,6 +1,6 @@
 import * as editor from './editor.js';
 import * as errorTranslator from './error-translator.js';
-import * as hintFinder from './hint-finder.js';
+import * as logger from './logger.js';
 
 let worker, isReady, timeoutTimer, runButtonId;
 
@@ -48,6 +48,8 @@ export async function run() {
     source: editor.sourceEditor.getValue(),
     stdin: editor.inputEditor.getValue().replaceAll('\r', '')
   });
+
+  logger.log('run', {});
 }
 
 function workerListenner(message) {
@@ -61,6 +63,12 @@ function workerListenner(message) {
   if (kind == 'done') {
     if (timeoutTimer) clearTimeout(timeoutTimer);
     enableReady();
+
+    logger.log('run-done', {
+      source: editor.sourceEditor.getValue(),
+      input: editor.inputEditor.getValue(),
+      output: editor.outputEditor.getValue(),
+    });
   }
 
   if (kind == 'stdout') {
@@ -96,4 +104,10 @@ function timeout() {
 `);
   worker.terminate();
   initializeWorker();
+
+  logger.log('run-timeout', {
+    source: editor.sourceEditor.getValue(),
+    input: editor.inputEditor.getValue(),
+    output: editor.outputEditor.getValue(),
+  });
 }

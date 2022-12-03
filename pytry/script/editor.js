@@ -1,3 +1,5 @@
+import * as logger from './logger.js';
+
 export let sourceEditor, inputEditor, outputEditor;
 export let sourceSession, inputSession, outputSession;
 export let sourceChangeListenner = [];
@@ -129,6 +131,15 @@ export function initialize(sourceEditorId, inputEditorId, outputEditorId) {
 export function copy_from_source() {
   if (navigator.clipboard) {
     navigator.clipboard.writeText(sourceEditor.getValue());
+    logger.log('copy_from_source', {
+      ok: true,
+      input: sourceEditor.getValue(),
+    });
+  }
+  else {
+    logger.log('copy_from_source', {
+      ok: false,
+    });
   }
 }
 
@@ -137,25 +148,66 @@ export function paste_to_input() {
     navigator.clipboard.readText()
       .then((text) => {
         inputEditor.setValue(text);
+        logger.log('paste_to_input', {
+          ok: true,
+          input: inputEditor.getValue(),
+        });
       });
     inputEditor.focus();
+  }
+  else {
+    logger.log('paste_to_input', {
+      ok: false,
+    });
   }
 }
 
 export function insert_int_input() {
+  const oldLine = logger.getCurrentLine();
+
   insertToSourceEditor('int(input())');
+
+  logger.log('insert_int_input', {
+    line_number: logger.getCurrentLineNumber(),
+    old_line: oldLine,
+    new_line: logger.getCurrentLine(),
+  });
 }
 
 export function insert_map_int_input_split() {
+  const oldLine = logger.getCurrentLine();
+
   insertToSourceEditor('map(int, input().split())');
+
+  logger.log('insert_map_int_input_split', {
+    line_number: logger.getCurrentLineNumber(),
+    old_line: oldLine,
+    new_line: logger.getCurrentLine(),
+  });
 }
 
 export function insert_input() {
+  const oldLine = logger.getCurrentLine();
+
   insertToSourceEditor('input()');
+
+  logger.log('insert_input', {
+    line_number: logger.getCurrentLineNumber(),
+    old_line: oldLine,
+    new_line: logger.getCurrentLine(),
+  });
 }
 
 export function insert_list_map_int_input_split() {
+  const oldLine = logger.getCurrentLine();
+
   insertToSourceEditor('list(map(int, input().split()))');
+
+  logger.log('insert_list_map_int_input_split', {
+    line_number: logger.getCurrentLineNumber(),
+    old_line: oldLine,
+    new_line: logger.getCurrentLine(),
+  });
 }
 
 function insertToSourceEditor(text) {

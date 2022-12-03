@@ -39,13 +39,20 @@ function workerListenner(message) {
       editor.clearSourceEditorMarker('Warning');
     }
   }
-  else {
+  else if (error != previousError) {
     const translated = errorTranslator.translate(error);
     let err = [...translated.matchAll(/プログラムの (\d*) 行目/g)];
     if (err != null && err.length != 0) {
       let lineNumber = Number(err[err.length - 1][1]);
       editor.addSourceEditorMarker(lineNumber, translated, 'Warning');
     }
+
+    logger.log('compile-error', {
+      source: editor.sourceEditor.getValue(),
+      error: error,
+      translated: translated,
+      ok: errorTranslator.lastTranslationSuccess,
+    });
   }
 
   previousError = error;
