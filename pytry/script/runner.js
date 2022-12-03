@@ -64,7 +64,7 @@ function workerListenner(message) {
     if (timeoutTimer) clearTimeout(timeoutTimer);
     enableReady();
 
-    logger.log('run-done', {
+    logger.log('run_done', {
       source: editor.sourceEditor.getValue(),
       input: editor.inputEditor.getValue(),
       output: editor.outputEditor.getValue(),
@@ -85,6 +85,14 @@ function workerListenner(message) {
       editor.addSourceEditorMarker(lineNumber, translated, 'Error');
       editor.addSourceEditorDecoration(lineNumber, 'glyphMarginError');
     }
+
+    logger.log('runtime_error', {
+      three_lines: logger.getCurrentThreeLines(),
+      line_number: logger.getCurrentLineNumber(),
+      error: error,
+      translated: translated,
+      translate_success: errorTranslator.lastTranslationSuccess,
+    });
   }
 
   if (kind == 'internalError') {
@@ -92,6 +100,12 @@ function workerListenner(message) {
 
     if (timeoutTimer) clearTimeout(timeoutTimer);
     enableReady();
+
+    logger.log('run_ie', {
+      source: editor.sourceEditor.getValue(),
+      input: editor.inputEditor.getValue(),
+      output: editor.outputEditor.getValue(),
+    });
   }
 }
 
@@ -105,7 +119,7 @@ function timeout() {
   worker.terminate();
   initializeWorker();
 
-  logger.log('run-timeout', {
+  logger.log('run_timeout', {
     source: editor.sourceEditor.getValue(),
     input: editor.inputEditor.getValue(),
     output: editor.outputEditor.getValue(),

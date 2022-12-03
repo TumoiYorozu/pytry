@@ -1,6 +1,6 @@
 import * as editor from './editor.js';
 
-const url = 'https://ktmr.vsw.jp/pytry/log.py';
+const url = 'https://ktmr.vsw.jp/pytry/log.cgi';
 const maxLength = 5000;
 const maxLengthGa = 80;
 
@@ -91,4 +91,18 @@ export function getCurrentLine() {
   const lineNumber = getCurrentLineNumber() - 1;
   const source = editor.sourceEditor.getValue();
   return source.split('\n')[lineNumber].trimEnd();
+}
+
+/**
+ * 
+ * @returns ソースエディタのカーソルがある行の前後 3 行のテキスト
+ */
+export function getCurrentThreeLines() {
+  const lineNumber = getCurrentLineNumber();
+  const source = '\n' + editor.sourceEditor.getValue() + '\n';
+  let res = '';
+  res += source.split('\n')[lineNumber - 1].trimEnd() + '\n';
+  res += source.split('\n')[lineNumber].trimEnd() + '\n';
+  res += source.split('\n')[lineNumber + 1].trimEnd() + '\n';
+  return res;
 }

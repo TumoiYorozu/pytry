@@ -132,13 +132,14 @@ export function copy_from_source() {
   if (navigator.clipboard) {
     navigator.clipboard.writeText(sourceEditor.getValue());
     logger.log('copy_from_source', {
-      ok: true,
-      input: sourceEditor.getValue(),
+      clipboard_success: 'success',
+      source: sourceEditor.getValue(),
     });
   }
   else {
     logger.log('copy_from_source', {
-      ok: false,
+      clipboard_success: 'undefined',
+      source: sourceEditor.getValue(),
     });
   }
 }
@@ -149,15 +150,21 @@ export function paste_to_input() {
       .then((text) => {
         inputEditor.setValue(text);
         logger.log('paste_to_input', {
-          ok: true,
+          clipboard_success: 'success',
           input: inputEditor.getValue(),
         });
-      });
+      }).catch(error => {
+        logger.log('paste_to_input', {
+          clipboard_success: 'disable',
+          input: inputEditor.getValue(),
+        });
+      });;
     inputEditor.focus();
   }
   else {
     logger.log('paste_to_input', {
-      ok: false,
+      clipboard_success: 'undefined',
+      input: inputEditor.getValue(),
     });
   }
 }

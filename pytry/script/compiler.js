@@ -47,11 +47,12 @@ function workerListenner(message) {
       editor.addSourceEditorMarker(lineNumber, translated, 'Warning');
     }
 
-    logger.log('compile-error', {
-      source: editor.sourceEditor.getValue(),
+    logger.log('compile_error', {
+      three_lines: logger.getCurrentThreeLines(),
+      line_number: logger.getCurrentLineNumber(),
       error: error,
       translated: translated,
-      ok: errorTranslator.lastTranslationSuccess,
+      translate_success: errorTranslator.lastTranslationSuccess,
     });
   }
 
