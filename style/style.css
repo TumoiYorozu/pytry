@@ -34,6 +34,7 @@ li {
   position: relative;
   color: white;
   padding: 6rem 2rem;
+  margin-bottom: 4rem;
   text-align: center;
   background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
     url("../img/background.jpg");
@@ -115,7 +116,6 @@ a.start-button::after {
   max-width: 50rem;
   margin: 0 auto;
   padding: 0 1rem;
-  padding-top: 3rem;
   padding-bottom: 4rem;
 }
 
@@ -172,11 +172,50 @@ a.start-button::after {
   font-weight: 300;
 }
 
+.usage {
+  display: flex;
+  gap: 0 2rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.usage-img {
+  width: 32rem;
+  max-width: 100%;
+  border: 1px black solid;
+}
+
+.usage-description {
+  width: 10rem;
+  font-size: 1.2rem;
+  padding: 1rem 0;
+  flex-grow: 1;
+}
+
+.usage-description strong {
+  background: linear-gradient(transparent 60%, #ff6 60%);
+}
+
+.usage-detail {
+  font-size: 0.8rem;
+  line-height: 1.6rem;
+  margin-top: 0.6rem;
+}
+
+.usage-detail::before {
+  content: "※ ";
+}
+
+hr {
+  margin-top: 2rem;
+}
+
 .joi-text {
   display: flex;
   gap: 1rem 2rem;
   flex-wrap: wrap;
   justify-content: center;
+  align-items: flex-start;
 }
 
 .joi-text-img {
@@ -242,4 +281,23 @@ footer a {
 
 footer a:hover {
   opacity: 0.8;
+}
+
+header {
+  background: #244558;
+  padding: 1rem;
+}
+
+header h1 {
+  margin: 0;
+}
+
+.logo-mark {
+  height: 1.8rem;
+  margin-right: 1rem;
+}
+
+.logo-type {
+  height: 1.4rem;
+  margin: 0.2rem 0;
 }
