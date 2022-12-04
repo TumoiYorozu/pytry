@@ -72,7 +72,7 @@ export function initizalize() {
 export function log(event_name, params) {
   for (let key in params)
     if (typeof params[key] == 'string')
-      params[key] = params[key].replace('\r', '');
+      params[key] = params[key].replaceAll('\r', '');
   send(event_name, params);
   ga(event_name, params);
 }
