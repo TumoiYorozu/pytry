@@ -70,6 +70,9 @@ export function initizalize() {
  * @param {*} params パラメータ
  */
 export function log(event_name, params) {
+  for (let key in params)
+    if (typeof params[key] == 'string')
+      params[key] = params[key].replace('\r', '');
   send(event_name, params);
   ga(event_name, params);
 }
