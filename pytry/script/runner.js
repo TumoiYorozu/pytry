@@ -89,7 +89,7 @@ function workerListenner(message) {
     logger.log('runtime_error', {
       three_lines: logger.getCurrentThreeLines(),
       line_number: logger.getCurrentLineNumber(),
-      error: error,
+      error: content,
       translated: translated,
       translate_success: errorTranslator.lastTranslationSuccess,
     });

@@ -1,5 +1,6 @@
 import * as editor from './editor.js';
 import * as errorTranslator from './error-translator.js';
+import * as logger from './logger.js';
 
 let worker, timer = null, previousError = '';
 
@@ -47,6 +48,8 @@ function workerListenner(message) {
       editor.addSourceEditorMarker(lineNumber, translated, 'Warning');
     }
 
+    previousError = error;
+
     logger.log('compile_error', {
       three_lines: logger.getCurrentThreeLines(),
       line_number: logger.getCurrentLineNumber(),
@@ -55,6 +58,4 @@ function workerListenner(message) {
       translate_success: errorTranslator.lastTranslationSuccess,
     });
   }
-
-  previousError = error;
 }
