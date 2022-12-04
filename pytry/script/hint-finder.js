@@ -31,8 +31,8 @@ export function findHints() {
       hint += h + '\n';
       if (!previousHints.has(hint)) {
         logger.log('hint_found', {
-          line_number: logger.getCurrentLineNumber(),
-          three_lines: logger.getCurrentThreeLines(),
+          line_number: i + 1,
+          three_lines: logger.getThreeLines(i + 1),
           hint: h,
         });
       }

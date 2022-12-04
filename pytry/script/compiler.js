@@ -46,16 +46,16 @@ function workerListenner(message) {
     if (err != null && err.length != 0) {
       let lineNumber = Number(err[err.length - 1][1]);
       editor.addSourceEditorMarker(lineNumber, translated, 'Warning');
+
+      logger.log('compile_error', {
+        three_lines: logger.getThreeLines(lineNumber),
+        line_number: lineNumber,
+        error: error,
+        translated: translated,
+        translate_success: errorTranslator.lastTranslationSuccess,
+      });
     }
 
     previousError = error;
-
-    logger.log('compile_error', {
-      three_lines: logger.getCurrentThreeLines(),
-      line_number: logger.getCurrentLineNumber(),
-      error: error,
-      translated: translated,
-      translate_success: errorTranslator.lastTranslationSuccess,
-    });
   }
 }

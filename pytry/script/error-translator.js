@@ -1,4 +1,4 @@
-export let lastTranslationSuccess = false;
+export let lastTranslationSuccess = '';
 
 /**
  * 専門的な英語のエラーメッセージをわかりやすい日本語に変換して返す
@@ -111,7 +111,7 @@ export function translate(originalErrorMessage) {
   translated = translated.replaceAll('MemoryError', 'メモリの使いすぎです (巨大なリストを作成したり無限ループが発生したりしたときに表示されることがあります)');
   translated = translated.replaceAll(/ModuleNotFoundError: No module named '(.*)'/g, '「$1」というモジュールが見つかりません (micropip でインストールできるかもしれません)');
 
-  lastTranslationSuccess = (basicTranslated != translated);
+  lastTranslationSuccess = (basicTranslated != translated) ? 'success' : 'failure';
 
   return translated;
 }

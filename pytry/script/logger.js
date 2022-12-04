@@ -98,10 +98,9 @@ export function getCurrentLine() {
 
 /**
  * 
- * @returns ソースエディタのカーソルがある行の前後 3 行のテキスト
+ * @returns 指定行の前後 3 行のテキスト
  */
-export function getCurrentThreeLines() {
-  const lineNumber = getCurrentLineNumber();
+export function getThreeLines(lineNumber) {
   const source = '\n' + editor.sourceEditor.getValue() + '\n';
   let res = '';
   res += source.split('\n')[lineNumber - 1].trimEnd() + '\n';

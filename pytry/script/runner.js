@@ -84,15 +84,15 @@ function workerListenner(message) {
       let lineNumber = Number(err[err.length - 1][1]);
       editor.addSourceEditorMarker(lineNumber, translated, 'Error');
       editor.addSourceEditorDecoration(lineNumber, 'glyphMarginError');
-    }
 
-    logger.log('runtime_error', {
-      three_lines: logger.getCurrentThreeLines(),
-      line_number: logger.getCurrentLineNumber(),
-      error: content,
-      translated: translated,
-      translate_success: errorTranslator.lastTranslationSuccess,
-    });
+      logger.log('runtime_error', {
+        three_lines: logger.getThreeLines(lineNumber),
+        line_number: lineNumber,
+        error: content,
+        translated: translated,
+        translate_success: errorTranslator.lastTranslationSuccess,
+      });
+    }
   }
 
   if (kind == 'internalError') {
