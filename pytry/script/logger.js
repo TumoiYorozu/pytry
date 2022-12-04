@@ -9,7 +9,7 @@ let sessionId = null;
 
 function send(event_name, params) {
   for (let key in params)
-    if (typeof params[key] == "string")
+    if (typeof params[key] == 'string')
       params[key] = params[key].substr(0, maxLength);
 
   const request = {
@@ -39,7 +39,7 @@ function send(event_name, params) {
 
 function ga(event_name, params) {
   for (let key in params)
-    if (typeof params[key] == "string")
+    if (typeof params[key] == 'string')
       params[key] = params[key].substr(0, maxLengthGa);
 
   gtag('event', event_name, Object.assign({

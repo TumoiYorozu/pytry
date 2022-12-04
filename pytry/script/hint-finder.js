@@ -27,7 +27,7 @@ export function findHints() {
     const line = lines[i];
     let hint = '';
 
-    addHint = (h) => {
+    const addHint = (h) => {
       hint += h + '\n';
       if (!previousHints.has(hint)) {
         logger.log('hint_found', {
