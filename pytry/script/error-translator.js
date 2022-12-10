@@ -81,6 +81,7 @@ export function translate(originalErrorMessage) {
 
   // 型
   translated = translated.replaceAll(/TypeError: '(.*)' object cannot be interpreted as an integer/g, '「$1」を整数値とみなすことはできません');
+  translated = translated.replaceAll(/TypeError: 'int' object is not iterable/g, '整数値は繰り返し不可能です (range() を使ってはどうですか？)');
   translated = translated.replaceAll(/TypeError: '(.*)' object is not iterable/g, '「$1」は繰り返し不可能です (リストのように使うことはできません)');
   translated = translated.replaceAll(/TypeError: argument of type '(.*)' is not iterable/g, '「$1」は繰り返し不可能です (in の右辺に使うことはできません)');
 
