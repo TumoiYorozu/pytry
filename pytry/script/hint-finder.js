@@ -8,13 +8,19 @@ let timer = null, previousHints = new Set([]);
  */
 export function initialize() {
   editor.sourceChangeListenner.push(onDidChangeContent);
-  timer = setTimeout(findHints, 3500);
+  timer = setTimeout(timerHandler, 3200);
 }
 
 function onDidChangeContent() {
   editor.clearSourceEditorMarker('Info');
+
   if (timer) clearTimeout(timer);
-  timer = setTimeout(findHints, 2500);
+  timer = setTimeout(timerHandler, 1200);
+}
+
+function timerHandler() {
+  findHints();
+  timer = setTimeout(timerHandler, 1200);
 }
 
 /**
@@ -24,6 +30,8 @@ export function findHints() {
   const lines = editor.sourceEditor.getValue().split('\n');
   const hints = new Set([]);
   for (let i = 0; i < lines.length; i++) {
+    if (i + 1 == logger.getCurrentLineNumber()) continue;
+
     const line = lines[i];
     let hint = '';
 

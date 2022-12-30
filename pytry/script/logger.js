@@ -79,7 +79,7 @@ export function log(event_name, params) {
 
 /**
  * 
- * @returns ソースエディタのカーソルがある行の行番号
+ * @returns ソースエディタのカーソルがある行の行番号 (1-origin)
  */
 export function getCurrentLineNumber() {
   const selection = editor.sourceEditor.getSelection();
