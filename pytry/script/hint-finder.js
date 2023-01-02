@@ -15,12 +15,12 @@ function onDidChangeContent() {
   editor.clearSourceEditorMarker('Info');
 
   if (timer) clearTimeout(timer);
-  timer = setTimeout(timerHandler, 1200);
+  timer = setTimeout(timerHandler, 150);
 }
 
 function timerHandler() {
   findHints();
-  timer = setTimeout(timerHandler, 1200);
+  timer = setTimeout(timerHandler, 150);
 }
 
 /**

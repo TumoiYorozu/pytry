@@ -19,12 +19,12 @@ function onDidChangeContent() {
   startCompilation(false);
 
   if (timer) clearTimeout(timer);
-  timer = setTimeout(timerHandler, 1000);
+  timer = setTimeout(timerHandler, 200);
 }
 
 function timerHandler() {
   startCompilation(true);
-  timer = setTimeout(timerHandler, 1000);
+  timer = setTimeout(timerHandler, 200);
 }
 
 function startCompilation(doesDetectNewError) {
