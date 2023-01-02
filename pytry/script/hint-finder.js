@@ -106,6 +106,9 @@ export function findHints() {
     }
 
     // その他
+    if (line.match(/^\s*print\s*=/g) !== null) {
+      addHint(`${i + 1} 行目はイコールではなく括弧の print() ではありませんか？`);
+    }
     if (line.match(/\w\[.{0,3}\,.{0,3}\]/g) !== null) {
       addHint(`${i + 1} 行目の [ ] の間のコンマ , はスライスのコロン : ではありませんか？`);
     }
