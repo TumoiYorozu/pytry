@@ -21,19 +21,28 @@ export function translate(originalErrorMessage) {
   translated = translated.replaceAll('IndentationError: expected an indented block', 'インデントを忘れています');
   translated = translated.replaceAll('IndentationError: unexpected indent', 'インデントがおかしな位置にあります');
   translated = translated.replaceAll('IndentationError: unindent does not match any outer indentation level', 'インデントが揃っていません');
-  translated = translated.replaceAll('SyntaxError: invalid non-printable character U+3000', '全角スペースが紛れ込んでいます (半角スペース 2 個に直しましょう)');
+  translated = translated.replaceAll('SyntaxError: invalid non-printable character U+3000', '全角スペースが紛れ込んでいるため，半角スペース 2 個に直しましょう');
   translated = translated.replaceAll('TabError: inconsistent use of tabs and spaces in indentation', 'インデントでタブと半角スペースが混ざっています');
 
   // 入出力
-  translated = translated.replaceAll(/ValueError: invalid literal for int\(\) with base 10: '(.*)'/g, '「$1」を整数に変換できません (入力の受け取り方や入力欄が正しくないことがあります)');
-  translated = translated.replaceAll(/ValueError: not enough values to unpack \(expected (.*), got (.*)\)/g, '$2 個しかないデータを $1 個に分けようとしました (入力の受け取り方や入力欄が正しくないことがあります)');
-  translated = translated.replaceAll(/ValueError: too many values to unpack \(expected (.*)\)/g, '$1 個より多いデータを $1 個に分けようとしました (入力の受け取り方や入力欄が正しくないことがあります)');
-  translated = translated.replaceAll('EOFError: EOF when reading a line', 'ファイルの末尾に到達しました (入力の受け取り方や入力欄が正しくないことがあります)');
-  translated = translated.replaceAll('TypeError: object.readline() returned non-string', 'ファイルの末尾に到達しました (入力の受け取り方や入力欄が正しくないことがあります)');
+  translated = translated.replaceAll(/ValueError: invalid literal for int\(\) with base 10: '(.*)'/g, `「$1」を整数に変換できません
+• 入力の受け取り方や入力欄が正しくないことがあります
+• int(input()) の代わりに map(int, input().split()) を使うと直るかもしれません`);
+  translated = translated.replaceAll(/ValueError: not enough values to unpack \(expected (.*), got (.*)\)/g, `$2 個しかないデータを $1 個に分けようとしました
+• 入力の受け取り方や入力欄が正しくないことがあります
+• map(int, input().split()) の代わりに int(input()) を使うと直るかもしれません`);
+  translated = translated.replaceAll(/ValueError: too many values to unpack \(expected (.*)\)/g, `$1 個より多いデータを $1 個に分けようとしました
+• 入力の受け取り方や入力欄が正しくないことがあります`);
+  translated = translated.replaceAll('EOFError: EOF when reading a line', `ファイルの末尾に到達しました
+• 入力の受け取り方や入力欄が正しくないことがあります`);
+  translated = translated.replaceAll('TypeError: object.readline() returned non-string', `ファイルの末尾に到達しました
+• 入力の受け取り方や入力欄が正しくないことがあります`);
   translated = translated.replaceAll("SyntaxError: Missing parentheses in call to 'print'. Did you mean print(...)?", 'print() のように print の後に括弧が必要です');
 
   // 存在しない
-  translated = translated.replaceAll(/NameError: name '(.*)' is not defined/g, '「$1」が見つかりません (小文字と大文字は区別します) (文字列はダブルクオーテーションで囲みます)');
+  translated = translated.replaceAll(/NameError: name '(.*)' is not defined/g, `「$1」が見つかりません
+• 小文字と大文字は区別します
+• 文字列はダブルクオーテーションで囲みます`);
   translated = translated.replaceAll(/ValueError: list.remove(x): x not in list/g, 'remove で消そうとしている要素が存在していません');
   translated = translated.replaceAll(/AttributeError: '(.*)' object has no attribute '(.*)'/g, '「$1」のオブジェクトに「.$2」は存在しません');
 
@@ -65,11 +74,16 @@ export function translate(originalErrorMessage) {
   translated = translated.replaceAll(/SyntaxError: '(.*)' was never closed/g, '「$1」に対応した閉じがありません');
 
   // 文法
-  translated = translated.replaceAll('SyntaxError: invalid syntax. Perhaps you forgot a comma?', '文法が間違っています (コンマを忘れていませんか？)');
+  translated = translated.replaceAll('SyntaxError: invalid syntax. Perhaps you forgot a comma?', `文法が間違っています
+• コンマを忘れていませんか？`);
   translated = translated.replaceAll('SyntaxError: invalid syntax', '文法が間違っています');
   translated = translated.replaceAll(/SyntaxError: expected '(.*)'/g, '「$1」が必要です');
-  translated = translated.replaceAll(/SyntaxError: invalid character '(.*)' \((.*)\)/g, '「$1」という文字は使えません (誤って全角文字を使っていることがあります)');
-  translated = translated.replaceAll('SyntaxError: invalid decimal literal', '文字や数値が混ざっています (変数名の先頭はアルファベットでなければなりません) (掛け算の記号 * は省略できません)');
+  translated = translated.replaceAll(/SyntaxError: invalid character '(.*)' \((.*)\)/g, `「$1」という文字は使えません
+• 全角文字を使っていませんか？`);
+  translated = translated.replaceAll('SyntaxError: invalid decimal literal', `文字や数値が混ざっています
+• 変数名の先頭はアルファベットでなければなりません
+• 掛け算の記号 * は省略できません`);
+  translated = translated.replaceAll('SyntaxError: leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers', '数値の先頭に 0 を付けることはできません');
   translated = translated.replaceAll("SyntaxError: 'return' outside function", '関数の中身以外で return を使うことはできません');
 
   // 演算
@@ -77,11 +91,14 @@ export function translate(originalErrorMessage) {
   translated = translated.replaceAll('ZeroDivisionError: integer division or modulo by zero', 'ゼロで割ろうとしました');
   translated = translated.replaceAll(/TypeError: unsupported operand type\(s\) for (.*): '(.*)' and '(.*)'/g, '「$2」と「$3」の間で「$1」の計算はできません');
   translated = translated.replaceAll(/TypeError: '(.*)' not supported between instances of '(.*)' and '(.*)'/g, '「$2」と「$3」の間で「$1」の計算はできません');
-  translated = translated.replaceAll(/TypeError: can only concatenate str \(not "(.*)"\) to str/g, '「$1」と文字列を + で結合することはできません (文字列同士のみ結合できます)');
+  translated = translated.replaceAll(/TypeError: can only concatenate str \(not "(.*)"\) to str/g, `「$1」と文字列を + で結合することはできません
+• 文字列同士のみ結合できます
+• str() を使って文字列でないものを文字列に変換できます`);
 
   // 型
   translated = translated.replaceAll(/TypeError: '(.*)' object cannot be interpreted as an integer/g, '「$1」を整数値とみなすことはできません');
-  translated = translated.replaceAll(/TypeError: 'int' object is not iterable/g, '整数値は繰り返し不可能です (range() を使ってはどうですか？)');
+  translated = translated.replaceAll(/TypeError: 'int' object is not iterable/g, `整数値は繰り返し不可能です
+• range() を使ってはどうですか？`);
   translated = translated.replaceAll(/TypeError: '(.*)' object is not iterable/g, '「$1」は繰り返し不可能です (リストのように使うことはできません)');
   translated = translated.replaceAll(/TypeError: argument of type '(.*)' is not iterable/g, '「$1」は繰り返し不可能です (in の右辺に使うことはできません)');
 
@@ -98,6 +115,7 @@ export function translate(originalErrorMessage) {
   translated = translated.replaceAll(/TypeError: '(.*)' is an invalid keyword argument for (.*)/g, '$2 に「$1」という引数はありません');
   translated = translated.replaceAll(/ValueError: (.*) arg is an empty sequence/g, '$1 の引数が空の列になってしまいました');
   translated = translated.replaceAll(/TypeError: (.*)\(\) takes no keyword arguments/g, '$1() の括弧内にイコールは使えません');
+  translated = translated.replaceAll(/TypeError: (.*)\(\) missing 1 required positional argument: '(.*)'/g, '$1() の引数「$2」が指定されていません');
 
   // 単語
   translated = translated.replaceAll('「int」', '「整数 (int)」');
@@ -109,8 +127,10 @@ export function translate(originalErrorMessage) {
   translated = translated.replaceAll('builtin_function_or_method', '組み込み関数');
 
   // その他
-  translated = translated.replaceAll('MemoryError', 'メモリの使いすぎです (巨大なリストを作成したり無限ループが発生したりしたときに表示されることがあります)');
-  translated = translated.replaceAll(/ModuleNotFoundError: No module named '(.*)'/g, '「$1」というモジュールが見つかりません (micropip でインストールできるかもしれません)');
+  translated = translated.replaceAll('MemoryError', `メモリの使いすぎです
+• 巨大なリストを作成していませんか？
+• 無限ループが発生していませんか？`);
+  translated = translated.replaceAll(/ModuleNotFoundError: No module named '(.*)'/g, '「$1」というモジュールが見つかりません');
 
   lastTranslationSuccess = (basicTranslated != translated) ? 'success' : 'failure';
 
