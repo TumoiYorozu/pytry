@@ -33,6 +33,9 @@ export function initialize(sourceEditorId, inputEditorId, outputEditorId) {
   if (localStorage.getItem('output_text') != null) {
     outputText = decodeURIComponent(localStorage.getItem('output_text'));
   }
+  localStorage.setItem('source_text', encodeURIComponent(sourceText));
+  localStorage.setItem('input_text', encodeURIComponent(inputText));
+  localStorage.setItem('output_text', encodeURIComponent(outputText));
 
   require(['vs/editor/editor.main'], function () {
     // monaco.languages.registerOnTypeFormattingEditProvider('python', new PyTryOnTypeFormattingEditProvider());

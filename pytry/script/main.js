@@ -6,13 +6,13 @@ import * as runner from './runner.js';
 import * as logger from './logger.js';
 
 window.addEventListener('load', (event) => {
-  logger.initizalize();
-
   editor.initialize('source-editor', 'input-editor', 'output-editor');
   hintFinder.initialize();
   compiler.initialize();
   formatter.initialize();
   runner.initialize('run');
+
+  logger.initizalize();
 
   document.getElementById('copy_from_source').addEventListener('click', editor.copy_from_source);
   document.getElementById('paste_to_input').addEventListener('click', editor.paste_to_input);

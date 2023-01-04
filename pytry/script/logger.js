@@ -23,7 +23,6 @@ function send(event_name, params) {
       event_name: event_name,
     }, params)),
   };
-  console.log(request.body);
 
   fetch(url, request)
     .then(response => response.json())
@@ -61,7 +60,15 @@ export function initizalize() {
     userId = sessionId;
     localStorage.setItem('user_id', encodeURIComponent(userId));
   }
-  send('view', {});
+  send('view', {
+    source: decodeURIComponent(localStorage.getItem('source_text')),
+    input: decodeURIComponent(localStorage.getItem('input_text')),
+    output: decodeURIComponent(localStorage.getItem('output_text')),
+  });
+  setInterval(() => {
+    send('keep', {
+    });
+  }, 1000 * 60);
 }
 
 /**
