@@ -117,6 +117,9 @@ export function translate(originalErrorMessage) {
   translated = translated.replaceAll(/TypeError: (.*)\(\) takes no keyword arguments/g, '$1() の括弧内にイコールは使えません');
   translated = translated.replaceAll(/TypeError: (.*)\(\) missing 1 required positional argument: '(.*)'/g, '$1() の引数「$2」が指定されていません');
 
+  // 非同期処理
+  translated = translated.replaceAll("SyntaxError: 'await' outside function", '関数の外側で「await」は使えません');
+
   // 単語
   translated = translated.replaceAll('「int」', '「整数 (int)」');
   translated = translated.replaceAll('「float」', '「小数 (float)」');
