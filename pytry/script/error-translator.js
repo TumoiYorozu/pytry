@@ -26,17 +26,19 @@ export function translate(originalErrorMessage) {
 
   // 入出力
   translated = translated.replaceAll(/ValueError: invalid literal for int\(\) with base 10: '(.*)'/g, `「$1」を整数に変換できません
-• 入力の受け取り方や入力欄が正しくないことがあります
-• int(input()) の代わりに map(int, input().split()) を使うと直るかもしれません`);
+• int(input()) の代わりに map(int, input().split()) を使ってはどうですか？
+• 入力欄について，整数が 1 行に 1 個ずつになるように改行してはどうですか？`);
   translated = translated.replaceAll(/ValueError: not enough values to unpack \(expected (.*), got (.*)\)/g, `$2 個しかないデータを $1 個に分けようとしました
-• 入力の受け取り方や入力欄が正しくないことがあります
-• map(int, input().split()) の代わりに int(input()) を使うと直るかもしれません`);
+• map(int, input().split()) の代わりに int(input()) を使ってはどうですか？
+• 入力欄について，整数を空白で区切って 1 行にまとめて書いてはどうですか？`);
   translated = translated.replaceAll(/ValueError: too many values to unpack \(expected (.*)\)/g, `$1 個より多いデータを $1 個に分けようとしました
-• 入力の受け取り方や入力欄が正しくないことがあります`);
+• 入力を受け取るコードと入力欄の書き方が一致していないかもしれません`);
   translated = translated.replaceAll('EOFError: EOF when reading a line', `ファイルの末尾に到達しました
-• 入力の受け取り方や入力欄が正しくないことがあります`);
+• 入力欄の内容が足りていないかもしれません
+• 入力を受け取るコードが多すぎるかもしれません`);
   translated = translated.replaceAll('TypeError: object.readline() returned non-string', `ファイルの末尾に到達しました
-• 入力の受け取り方や入力欄が正しくないことがあります`);
+• 入力欄の内容が足りていないかもしれません
+• 入力を受け取るコードが多すぎるかもしれません`);
   translated = translated.replaceAll("SyntaxError: Missing parentheses in call to 'print'. Did you mean print(...)?", 'print() のように print の後に括弧が必要です');
 
   // 存在しない
