@@ -109,7 +109,7 @@ export function findHints() {
     }
 
     // その他
-    if (line.match(/input\(.+\)/g) !== null) {
+    if (line.match(/input\([^\)]+\)/g) !== null) {
       addHint('PyTry では input() の括弧内に何か記述するのは非推奨です．');
     }
     if (line.match(/^\s*print\s*=/g) !== null) {
