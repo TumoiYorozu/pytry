@@ -81,7 +81,7 @@ export function translate(originalErrorMessage) {
   translated = translated.replaceAll('SyntaxError: invalid syntax', '文法が間違っています');
   translated = translated.replaceAll(/SyntaxError: expected '(.*)'/g, '「$1」が必要です');
   translated = translated.replaceAll(/SyntaxError: invalid character '(.*)' \((.*)\)/g, `「$1」という文字は使えません
-• 全角文字を使っていませんか？`);
+• 全角文字を使っている場合は半角文字に直してください`);
   translated = translated.replaceAll('SyntaxError: invalid decimal literal', `文字や数値が混ざっています
 • 変数名の先頭はアルファベットでなければなりません
 • 掛け算の記号 * は省略できません`);

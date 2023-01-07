@@ -104,6 +104,18 @@ export function findHints() {
     if (line.match(/<>/g) !== null) {
       addHint('<> は != ではありませんか？');
     }
+    if (line.match(/> =/g) !== null) {
+      addHint('> = は >= ではありませんか？ (間の空白をなくす)');
+    }
+    if (line.match(/< =/g) !== null) {
+      addHint('< = は <= ではありませんか？ (間の空白をなくす)');
+    }
+    if (line.match(/= =/g) !== null) {
+      addHint('= = は == ではありませんか？ (間の空白をなくす)');
+    }
+    if (line.match(/! =/g) !== null) {
+      addHint('! = は != ではありませんか？ (間の空白をなくす)');
+    }
     if (line.match(/(if|while)[^=]*=[^=]/g) !== null && line.match(/>=|<=|!=|=>|=<|=!/g) == null) {
       addHint('= は == ではありませんか？');
     }
