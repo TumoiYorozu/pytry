@@ -17,7 +17,7 @@ export function translate(originalErrorMessage) {
   const basicTranslated = translated;
 
   // インデント
-  translated = translated.replaceAll(/IndentationError: expected an indented block after '(.*)' statement on line (.*)/g, '$2 行目の $1 文の後にインデントされた部分が必要です');
+  translated = translated.replaceAll(/IndentationError: expected an indented block after '(.*)' statement on line (.*)/g, '$2 行目で $1 文を使っているため，ここにはインデントされたコードが必要です');
   translated = translated.replaceAll('IndentationError: expected an indented block', 'インデントを忘れています');
   translated = translated.replaceAll('IndentationError: unexpected indent', 'インデントがおかしな位置にあります');
   translated = translated.replaceAll('IndentationError: unindent does not match any outer indentation level', 'インデントが揃っていません');
@@ -25,9 +25,11 @@ export function translate(originalErrorMessage) {
   translated = translated.replaceAll('TabError: inconsistent use of tabs and spaces in indentation', 'インデントでタブと半角スペースが混ざっています');
 
   // 入出力
-  translated = translated.replaceAll(/ValueError: invalid literal for int\(\) with base 10: '(.*)'/g, `「$1」を整数に変換できません
+  translated = translated.replaceAll(/ValueError: invalid literal for int\(\) with base 10: '([\d\s]*)'/g, `「$1」を整数に変換できません
 • int(input()) の代わりに map(int, input().split()) を使ってはどうですか？
 • 入力欄について，整数が 1 行に 1 個ずつになるように改行してはどうですか？`);
+  translated = translated.replaceAll(/ValueError: invalid literal for int\(\) with base 10: '(.*)'/g, `「$1」を整数に変換できません
+• int(input()) の代わりに input() を使ってはどうですか？`);
   translated = translated.replaceAll(/ValueError: not enough values to unpack \(expected (.*), got (.*)\)/g, `$2 個しかないデータを $1 個に分けようとしました
 • map(int, input().split()) の代わりに int(input()) を使ってはどうですか？
 • 入力欄について，整数を空白で区切って 1 行にまとめて書いてはどうですか？`);
@@ -43,7 +45,7 @@ export function translate(originalErrorMessage) {
 
   // 存在しない
   translated = translated.replaceAll(/NameError: name '(.*)' is not defined/g, `「$1」が見つかりません
-• 小文字と大文字は区別します
+• 変数名などの小文字と大文字は区別します
 • 文字列はダブルクオーテーションで囲みます`);
   translated = translated.replaceAll(/ValueError: list.remove(x): x not in list/g, 'remove で消そうとしている要素が存在していません');
   translated = translated.replaceAll(/AttributeError: '(.*)' object has no attribute '(.*)'/g, '「$1」のオブジェクトに「.$2」は存在しません');
@@ -57,6 +59,7 @@ export function translate(originalErrorMessage) {
   translated = translated.replaceAll(/KeyError: '(.*)'/g, 'キー「$1」は存在しません');
   translated = translated.replaceAll('TypeError: string indices must be integers', '文字列の添え字は整数にしてください');
   translated = translated.replaceAll(/TypeError: list indices must be integers or slices, not (.*)/g, 'リストの添え字は「$1」ではなく整数やスライスにしてください');
+  translated = translated.replaceAll('TypeError: slice indices must be integers or None or have an __index__ method', 'スライスの添え字は整数にしてください');
   translated = translated.replaceAll(/TypeError: 'str' object does not support item assignment/g, '文字列から添え字で取り出した文字は読み取り専用で代入はできません');
   translated = translated.replaceAll(/TypeError: '(.*)' object does not support item assignment/g, '「$1」の添え字で指定した要素に代入することはできません');
 
@@ -74,6 +77,7 @@ export function translate(originalErrorMessage) {
   translated = translated.replaceAll('SyntaxError: unexpected EOF while parsing', '括弧などを閉じないまま行が終わってしまいました');
   translated = translated.replaceAll(/SyntaxError: unmatched '(.*)'/g, '「$1」の開きと閉じが対応していません');
   translated = translated.replaceAll(/SyntaxError: '(.*)' was never closed/g, '「$1」に対応した閉じがありません');
+  translated = translated.replaceAll(/SyntaxError: closing parenthesis '(.*)' does not match opening parenthesis '(.*)'/g, '開き括弧「$2」に対応する閉じ括弧が「$1」になっています');
 
   // 文法
   translated = translated.replaceAll('SyntaxError: invalid syntax. Perhaps you forgot a comma?', `文法が間違っています
@@ -86,7 +90,8 @@ export function translate(originalErrorMessage) {
 • 変数名の先頭はアルファベットでなければなりません
 • 掛け算の記号 * は省略できません`);
   translated = translated.replaceAll('SyntaxError: leading zeros in decimal integer literals are not permitted; use an 0o prefix for octal integers', '数値の先頭に 0 を付けることはできません');
-  translated = translated.replaceAll("SyntaxError: 'return' outside function", '関数の中身以外で return を使うことはできません');
+  translated = translated.replaceAll("SyntaxError: 'break' outside loop", 'ループの中以外で return は使えません');
+  translated = translated.replaceAll("SyntaxError: 'return' outside function", '関数の中以外で return は使えません');
 
   // 演算
   translated = translated.replaceAll('ZeroDivisionError: division by zero', 'ゼロで割ろうとしました');
@@ -96,9 +101,12 @@ export function translate(originalErrorMessage) {
   translated = translated.replaceAll(/TypeError: can only concatenate str \(not "(.*)"\) to str/g, `「$1」と文字列を + で結合することはできません
 • 文字列同士のみ結合できます
 • str() を使って文字列でないものを文字列に変換できます`);
+  translated = translated.replaceAll('「** or pow()」', ' ** や pow() ');
 
   // 型
   translated = translated.replaceAll(/TypeError: '(.*)' object cannot be interpreted as an integer/g, '「$1」を整数値とみなすことはできません');
+  translated = translated.replaceAll('TypeError: not all arguments converted during string formatting', `文字列フォーマットで使われていない引数が存在します
+• 割り算の余りを求める % の左辺が文字列になっていませんか？`);
   translated = translated.replaceAll(/TypeError: 'int' object is not iterable/g, `整数値は繰り返し不可能です
 • range() を使ってはどうですか？`);
   translated = translated.replaceAll(/TypeError: '(.*)' object is not iterable/g, '「$1」は繰り返し不可能です (リストのように使うことはできません)');
@@ -108,6 +116,7 @@ export function translate(originalErrorMessage) {
   translated = translated.replaceAll(/TypeError: object of type '(.*)' has no len\(\)/g, 'len() の括弧内は「$1」にはできません');
   translated = translated.replaceAll(/TypeError: ord\(\) expected a character, but string of length (.*) found/g, 'ord() の括弧内の文字列は長さ 1 でないといけませんが，長さ $1 の文字列が渡されました');
   translated = translated.replaceAll(/TypeError: ord\(\) expected string of length 1, but (.*) found/g, 'ord() の括弧内は 1 文字の文字列でないといけませんが，「$1」が渡されました');
+  translated = translated.replaceAll('TypeError: type() takes 1 or 3 arguments', 'type() の括弧内の引数は 1 個または 3 個です');
 
   // 関数呼び出し
   translated = translated.replaceAll(/TypeError: '(.*)' object is not callable/g, '「$1」のオブジェクトは関数ではないので () を付けても呼び出せません');
@@ -120,7 +129,7 @@ export function translate(originalErrorMessage) {
   translated = translated.replaceAll(/TypeError: (.*)\(\) missing 1 required positional argument: '(.*)'/g, '$1() の引数「$2」が指定されていません');
 
   // 非同期処理
-  translated = translated.replaceAll("SyntaxError: 'await' outside function", '関数の外側で「await」は使えません');
+  translated = translated.replaceAll("SyntaxError: 'await' outside function", '関数の中以外で await は使えません');
 
   // 単語
   translated = translated.replaceAll('「int」', '「整数 (int)」');

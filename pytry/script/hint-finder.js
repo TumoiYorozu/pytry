@@ -116,7 +116,7 @@ export function findHints() {
     if (line.match(/! =/g) !== null) {
       addHint('! = は != ではありませんか？ (間の空白をなくす)');
     }
-    if (line.match(/(if|while)[^=]*=[^=]/g) !== null && line.match(/>=|<=|!=|=>|=<|=!/g) == null) {
+    if (line.match(/(if|while)[^=]*=[^=]/g) !== null && line.match(/>\s*=|<\s*=|!\s*=|=\s*>|=\s*<|=\s*!/g) == null) {
       addHint('= は == ではありませんか？');
     }
 
@@ -127,7 +127,7 @@ export function findHints() {
     if (line.match(/^\s*print\s*=/g) !== null) {
       addHint('イコールではなく括弧の print() ではありませんか？');
     }
-    if (line.match(/\w\[.{0,3}\,.{0,3}\]/g) !== null) {
+    if (line.match(/\w\[[^\[\]]{0,3}\,[^\[\]]{0,3}\]/g) !== null) {
       addHint('[ ] の間のコンマ , はスライスのコロン : ではありませんか？');
     }
 
