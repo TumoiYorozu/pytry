@@ -64,15 +64,15 @@ export function initizalize() {
     localStorage.setItem('user_id', encodeURIComponent(userId));
   }
   send('view', {
-    source: decodeURIComponent(localStorage.getItem('source_text')),
-    input: decodeURIComponent(localStorage.getItem('input_text')),
-    output: decodeURIComponent(localStorage.getItem('output_text')),
+    source: decodeURIComponent(localStorage.getItem('source_text')).replaceAll('\r', ''),
+    input: decodeURIComponent(localStorage.getItem('input_text')).replaceAll('\r', ''),
+    output: decodeURIComponent(localStorage.getItem('output_text')).replaceAll('\r', ''),
   });
   setInterval(() => {
     const source = editor.sourceEditor.getValue();
     if (source != lastSource) {
       send('keep', {
-        source: source
+        source: source.replaceAll('\r', '')
       });
     }
     else {
