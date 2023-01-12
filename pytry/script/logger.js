@@ -6,11 +6,14 @@ const maxLengthGa = 80;
 
 let userId = null;
 let sessionId = null;
+let lastSource = '';
 
 function send(event_name, params) {
   for (let key in params)
     if (typeof params[key] == 'string')
       params[key] = params[key].substr(0, maxLength);
+
+  if (params['source'] !== undefined) lastSource = params['source'];
 
   const request = {
     method: 'POST',
@@ -66,8 +69,16 @@ export function initizalize() {
     output: decodeURIComponent(localStorage.getItem('output_text')),
   });
   setInterval(() => {
-    send('keep', {
-    });
+    const source = editor.sourceEditor.getValue();
+    if (source != lastSource) {
+      send('keep', {
+        source: source
+      });
+    }
+    else {
+      send('keep', {
+      });
+    }
   }, 1000 * 60);
 }
 
