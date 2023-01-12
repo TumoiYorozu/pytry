@@ -69,10 +69,10 @@ export function initizalize() {
     output: decodeURIComponent(localStorage.getItem('output_text')).replaceAll('\r', ''),
   });
   setInterval(() => {
-    const source = editor.sourceEditor.getValue();
+    const source = editor.sourceEditor.getValue().replaceAll('\r', '');
     if (source != lastSource) {
       send('keep', {
-        source: source.replaceAll('\r', '')
+        source: source
       });
     }
     else {
