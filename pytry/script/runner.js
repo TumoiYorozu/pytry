@@ -2,14 +2,16 @@ import * as editor from './editor.js';
 import * as errorTranslator from './error-translator.js';
 import * as logger from './logger.js';
 
-let worker, isReady, timeoutTimer, runButtonId;
+let worker, isReady, timeoutTimer, runButtonId, runCompletedId;
 
 /**
  * Python 実行環境の初期化を行う
  * @param {string} _runButtonId 実行ボタンの id
+ * @param {string} _runCompletedId 実行完了時に表示するオブジェクトの id
  */
-export function initialize(_runButtonId) {
+export function initialize(_runButtonId, _runCompletedId) {
   runButtonId = _runButtonId;
+  runCompletedId = _runCompletedId;
   initializeWorker();
 }
 
@@ -29,6 +31,19 @@ function enableReady() {
   isReady = true;
   document.getElementById(runButtonId).innerHTML = '実行';
   document.getElementById(runButtonId).classList.add('pushable');
+}
+
+function showRunCompleted() {
+  const elem = document.getElementById(runCompletedId);
+  elem.classList.remove('fade-up');
+  window.requestAnimationFrame(function (time) {
+    window.requestAnimationFrame(function (time) {
+      elem.classList.add('fade-up');
+    });
+  });
+  elem.addEventListener('animationend', () => {
+    elem.classList.remove('fade-up');
+  });
 }
 
 /**
@@ -63,6 +78,7 @@ function workerListenner(message) {
   if (kind == 'done') {
     if (timeoutTimer) clearTimeout(timeoutTimer);
     enableReady();
+    showRunCompleted();
 
     logger.log('run_done', {
       source: editor.sourceEditor.getValue(),

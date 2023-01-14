@@ -10,7 +10,7 @@ window.addEventListener('load', (event) => {
   hintFinder.initialize();
   compiler.initialize();
   formatter.initialize();
-  runner.initialize('run');
+  runner.initialize('run', 'run-completed');
 
   logger.initizalize();
 
