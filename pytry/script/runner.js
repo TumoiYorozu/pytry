@@ -96,7 +96,13 @@ function workerListenner(message) {
     showRunCompletedWindow();
 
     const elem = document.getElementById(runTimeoutWindowId);
-    elem.classList.remove('fade-up-slow');
+    window.requestAnimationFrame((time) => {
+      window.requestAnimationFrame((time) => {
+        window.requestAnimationFrame((time) => {
+          elem.classList.remove('fade-up-slow');
+        });
+      });
+    });
 
     logger.log('run_done', {
       source: editor.sourceEditor.getValue(),
@@ -135,7 +141,13 @@ function workerListenner(message) {
     enableReady();
 
     const elem = document.getElementById(runTimeoutWindowId);
-    elem.classList.remove('fade-up-slow');
+    window.requestAnimationFrame((time) => {
+      window.requestAnimationFrame((time) => {
+        window.requestAnimationFrame((time) => {
+          elem.classList.remove('fade-up-slow');
+        });
+      });
+    });
 
     logger.log('run_ie', {
       source: editor.sourceEditor.getValue(),
@@ -157,7 +169,13 @@ function timeout() {
 `);
 
   const elem = document.getElementById(runTimeoutWindowId);
-  elem.classList.remove('fade-up-slow');
+  window.requestAnimationFrame((time) => {
+    window.requestAnimationFrame((time) => {
+      window.requestAnimationFrame((time) => {
+        elem.classList.remove('fade-up-slow');
+      });
+    });
+  });
 
   logger.log('run_timeout', {
     source: editor.sourceEditor.getValue(),
