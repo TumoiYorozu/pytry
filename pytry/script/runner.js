@@ -2,16 +2,18 @@ import * as editor from './editor.js';
 import * as errorTranslator from './error-translator.js';
 import * as logger from './logger.js';
 
-let worker, isReady, timeoutTimer, runButtonId, runCompletedId;
+let worker, isReady, runButtonId, runCompletedWindowId, runTimeoutWindowId;
 
 /**
  * Python 実行環境の初期化を行う
  * @param {string} _runButtonId 実行ボタンの id
- * @param {string} _runCompletedId 実行完了時に表示するオブジェクトの id
+ * @param {string} _runCompletedWindowId 実行完了時に表示するオブジェクトの id
+ * @param {string} _runTimeoutWindowId 実行継続時に表示するオブジェクトの id
  */
-export function initialize(_runButtonId, _runCompletedId) {
+export function initialize(_runButtonId, _runCompletedWindowId, _runTimeoutWindowId) {
   runButtonId = _runButtonId;
-  runCompletedId = _runCompletedId;
+  runCompletedWindowId = _runCompletedWindowId;
+  runTimeoutWindowId = _runTimeoutWindowId;
   initializeWorker();
 }
 
@@ -33,17 +35,30 @@ function enableReady() {
   document.getElementById(runButtonId).classList.add('pushable');
 }
 
-function showRunCompleted() {
-  const elem = document.getElementById(runCompletedId);
+function showRunCompletedWindow() {
+  const elem = document.getElementById(runCompletedWindowId);
   elem.classList.remove('fade-up');
-  window.requestAnimationFrame(function (time) {
-    window.requestAnimationFrame(function (time) {
+  window.requestAnimationFrame((time) => {
+    window.requestAnimationFrame((time) => {
       elem.classList.add('fade-up');
     });
   });
   elem.addEventListener('animationend', () => {
     elem.classList.remove('fade-up');
   });
+}
+
+function showRunTimeoutWindow() {
+  const elem = document.getElementById(runTimeoutWindowId);
+  elem.classList.remove('fade-up-slow');
+  window.requestAnimationFrame((time) => {
+    window.requestAnimationFrame((time) => {
+      elem.classList.add('fade-up-slow');
+    });
+  });
+  elem.onclick = () => {
+    timeout();
+  };
 }
 
 /**
@@ -58,11 +73,12 @@ export async function run() {
   editor.clearSourceEditorDecoration();
   editor.clearOutputEditor();
 
-  timeoutTimer = setTimeout(timeout, 10000);
   worker.postMessage({
     source: editor.sourceEditor.getValue(),
     stdin: editor.inputEditor.getValue().replaceAll('\r', '')
   });
+
+  showRunTimeoutWindow();
 
   logger.log('run', {});
 }
@@ -76,9 +92,11 @@ function workerListenner(message) {
   }
 
   if (kind == 'done') {
-    if (timeoutTimer) clearTimeout(timeoutTimer);
     enableReady();
-    showRunCompleted();
+    showRunCompletedWindow();
+
+    const elem = document.getElementById(runTimeoutWindowId);
+    elem.classList.remove('fade-up-slow');
 
     logger.log('run_done', {
       source: editor.sourceEditor.getValue(),
@@ -114,8 +132,10 @@ function workerListenner(message) {
   if (kind == 'internalError') {
     editor.addToOutputEditor(content);
 
-    if (timeoutTimer) clearTimeout(timeoutTimer);
     enableReady();
+
+    const elem = document.getElementById(runTimeoutWindowId);
+    elem.classList.remove('fade-up-slow');
 
     logger.log('run_ie', {
       source: editor.sourceEditor.getValue(),
@@ -126,14 +146,18 @@ function workerListenner(message) {
 }
 
 function timeout() {
-  editor.addToOutputEditor(`実行から 10 秒が経過したため処理を打ち切りました
-次に実行できるようになるまで数秒かかります
-この表示が現れる主な原因は次の通りです：
+  worker.terminate();
+  initializeWorker();
+
+  editor.addToOutputEditor(`
+実行を強制終了しました
+処理がなかなか終わらない主な原因は次の通りです：
 1. 無限ループが発生している (while 文の条件式などが間違っていないか確認しましょう)
 2. 解法の効率が悪い (時間計算量を見積もりましょう)
 `);
-  worker.terminate();
-  initializeWorker();
+
+  const elem = document.getElementById(runTimeoutWindowId);
+  elem.classList.remove('fade-up-slow');
 
   logger.log('run_timeout', {
     source: editor.sourceEditor.getValue(),
