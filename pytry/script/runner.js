@@ -73,12 +73,12 @@ export async function run() {
   editor.clearSourceEditorDecoration();
   editor.clearOutputEditor();
 
+  showRunTimeoutWindow();
+
   worker.postMessage({
     source: editor.sourceEditor.getValue(),
     stdin: editor.inputEditor.getValue().replaceAll('\r', '')
   });
-
-  showRunTimeoutWindow();
 
   logger.log('run', {});
 }
