@@ -9,9 +9,19 @@ async function initialize() {
     indexURL: new URL('../modules/pyodide', location.href).toString(),
   });
 
-  await pyodide.loadPackage('numpy');
   await pyodide.loadPackage('micropip');
   pyodide.runPython(await (await fetch('./py/runner-initialize.py')).text());
+
+  pyodide.loadPackage('numpy'); // Fundamental package for array computing in Python
+  pyodide.loadPackage('scipy'); // Fundamental algorithms for scientific computing in Python
+  pyodide.loadPackage('networkx'); // Python package for creating and manipulating graphs and networks
+  pyodide.loadPackage('sympy'); // Computer algebra system (CAS) in Python
+  pyodide.loadPackage('more-itertools'); // More routines for operating on iterables, beyond itertools
+  pyodide.loadPackage('shapely'); // Manipulation and analysis of geometric objects
+  pyodide.loadPackage('bitarray'); // efficient arrays of booleans -- C extension
+  pyodide.loadPackage('mpmath'); // Python library for arbitrary-precision floating-point arithmetic
+  pyodide.loadPackage('pandas'); // Powerful data structures for data analysis, time series, and statistics
+  pyodide.loadPackage('scikit-learn'); // A set of python modules for machine learning and data mining
 
   self.postMessage({
     kind: 'initialized',
