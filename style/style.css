@@ -172,6 +172,24 @@ a.start-button::after {
   font-weight: 300;
 }
 
+.large-number {
+  font-weight: 700;
+  text-align: center;
+  font-size: 3rem;
+  margin-top: 2rem;
+  margin-bottom: 3rem;
+}
+
+.large-number span {
+  font-size: 2rem;
+  margin-left: 0.4rem;
+}
+
+.number-description {
+  font-weight: 300;
+  text-align: center;
+}
+
 .usage {
   display: flex;
   gap: 0 2rem;
