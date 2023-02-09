@@ -23,6 +23,7 @@ window.addEventListener('load', (event) => {
   document.getElementById('insert_list_map_int_input_split').addEventListener('click', editor.insert_list_map_int_input_split);
 
   document.getElementById('run').addEventListener('click', async (event) => {
+    logger.log('run_click', {});
     await formatter.formatAndUpdateEditor(editor.sourceEditor);
     runner.run();
   });
