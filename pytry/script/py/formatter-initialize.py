@@ -2,7 +2,7 @@ import micropip
 
 
 async def install_black():
-    await micropip.install('black')
+    await micropip.install("black == 22.12.0")
 
 
 def format_code():
